@@ -4,6 +4,10 @@
 
 <br>
 
+## Minimum Requirements
+
+You will need CoCart v3.8.1 or above to use this plugin.
+
 ## Setup
 
 1. Set a unique secret key in your `wp-config.php` file defined to `COCART_JWT_AUTH_SECRET_KEY`.
