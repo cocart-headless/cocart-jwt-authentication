@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<ruleset name="CoCart Coding Standards">
+	<description>CoCart Code Standards</description>
+
+	<file>.</file>
+
+	<!-- Exclude paths -->
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+
+	<!-- Show progress, show the error codes for each message (source). -->
+	<arg value="ps" />
+
+	<!-- Strip the filepaths in reports down to the relevant bit. -->
+	<arg name="basepath" value="./" />
+
+	<!-- Check up to 8 files simultaneously. -->
+	<arg name="parallel" value="8" />
+
+	<!-- Configs -->
+	<config name="minimum_supported_wp_version" value="5.5" />
+	<config name="testVersion" value="7.0-" />
+
+	<!-- Rules -->
+	<rule ref="CoCart-Core">
+		<exclude name="Core.Commenting.CommentTags.AuthorTag" />
+		<exclude name="WordPress.PHP.DontExtract" />
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array" value="cocart-jwt-authentication" />
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>languages/</exclude-pattern>
+	</rule>
+
+	<rule ref="PHPCompatibility">
+		<include-pattern>*\.php$</include-pattern>
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+</ruleset>

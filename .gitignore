@@ -1,0 +1,27 @@
+# Editors
+.vscode
+
+# Grunt
+/node_modules/
+npm-debug.log
+
+# OS X metadata
+.DS_Store
+
+# Windows junk
+Thumbs.db
+
+# Composer
+/vendor/
+
+# Languages
+/languages/*
+!/languages/README.md
+
+# Build & Releases
+/build/
+/releases/
+
+# Various file types to ignore when exporting.
+.gitconfig
+*.yml
