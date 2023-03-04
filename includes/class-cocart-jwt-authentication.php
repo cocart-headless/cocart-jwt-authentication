@@ -141,7 +141,7 @@ final class Plugin {
 
 			// Check if the token is valid using the secret key.
 			if ( ! self::validate_token( $token, $secret_key ) ) {
-				$auth->set_error( new \WP_Error( 'cocart_jwt_auth_not_valid', __( 'JWT Token is not valid.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
+				$auth->set_error( new \WP_Error( 'cocart_jwt_auth_not_valid', __( 'JWT Token is not valid or has expired.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
 
 				return false;
 			}
