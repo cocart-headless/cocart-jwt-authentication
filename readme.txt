@@ -18,25 +18,57 @@ JWT Authentication for CoCart.
 
 This free add-on for [CoCart](https://wordpress.org/plugins/cart-rest-api-for-woocommerce/) allows you to authenticate via a simple JWT Token.
 
-## Setup
+## Enable PHP HTTP Authorization Header
+
+### Shared Hosts
+
+Most shared hosts have disabled the **HTTP Authorization Header** by default.
+
+To enable this option you'll need to edit your **.htaccess** file by adding the following:
+
+```
+RewriteEngine on
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule ^(.*) - [E=HTTP_AUTHORIZATION:%1]
+```
+
+or
+
+```
+RewriteEngine On
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+```
+
+### WPEngine
+
+To enable this option you'll need to edit your **.htaccess** file by adding the following (see [this issue](https://github.com/Tmeister/wp-api-jwt-auth/issues/1)):
+
+```
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+```
+
+## Configuration
 
 1. Set a unique secret key in your `wp-config.php` file defined to `COCART_JWT_AUTH_SECRET_KEY`.
 2. Install and activate plugin.
-3. Authenticate via basic method with the login endpoint to get your token.
-4. Store the given token under `jwt_token` in your application.
-5. Now authenticate any cart route with `Bearer` authentication with the token given.
 
-#### Configuration
+### Token Expiration
 
 By default, the token expires after two full days but can be filtered to change to your preference using this hook `cocart_jwt_auth_expire`.
 
 Here is an example changing it to expire after just 2 hours.
 
-```php
+```
 add_filter( 'cocart_jwt_auth_expire', function() {
   return MINUTE_IN_SECONDS * 120
 });
 ```
+
+## Usage
+
+1. Authenticate via basic method with the login endpoint to get your token.
+2. Store the given token under `jwt_token` in your application.
+3. Now authenticate any cart route with `Bearer` authentication with the token given.
 
 ## Tools and Libraries
 
