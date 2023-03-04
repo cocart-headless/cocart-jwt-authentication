@@ -2,7 +2,7 @@
 Author URI: https://sebastiendumont.com
 Plugin URI: https://cocart.xyz
 Contributors: cocartforwc, sebd86
-Tags: woocommerce, cart, rest-api, decoupled, headless
+Tags: jwt, jwt-auth, json-web-token, woocommerce, cart, decoupled, headless
 Requires at least: 5.6
 Requires PHP: 7.4
 Tested up to: 6.2
