@@ -26,26 +26,26 @@ Most shared hosts have disabled the **HTTP Authorization Header** by default.
 
 To enable this option you'll need to edit your **.htaccess** file by adding the following:
 
-```
+`
 RewriteEngine on
 RewriteCond %{HTTP:Authorization} ^(.*)
 RewriteRule ^(.*) - [E=HTTP_AUTHORIZATION:%1]
-```
+`
 
 or
 
-```
+`
 RewriteEngine On
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-```
+`
 
 ### WPEngine
 
 To enable this option you'll need to edit your **.htaccess** file by adding the following (see [this issue](https://github.com/Tmeister/wp-api-jwt-auth/issues/1)):
 
-```
+`
 SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
-```
+`
 
 ## Configuration
 
@@ -58,11 +58,11 @@ By default, the token expires after two full days but can be filtered to change 
 
 Here is an example changing it to expire after just 2 hours.
 
-```
+`
 add_filter( 'cocart_jwt_auth_expire', function() {
   return MINUTE_IN_SECONDS * 120
 });
-```
+`
 
 ## Usage
 
@@ -85,6 +85,7 @@ We also have other add-ons that extend CoCart to enhance your development and yo
 
 * **[CoCart - Cart Enhanced](https://wordpress.org/plugins/cocart-get-cart-enhanced/)** enhances the data returned for the cart and the items added to it. – FREE
 * **[CoCart - CORS](https://wordpress.org/plugins/cocart-cors/)** enables support for CORS to allow CoCart to work across multiple domains. - **FREE**
+* **[CoCart - Rate Limiting](https://wordpress.org/plugins/cocart-rate-limiting/)** enables the rate limiting feature. - **FREE**
 
 They work with the FREE version of CoCart already, and these add-ons of course come with support too.
 
