@@ -5,7 +5,7 @@ Contributors: cocartforwc, sebd86
 Tags: jwt, jwt-auth, json-web-token, woocommerce, cart, decoupled, headless
 Requires at least: 5.6
 Requires PHP: 7.3
-Tested up to: 6.2
+Tested up to: 6.1
 Stable tag: 1.0.0
 WC requires at least: 6.4
 WC tested up to: 7.4
