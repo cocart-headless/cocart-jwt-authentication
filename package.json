@@ -19,7 +19,7 @@
 		"url": "https://github.com/co-cart/cocart-jwt-authentication/issues"
 	},
 	"requires": "5.6",
-	"requires_php": "7.4",
+	"requires_php": "7.3",
 	"tested_up_to": "6.2",
 	"wc_requires": "6.4",
 	"wc_tested_up_to": "7.4",

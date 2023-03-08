@@ -4,7 +4,7 @@ Plugin URI: https://cocart.xyz
 Contributors: cocartforwc, sebd86
 Tags: jwt, jwt-auth, json-web-token, woocommerce, cart, decoupled, headless
 Requires at least: 5.6
-Requires PHP: 7.4
+Requires PHP: 7.3
 Tested up to: 6.2
 Stable tag: 1.0.0
 WC requires at least: 6.4

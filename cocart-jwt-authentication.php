@@ -9,7 +9,7 @@
  * Text Domain: cocart-jwt-authentication
  * Domain Path: /languages/
  * Requires at least: 5.6
- * Requires PHP: 7.4
+ * Requires PHP: 7.3
  * WC requires at least: 6.4
  * WC tested up to: 7.4
  *
