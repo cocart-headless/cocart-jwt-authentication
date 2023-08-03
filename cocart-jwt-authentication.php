@@ -5,7 +5,7 @@
  * Description: JWT Authentication for CoCart.
  * Author:      Sébastien Dumont
  * Author URI:  https://sebastiendumont.com
- * Version:     1.0.0
+ * Version:     1.0.1
  * Text Domain: cocart-jwt-authentication
  * Domain Path: /languages/
  * Requires at least: 5.6

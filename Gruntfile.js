@@ -242,6 +242,7 @@
 							'!.htaccess',
 							'!<%= pkg.name %>-git/**',
 							'!<%= pkg.name %>-svn/**',
+							'!bin/**',
 							'!node_modules/**',
 							'!releases/**',
 							'!vendor/**',
