@@ -1,14 +1,12 @@
 === CoCart - JWT Authentication === 
-Author URI: https://sebastiendumont.com
-Plugin URI: https://cocart.xyz
 Contributors: cocartforwc, sebd86
-Tags: jwt, jwt-auth, json-web-token, woocommerce, cart, decoupled, headless
+Tags: woocommerce, rest-api, decoupled, headless, jwt
 Requires at least: 5.6
-Requires PHP: 7.3
-Tested up to: 6.2.2
-Stable tag: 1.0.1
+Requires PHP: 7.4
+Tested up to: 6.5
+Stable tag: 1.0.2
 WC requires at least: 6.4
-WC tested up to: 7.9
+WC tested up to: 8.8
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -73,16 +71,15 @@ add_filter( 'cocart_jwt_auth_expire', function() {
 2. Store the given token under `jwt_token` in your application.
 3. Now authenticate any cart route with `Bearer` authentication with the token given.
 
+## 🧰 Developer Tools
+
+* **[CoCart Beta Tester](https://github.com/cocart-headless/cocart-beta-tester)** allows you to easily update to pre-release versions of CoCart Lite for testing and development purposes.
+* **[CoCart VSCode](https://github.com/cocart-headless/cocart-vscode)** extension for Visual Studio Code adds snippets and autocompletion of functions, classes and hooks.
+* **[CoCart Product Support Boilerplate](https://github.com/cocart-headless/cocart-product-support-boilerplate)** provides a basic boilerplate for supporting a different product types to add to the cart with validation including adding your own parameters.
+* **[CoCart Cart Callback Example](https://github.com/cocart-headless/cocart-cart-callback-example)** provides you an example of registering a callback that can be triggered when updating the cart.
+
 ★★★★★
 > Amazing Plugin. I’m using it to create a react-native app with WooCommerce as back-end. This plugin is a life-saver! [Daniel Loureiro](https://wordpress.org/support/topic/amazing-plugin-1562/)
-
-## 🧰 Tools and Libraries
-
-* **[CoCart Beta Tester](https://github.com/co-cart/cocart-beta-tester)** allows you to easily update to prerelease versions of CoCart Lite for testing and development purposes.
-* **[CoCart VSCode](https://github.com/co-cart/cocart-vscode)** extension for Visual Studio Code adds snippets and autocompletion of functions, classes and hooks.
-* **[CoCart Product Support Boilerplate](https://github.com/co-cart/cocart-product-support-boilerplate)** provides a basic boilerplate for supporting a different product types to add to the cart with validation including adding your own parameters.
-* **[CoCart Cart Callback Example](https://github.com/co-cart/cocart-cart-callback-example)** provides you an example of registering a callback that can be triggered when updating the cart.
-* **[CoCart Tweaks](https://github.com/co-cart/co-cart-tweaks)** provides a starting point for developers to tweak CoCart to their needs.
 
 #### 👍 Add-ons to further enhance CoCart
 
@@ -91,45 +88,47 @@ We also have other add-ons that extend CoCart to enhance your development and yo
 * **[CoCart - Cart Enhanced](https://wordpress.org/plugins/cocart-get-cart-enhanced/)** enhances the data returned for the cart and the items added to it.
 * **[CoCart - CORS](https://wordpress.org/plugins/cocart-cors/)** enables support for CORS to allow CoCart to work across multiple domains.
 * **[CoCart - Rate Limiting](https://wordpress.org/plugins/cocart-rate-limiting/)** enables the rate limiting feature.
+* and more add-ons in development.
 
-They work with the FREE version of CoCart already, and these add-ons of course come with support too.
+They work with the core of CoCart already, and these add-ons of course come with support too.
 
 ### ⌨️ Join our growing community
 
 A Discord community for developers, WordPress agencies and shop owners building the fastest and best headless WooCommerce stores with CoCart.
 
-[Join our community](https://cocart.xyz/community/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart)
+[Join our community](https://cocartapi.com/community/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart)
 
 ### 🐞 Bug reports
 
-Bug reports for CoCart - JWT Authentication are welcomed in the [CoCart - JWT Authentication repository on GitHub](https://github.com/co-cart/cocart-jwt-authentication). Please note that GitHub is not a support forum, and that issues that aren’t properly qualified as bugs will be closed.
+Bug reports for CoCart - JWT Authentication are welcomed in the [CoCart - JWT Authentication repository on GitHub](https://github.com/cocart-headless/cocart-jwt-authentication). Please note that GitHub is not a support forum, and that issues that aren’t properly qualified as bugs will be closed.
 
 ### More information
 
-* The [CoCart plugin](https://cocart.xyz/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart) official website.
+* The official [CoCart API plugin](https://cocartapi.com/?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink) website.
+* [CoCart for Developers](https://cocart.dev/?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink), an official hub for resources you need to be productive with CoCart and keep track of everything that is happening with the API.
 * The CoCart [Documentation](https://docs.cocart.xyz/)
 * [Subscribe to updates](http://eepurl.com/dKIYXE)
-* Like, Follow and Star on [Facebook](https://www.facebook.com/cocartforwc/), [Twitter](https://twitter.com/cocartapi), [Instagram](https://www.instagram.com/co_cart/) and [GitHub](https://github.com/co-cart/co-cart)
+* Like, Follow and Star on [Facebook](https://www.facebook.com/cocartforwc/), [Twitter](https://twitter.com/cocartapi), [Instagram](https://www.instagram.com/cocartheadless/) and [GitHub](https://github.com/co-cart/co-cart)
 
 #### 💯 Credits
 
-This plugin is created by [Sébastien Dumont](https://sebastiendumont.com).
+This plugin is developed and maintained by [Sébastien Dumont](https://twitter.com/sebd86).
+Founder of [CoCart Headless, LLC](https://twitter.com/cocartheadless).
 
 == Installation ==
 
 = Minimum Requirements =
 
-You will need CoCart v3.8.1 or above.
-
 * WordPress v5.6
-* WooCommerce v4.3
-* PHP v7.3
+* WooCommerce v6.4
+* PHP v7.4
+* CoCart v3.8.1
 
 = Recommended Requirements =
 
 * WordPress v6.0 or higher.
 * WooCommerce v7.0 or higher.
-* PHP v7.4
+* PHP v8.0 or higher.
 
 = Automatic installation =
 
@@ -155,4 +154,4 @@ You can read more about the details of Semver at [semver.org](https://semver.org
 
 == Changelog ==
 
-[View the full changelog here](https://github.com/co-cart/cocart-jwt-authentication/blob/master/CHANGELOG.md).
+[View the full changelog here](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/CHANGELOG.md).

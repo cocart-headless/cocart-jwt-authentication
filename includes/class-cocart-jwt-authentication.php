@@ -2,9 +2,9 @@
 /**
  * CoCart JWT Authentication core setup.
  *
- * @author   Sébastien Dumont
- * @category Package
- * @license  GPL-2.0+
+ * @author  Sébastien Dumont
+ * @package CoCart JWT Authentication
+ * @license GPL-2.0+
  */
 
 namespace CoCart\JWTAuthentication;
@@ -28,8 +28,10 @@ final class Plugin {
 	 * @access public
 	 *
 	 * @static
+	 *
+	 * @var string
 	 */
-	public static $version = '1.0.1';
+	public static $version = '1.0.2';
 
 	/**
 	 * JWT algorithm to generate signature.
@@ -104,8 +106,10 @@ final class Plugin {
 	 *
 	 * @static
 	 *
+	 * @since 1.0.0 Introduced.
+	 *
 	 * @param int    $user_id The user ID if authentication was successful.
-	 * @param bool            Determines if the site is secure.
+	 * @param bool   $ssl     Determines if the site is secure.
 	 * @param object $auth    The Authentication class.
 	 *
 	 * @return int $user_id The user ID returned if authentication was successful.
@@ -151,7 +155,7 @@ final class Plugin {
 			$payload = $payload->payload;
 
 			// The token is decoded now validate the iss.
-			if ( $payload->iss !== self::get_iss() ) {
+			if ( self::get_iss() !== $payload->iss ) {
 				$auth->set_error( new \WP_Error( 'cocart_jwt_auth_bad_iss', __( 'The token issuer does not match with this server.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
 
 				return false;
@@ -272,13 +276,13 @@ final class Plugin {
 	 * @return string The username returned if found.
 	 */
 	protected static function get_user_by_phone( $phone ) {
-		$matchingUsers = get_users( array(
-			'meta_key'     => 'billing_phone',
-			'meta_value'   => $phone,
+		$matching_users = get_users( array(
+			'meta_key'     => 'billing_phone', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value'   => $phone,          // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			'meta_compare' => '=',
 		) );
 
-		$username = ! empty( $matchingUsers ) && is_array( $matchingUsers ) ? $matchingUsers[0]->user_login : $phone;
+		$username = ! empty( $matching_users ) && is_array( $matching_users ) ? $matching_users[0]->user_login : $phone;
 
 		return $username;
 	} // END get_user_by_phone()
@@ -310,7 +314,7 @@ final class Plugin {
 	 *
 	 * @static
 	 *
-	 * @param array $extras
+	 * @param array $extras Other extras filtered with `cocart_login_extras`.
 	 *
 	 * @return array $extras
 	 */
@@ -326,6 +330,7 @@ final class Plugin {
 
 	/**
 	 * Validates a provided token against the provided secret key.
+	 *
 	 * Checks for format, valid header for our class, expiration claim validity and signature.
 	 * https://datatracker.ietf.org/doc/html/rfc7519#section-7.2
 	 *
@@ -333,8 +338,8 @@ final class Plugin {
 	 *
 	 * @static
 	 *
-	 * @param string $token  Full token string.
-	 * @param string $secret The secret key used to generate the signature.
+	 * @param string $token      Full token string.
+	 * @param string $secret_key The secret key used to generate the signature.
 	 *
 	 * @return bool
 	 */
@@ -422,15 +427,15 @@ final class Plugin {
 	 *
 	 * @static
 	 *
-	 * @param string $string Header + Payload token substring.
-	 * @param string $secret The secret used to generate the signature.
+	 * @param string $header_encoded Header + Payload token substring.
+	 * @param string $secret         The secret used to generate the signature.
 	 *
 	 * @return false|string
 	 */
-	private static function generate_signature( string $string, string $secret ) {
+	private static function generate_signature( string $header_encoded, string $secret ) {
 		return hash_hmac(
 			'sha256',
-			$string,
+			$header_encoded,
 			$secret,
 			true
 		);
@@ -443,15 +448,15 @@ final class Plugin {
 	 *
 	 * @static
 	 *
-	 * @param string $string The string to be encoded.
+	 * @param string $encode_string The string to be encoded.
 	 *
 	 * @return string
 	 */
-	private static function to_base_64_url( string $string ) {
+	private static function to_base_64_url( string $encode_string ) {
 		return str_replace(
 			array( '+', '/', '=' ),
 			array( '-', '_', '' ),
-			base64_encode( $string ) // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+			base64_encode( $encode_string ) // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 		);
 	} // END to_base_64_url()
 
@@ -462,25 +467,25 @@ final class Plugin {
 	 *
 	 * @static
 	 *
-	 * @param string $string the string to be decoded.
+	 * @param string $encoded_string the string to be decoded.
 	 *
 	 * @return string
 	 */
-	private static function from_base_64_url( string $string ) {
+	private static function from_base_64_url( string $encoded_string ) {
 		/**
 		 * Add padding to base64 strings which require it. Some base64 URL strings
 		 * which are decoded will have missing padding which is represented by the
 		 * equals sign.
 		 */
-		if ( strlen( $string ) % 4 !== 0 ) {
-			return self::from_base_64_url( $string . '=' );
+		if ( strlen( $encoded_string ) % 4 !== 0 ) {
+			return self::from_base_64_url( $encoded_string . '=' );
 		}
 
 		return base64_decode( // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 			str_replace(
 				array( '-', '_' ),
 				array( '+', '/' ),
-				$string
+				$encoded_string
 			)
 		);
 	} // END from_base_64_url()
@@ -511,5 +516,4 @@ final class Plugin {
 		load_textdomain( 'cocart-jwt-authentication', WP_LANG_DIR . '/cocart-jwt-authentication/cocart-jwt-authentication-' . $locale . '.mo' );
 		load_plugin_textdomain( 'cocart-jwt-authentication', false, plugin_basename( dirname( COCART_JWT_AUTHENTICATION_FILE ) ) . '/languages' );
 	} // END load_plugin_textdomain()
-
 } // END class

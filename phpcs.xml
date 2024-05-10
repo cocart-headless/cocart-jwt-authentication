@@ -6,6 +6,11 @@
 
 	<!-- Exclude paths -->
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>Gruntfile.js</exclude-pattern>
+
+	<!-- Enable colors in report -->
+	<arg name="colors"/>
 
 	<!-- Show progress, show the error codes for each message (source). -->
 	<arg value="ps" />
@@ -16,9 +21,12 @@
 	<!-- Check up to 8 files simultaneously. -->
 	<arg name="parallel" value="8" />
 
+	<!-- Only check PHP files. -->
+	<arg name="extensions" value="php"/>
+
 	<!-- Configs -->
-	<config name="minimum_supported_wp_version" value="5.5" />
-	<config name="testVersion" value="7.0-" />
+	<config name="minimum_supported_wp_version" value="5.6" />
+	<config name="testVersion" value="7.4-" />
 
 	<!-- Rules -->
 	<rule ref="CoCart-Core">
@@ -36,8 +44,32 @@
 		<exclude-pattern>languages/</exclude-pattern>
 	</rule>
 
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<exclude-pattern>includes/*.php</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.PHP.StrictInArray.MissingTrueStrict">
+		<severity>0</severity>
+	</rule>
+
+	<rule ref="WordPress.PHP.PregQuoteDelimiter.Missing">
+		<severity>0</severity>
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.ValidHookName.UseUnderscores">
+		<severity>0</severity>
+	</rule>
+
 	<rule ref="PHPCompatibility">
 		<include-pattern>*\.php$</include-pattern>
 		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+
+	<rule ref="PSR2.Classes.PropertyDeclaration.Underscore">
+		<severity>0</severity>
+	</rule>
+
+	<rule ref="Squiz.Commenting.FunctionComment.ParamNameNoMatch">
+		<severity>0</severity>
 	</rule>
 </ruleset>

@@ -1,15 +1,15 @@
 <?php
-/*
+/**
  * Plugin Name: CoCart JWT Authentication
- * Plugin URI:  https://cocart.xyz
+ * Plugin URI:  https://cocartapi.com
  * Description: JWT Authentication for CoCart.
- * Author:      Sébastien Dumont
- * Author URI:  https://sebastiendumont.com
- * Version:     1.0.1
+ * Author:      CoCart Headless, LLC
+ * Author URI:  https://cocartapi.com
+ * Version:     1.0.2
  * Text Domain: cocart-jwt-authentication
  * Domain Path: /languages/
  * Requires at least: 5.6
- * Requires PHP: 7.3
+ * Requires PHP: 7.4
  *
  * @package CoCart JWT Authentication
  */
@@ -35,6 +35,9 @@ if ( ! class_exists( 'CoCart\JWTAuthentication\Plugin', false ) ) {
  * @return cocart_jwt_authentication
  */
 if ( ! function_exists( 'cocart_jwt_authentication' ) ) {
+	/**
+	 * Initialize CoCart JWT Authentication.
+	 */
 	function cocart_jwt_authentication() {
 		return \CoCart\JWTAuthentication\Plugin::init();
 	}

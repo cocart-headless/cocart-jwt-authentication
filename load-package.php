@@ -2,7 +2,7 @@
 /**
  * This file is designed to be used to load as package NOT a WP plugin!
  *
- * @version 1.0.1
+ * @version 1.0.2
  * @package CoCart JWT Authentication
  */
 
@@ -27,6 +27,9 @@ if ( ! class_exists( 'CoCart\JWTAuthentication\Plugin', false ) ) {
  * @return cocart_jwt_authentication
  */
 if ( ! function_exists( 'cocart_jwt_authentication' ) ) {
+	/**
+	 * Initialize CoCart JWT Authentication.
+	 */
 	function cocart_jwt_authentication() {
 		return \CoCart\JWTAuthentication\Plugin::init();
 	}

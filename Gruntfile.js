@@ -1,17 +1,17 @@
 /**
  * Build automation scripts.
- * 
+ *
  * @package CoCart
  */
 
- module.exports = function(grunt) {
+module.exports = function (grunt) {
 	'use strict';
 
-	require('load-grunt-tasks')(grunt);
+	require( 'load-grunt-tasks' )( grunt );
 
 	// Project configuration.
 	grunt.initConfig({
-		pkg: grunt.file.readJSON('package.json'),
+		pkg: grunt.file.readJSON( 'package.json' ),
 
 		// Update developer dependencies
 		devUpdate: {
@@ -47,11 +47,11 @@
 					potHeaders: {
 						'poedit': true,                                       // Includes common Poedit headers.
 						'x-poedit-keywordslist': true,                        // Include a list of all possible gettext functions.
-						'Report-Msgid-Bugs-To': 'https://github.com/co-cart/cocart-jwt-authentication/issues',
+						'Report-Msgid-Bugs-To': 'https://github.com/cocart-headless/cocart-jwt-authentication/issues',
 						'language-team': 'Sébastien Dumont <translate@cocart.xyz>',
 						'language': 'en_US'
 					},
-					processPot: function( pot ) {
+					processPot: function ( pot ) {
 						var translation,
 							excluded_meta = [
 								'Plugin Name of the plugin/theme',
@@ -60,7 +60,7 @@
 								'Author of the plugin/theme',
 								'Author URI of the plugin/theme'
 							];
-	
+
 						for ( translation in pot.translations[''] ) {
 							if ( 'undefined' !== typeof pot.translations[''][ translation ].comments.extracted ) {
 								if ( excluded_meta.indexOf( pot.translations[''][ translation ].comments.extracted ) >= 0 ) {
@@ -69,7 +69,7 @@
 								}
 							}
 						}
-	
+
 						return pot;
 					},
 					type: 'wp-plugin',                                        // Type of project.
