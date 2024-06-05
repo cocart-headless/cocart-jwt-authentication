@@ -120,7 +120,7 @@ final class Plugin {
 		$auth_header = self::get_auth_header();
 
 		// Validating authorization header and token.
-		if ( isset( $auth_header ) && 0 === stripos( $auth_header, 'bearer ' ) ) {
+		if ( ! empty( $auth_header ) && 0 === stripos( $auth_header, 'bearer ' ) ) {
 			/**
 			 * The HTTP_AUTHORIZATION is present, verify the format.
 			 * If the format is wrong return the user.
@@ -290,6 +290,13 @@ final class Plugin {
 	/**
 	 * Get the authorization header.
 	 *
+	 * Returns the value from the authorization header.
+	 *
+	 * On certain systems and configurations, the Authorization header will be
+	 * stripped out by the server or PHP. Typically this is then used to
+	 * generate `PHP_AUTH_USER`/`PHP_AUTH_PASS` but not passed on. We use
+	 * `getallheaders` here to try and grab it out instead.
+	 *
 	 * @access protected
 	 *
 	 * @static
@@ -297,14 +304,31 @@ final class Plugin {
 	 * @return string $auth_header
 	 */
 	protected static function get_auth_header() {
-		$auth_header = isset( $_SERVER['HTTP_AUTHORIZATION'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ) ) : false;
+		$auth_header = ! empty( $_SERVER['HTTP_AUTHORIZATION'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ) ) : '';
 
-		// Double check for different auth header string (server dependent).
-		if ( ! $auth_header ) {
-			$auth_header = isset( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) ) : false;
+		if ( function_exists( 'getallheaders' ) ) {
+			$headers = getallheaders();
+			// Check for the authorization header case-insensitively.
+			foreach ( $headers as $key => $value ) {
+				if ( 'authorization' === strtolower( $key ) ) {
+					$auth_header = $value;
+				}
+			}
 		}
 
-		return $auth_header;
+		// Double check for different auth header string if empty (server dependent).
+		if ( empty( $auth_header ) ) {
+			$auth_header = isset( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) ) : '';
+		}
+
+		/**
+		 * Filter allows you to change the authorization header.
+		 *
+		 * @since 4.1.0 Introduced into the core of CoCart.
+		 *
+		 * @param string Authorization header.
+		 */
+		return apply_filters( 'cocart_auth_header', $auth_header );
 	} // END get_auth_header()
 
 	/**
