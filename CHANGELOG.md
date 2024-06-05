@@ -1,5 +1,11 @@
 # Changelog for CoCart JWT Authentication
 
+## v1.0.3 - 5th June, 2024
+
+### What's New?
+
+* Authorization header now detectable with `getallheaders()` function.
+
 ## v1.0.2 - 10th May, 2024
 
 ### Compatibility
