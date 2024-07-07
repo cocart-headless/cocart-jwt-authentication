@@ -127,25 +127,28 @@ final class Plugin {
 			 */
 			list($token) = sscanf( $auth_header, 'Bearer %s' );
 
-			// If the token is malformed then set error.
+			// If the token is malformed then return error.
 			if ( ! $token ) {
-				$auth->set_error( new \WP_Error( 'cocart_jwt_auth_bad_auth_header', __( 'Authorization header malformed. Please check the authentication token and try again.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
+				// Error: Authorization header malformed. Please check the authentication token and try again.
+				$auth->set_error( new \WP_Error( 'cocart_jwt_auth_bad_auth_header', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
 
 				return false;
 			}
 
 			$secret_key = defined( 'COCART_JWT_AUTH_SECRET_KEY' ) ? COCART_JWT_AUTH_SECRET_KEY : false;
 
-			// First thing, check the secret key if not exist return a error.
+			// First thing, check the secret key, if not exist return error.
 			if ( ! $secret_key ) {
-				$auth->set_error( new \WP_Error( 'cocart_jwt_auth_bad_config', __( 'JWT is not configured properly.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
+				// Error: JWT is not configured properly.
+				$auth->set_error( new \WP_Error( 'cocart_jwt_auth_bad_config', __( 'JWT configuration error.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
 
 				return false;
 			}
 
 			// Check if the token is valid using the secret key.
 			if ( ! self::validate_token( $token, $secret_key ) ) {
-				$auth->set_error( new \WP_Error( 'cocart_jwt_auth_not_valid', __( 'JWT Token is not valid or has expired.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
+				// Error: JWT Token is not valid or has expired.
+				$auth->set_error( new \WP_Error( 'cocart_jwt_auth_not_valid', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
 
 				return false;
 			}
@@ -156,14 +159,16 @@ final class Plugin {
 
 			// The token is decoded now validate the iss.
 			if ( self::get_iss() !== $payload->iss ) {
-				$auth->set_error( new \WP_Error( 'cocart_jwt_auth_bad_iss', __( 'The token issuer does not match with this server.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
+				// Error: The token issuer does not match with this server.
+				$auth->set_error( new \WP_Error( 'cocart_jwt_auth_bad_iss', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
 
 				return false;
 			}
 
 			// Check the user id existence in the token.
 			if ( ! isset( $payload->data->user->id ) ) {
-				$auth->set_error( new \WP_Error( 'cocart_jwt_auth_user_missing', __( 'The token does not identify any user.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
+				// Error: The token does not identify any user.
+				$auth->set_error( new \WP_Error( 'cocart_jwt_auth_user_missing', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
 
 				return false;
 			}
@@ -172,7 +177,8 @@ final class Plugin {
 			$user = get_user_by( 'id', $payload->data->user->id );
 
 			if ( ! $user ) {
-				$auth->set_error( new \WP_Error( 'cocart_jwt_auth_no_user', __( "The user doesn't exist.", 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
+				// Error: The user doesn't exist.
+				$auth->set_error( new \WP_Error( 'cocart_jwt_auth_no_user', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
 
 				return false;
 			}
