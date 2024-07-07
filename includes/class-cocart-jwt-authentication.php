@@ -183,20 +183,8 @@ final class Plugin {
 				return false;
 			}
 
-			$username = isset( $payload->data->user->username ) ? $payload->data->user->username : '';
-			$password = isset( $payload->data->user->password ) ? $payload->data->user->password : '';
-
-			// Authenticate user once token is decoded.
-			$auth_user = wp_authenticate( $username, $password );
-
-			// If the authentication is failed return error response.
-			if ( is_wp_error( $auth_user ) ) {
-				$auth->set_error( new \WP_Error( 'cocart_jwt_authentication_error', __( 'Authentication is invalid. Please check the authentication information is correct and try again. Authentication also only works on a secure connection.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
-
-				return false;
-			}
-
-			return $auth_user->ID;
+			// User is authenticated.
+			return $user->ID;
 		}
 
 		return $user_id;
