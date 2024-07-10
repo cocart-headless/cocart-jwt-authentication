@@ -202,6 +202,12 @@ final class Plugin {
 				return false;
 			}
 
+			// Validate IP or Device.
+			if ( \CoCart_Authentication::get_ip_address() !== $payload->data->user->ip || sanitize_text_field( wp_unslash( self::get_user_agent_header() ) ) !== $payload->data->user->device ) {
+				// Error: IP or Device mismatch.
+				$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
+			}
+
 			// User is authenticated.
 			return $user->ID;
 		}
@@ -255,7 +261,8 @@ final class Plugin {
 					'user'       => array(
 						'id'       => $user->ID,
 						'username' => $username,
-						'password' => $password,
+						'ip'       => \CoCart_Authentication::get_ip_address(),
+						'device'   => ! empty( self::get_user_agent_header() ) ? sanitize_text_field( wp_unslash( self::get_user_agent_header() ) ) : '',
 					),
 					'secret_key' => $secret_key,
 				),
