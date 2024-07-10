@@ -79,7 +79,10 @@ final class Plugin {
 		add_filter( 'cocart_authenticate', array( __CLASS__, 'perform_jwt_authentication' ), 0, 3 );
 
 		// Send token to login response.
-		add_filter( 'cocart_login_extras', array( __CLASS__, 'send_token' ) );
+		add_filter( 'cocart_login_extras', array( __CLASS__, 'send_token' ), 0, 2 );
+
+		// Delete token when user logs out.
+		add_action( 'wp_logout', array( __CLASS__, 'destroy_token' ) );
 	} // END init()
 
 	/**
@@ -285,6 +288,25 @@ final class Plugin {
 		return time();
 	} // END generate_token()
 
+	/**
+	 * Generate refresh token.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 2.0.0 Introduced.
+	 *
+	 * @param int $user_id User ID.
+	 *
+	 * @return int User ID
+	 */
+	public static function generate_refresh( $user_id ) {
+		$refresh_token = bin2hex( random_bytes( 64 ) ); // Generates a random 64-byte string.
+		update_user_meta( $user_id, 'cocart_jwt_refresh_token', $refresh_token );
+
+		return $refresh_token;
+	} // END generate_refresh()
 
 	/**
 	 * Sends the generated token to the login response.
@@ -293,19 +315,38 @@ final class Plugin {
 	 *
 	 * @static
 	 *
-	 * @param array $extras Other extras filtered with `cocart_login_extras`.
+	 * @param array  $extras       Other extras filtered with `cocart_login_extras`.
+	 * @param object $current_user The current user.
 	 *
 	 * @return array $extras
 	 */
-	public static function send_token( $extras ) {
+	public static function send_token( $extras, $user ) {
 		$secret_key = defined( 'COCART_JWT_AUTH_SECRET_KEY' ) ? COCART_JWT_AUTH_SECRET_KEY : false;
 
 		if ( $secret_key ) {
-			$extras['jwt_token'] = self::generate_token( $secret_key );
+			$extras['jwt_token']   = self::generate_token( $secret_key );
+			$extras['jwt_refresh'] = self::generate_refresh( $user->ID );
 		}
 
 		return $extras;
 	} // END send_token()
+
+	/**
+	 * Destroys the refresh token when the user logs out.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 2.0.0 Introduced.
+	 *
+	 * @hooked: wp_logout
+	 *
+	 * @param int $user_id User ID.
+	 */
+	public static function destroy_token( $user_id ) {
+		delete_user_meta( $user_id, 'cocart_jwt_refresh_token' );
+	} // END destroy_token()
 
 	/**
 	 * Validates a provided token against the provided secret key.
