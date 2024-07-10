@@ -229,7 +229,7 @@ final class Plugin {
 	} // END get_iss()
 
 	/**
-	 * Generates a token for user.
+	 * Generates a token for user otherwise returns a timestamp.
 	 *
 	 * @access public
 	 *
