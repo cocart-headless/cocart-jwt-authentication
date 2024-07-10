@@ -251,7 +251,17 @@ final class Plugin {
 			// Generate a token from provided data and secret key.
 			$user      = get_user_by( 'login', $username );
 			$issued_at = time();
-			$expire    = $issued_at + intval( apply_filters( 'cocart_jwt_auth_expire', DAY_IN_SECONDS * 2 ) );
+
+			/**
+			 * Authorization expiration.
+			 *
+			 * Expires after 2 days by default.
+			 *
+			 * @since 1.0.0 Introduced.
+			 */
+			$auth_expires = apply_filters( 'cocart_jwt_auth_expire', DAY_IN_SECONDS * 2 );
+
+			$expire    = $issued_at + intval( $auth_expires );
 			$header    = self::to_base_64_url( self::generate_header() );
 			$payload   = self::to_base_64_url( wp_json_encode( array(
 				'iss'  => self::get_iss(),
