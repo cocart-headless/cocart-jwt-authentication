@@ -41,6 +41,30 @@ final class Plugin {
 	private static $algorithm = 'HS256';
 
 	/**
+	 * All possible HTTP headers that represent the
+	 * User-Agent string.
+	 *
+	 * @access protected
+	 *
+	 * @since 2.0.0 Introduced.
+	 *
+	 * @var array
+	 */
+	protected static array $user_agent_headers = array(
+		// The default User-Agent string.
+		'HTTP_USER_AGENT',
+		// Header can occur on devices using Opera Mini.
+		'HTTP_X_OPERAMINI_PHONE_UA',
+		// Vodafone specific header: http://www.seoprinciple.com/mobile-web-community-still-angry-at-vodafone/24/
+		'HTTP_X_DEVICE_USER_AGENT',
+		'HTTP_X_ORIGINAL_USER_AGENT',
+		'HTTP_X_SKYFIRE_PHONE',
+		'HTTP_X_BOLT_PHONE_UA',
+		'HTTP_DEVICE_STOCK_UA',
+		'HTTP_X_UCBROWSER_DEVICE_UA',
+	);
+
+	/**
 	 * Initiate CoCart JWT Authentication.
 	 *
 	 * @access public
@@ -441,6 +465,44 @@ final class Plugin {
 			)
 		);
 	} // END from_base_64_url()
+
+	/**
+	 * Get all possible HTTP headers that can contain the User-Agent string.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 2.0.0 Introduced.
+	 *
+	 * @return array List of HTTP headers.
+	 */
+	public static function get_user_agent_headers() {
+		return self::$user_agent_headers;
+	} // END get_user_agent_headers()
+
+	/**
+	 * Get the found User-Agent header.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 2.0.0 Introduced.
+	 *
+	 * @return string
+	 */
+	public static function get_user_agent_header() {
+		$user_agent_header = '';
+
+		foreach ( self::get_user_agent_headers() as $ua_header ) {
+			if ( ! empty( $ua_header ) ) {
+				$user_agent_header = $ua_header;
+			}
+		}
+
+		return $user_agent_header;
+	} // END get_user_agent_header()
 
 	/**
 	 * Load the plugin translations if any ready.
