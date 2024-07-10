@@ -141,7 +141,7 @@ final class Plugin {
 	public static function perform_jwt_authentication( int $user_id, bool $ssl, $auth ) {
 		$auth->set_method( 'jwt_auth' );
 
-		$auth_header = self::get_auth_header();
+		$auth_header = \CoCart_Authentication::get_auth_header();
 
 		// Validating authorization header and token.
 		if ( ! empty( $auth_header ) && 0 === stripos( $auth_header, 'bearer ' ) ) {
@@ -237,24 +237,15 @@ final class Plugin {
 	 * @param string $secret_key Secret Key to use for encoding the token.
 	 */
 	public static function generate_token( string $secret_key ) {
-		$auth_header = self::get_auth_header();
+		$auth_header = \CoCart_Authentication::get_auth_header();
 
 		// Validating authorization header and get username and password.
-		if ( isset( $auth_header ) && 0 === stripos( $auth_header, 'basic ' ) ) {
+		if ( ! empty( $auth_header ) && 0 === stripos( $auth_header, 'basic ' ) ) {
 			$exploded = explode( ':', base64_decode( substr( $auth_header, 6 ) ), 2 ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			list( $username, $password ) = $exploded;
 
-			// Check if the username provided is a billing phone number and return the username if true.
-			if ( WC_Validation::is_phone( $username ) ) {
-				$username = self::get_user_by_phone( $username ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			}
-
-			// Check if the username provided was an email address and return the username if true.
-			if ( is_email( $username ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$user     = get_user_by( 'email', $username ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$username = $user->user_login; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			}
+			$username = \CoCart_Authentication::get_username( $username );
 
 			// Generate a token from provided data and secret key.
 			$user      = get_user_by( 'login', $username );
