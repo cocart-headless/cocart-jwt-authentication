@@ -10,6 +10,8 @@
  * Domain Path: /languages/
  * Requires at least: 5.6
  * Requires PHP: 7.4
+ * CoCart requires at least: 4.2
+ * CoCart tested up to: 4.3
  *
  * @package CoCart JWT Authentication
  */
