@@ -258,11 +258,11 @@ final class Plugin {
 			/**
 			 * Authorization expiration.
 			 *
-			 * Expires after 2 days by default.
+			 * Expires after 10 days by default.
 			 *
 			 * @since 1.0.0 Introduced.
 			 */
-			$auth_expires = apply_filters( 'cocart_jwt_auth_expire', DAY_IN_SECONDS * 2 );
+			$auth_expires = apply_filters( 'cocart_jwt_auth_expire', DAY_IN_SECONDS * 10 );
 
 			$expire    = $issued_at + intval( $auth_expires );
 			$header    = self::to_base_64_url( self::generate_header() );
