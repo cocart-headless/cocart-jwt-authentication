@@ -8,6 +8,7 @@ module.exports = function (grunt) {
 	'use strict';
 
 	require( 'load-grunt-tasks' )( grunt );
+	grunt.loadNpmTasks('grunt-shell');
 
 	// Project configuration.
 	grunt.initConfig({
@@ -156,6 +157,14 @@ module.exports = function (grunt) {
 						to: "WC tested up to: <%= pkg.wc_tested_up_to %>"
 					},
 					{
+						from: /CoCart requires at least:.*$/m,
+						to: "CoCart requires at least: <%= pkg.cocart_requires %>"
+					},
+					{
+						from: /CoCart tested up to:.*$/m,
+						to: "CoCart tested up to: <%= pkg.cocart_tested_up_to %>"
+					},
+					{
 						from: /Version:.*$/m,
 						to: "Version:     <%= pkg.version %>"
 					},
@@ -271,23 +280,69 @@ module.exports = function (grunt) {
 						dest: '<%= pkg.name %>'
 					}
 				]
+			},
+			tarGz: {
+				options: {
+					archive: './releases/<%= pkg.name %>-v<%= pkg.version %>.tar.gz',
+					mode: 'tgz' // Setting the mode to 'tgz' will create a .tar.gz archive
+				},
+				files: [
+					{
+						expand: true,
+						cwd: './build/',
+						src: '**',
+						dest: '<%= pkg.name %>'
+					}
+				]
 			}
 		},
 
 		// Deletes the deployable plugin folder once zipped up.
 		clean: {
-			build: [ 'build/' ]
+			build: [ 'build/' ],
+			checksum: ['checksum.md5']
+		},
+
+		// Shell task to generate the checksum file with exclusions
+		shell: {
+			generateChecksum: {
+				command: `find . -type f \
+					! -path '*/.*' \
+					! -name '*.dist' \
+					! -name '*.gif' \
+					! -name '*.html' \
+					! -name '*.jpg' \
+					! -name '*.jpeg' \
+					! -name '*.js' \
+					! -name '*.json' \
+					! -name '*.log' \
+					! -name '*.lock' \
+					! -name '*.md' \
+					! -name '*.png' \
+					! -name '*.scss' \
+					! -name '*.sh' \
+					! -name '*.txt' \
+					! -name '*.xml' \
+					! -name '*.zip' \
+					! -name '*.md5' \
+					! -name '*.neon' \
+					! -path '*/bin/*' \
+					! -path '*/node_modules/*' \
+					! -path '*/releases/*' \
+					! -path '*/tests/*' \
+					! -path '*/vendor/*' \
+					! -path '*/unit-tests/*' \
+					-exec md5sum {} + > checksum.md5`
+			}
 		}
+
 	});
 
 	// Set the default grunt command to run test cases.
 	grunt.registerTask( 'default', [ 'test' ] );
 
 	// Checks for developer dependencies updates.
-	grunt.registerTask( 'check', [ 'devUpdate' ] );
-
-	// Checks for errors.
-	grunt.registerTask( 'test', [ 'checktextdomain' ] );
+	grunt.registerTask( 'check', [ 'checktextdomain' ] );
 
 	// Update version of plugin.
 	grunt.registerTask( 'version', [ 'replace:container', 'replace:package', 'replace:readme' ] );
@@ -307,12 +362,16 @@ module.exports = function (grunt) {
 	 * Creates a deployable plugin zipped up ready to upload
 	 * and install on a WordPress installation.
 	 */
-	grunt.registerTask( 'zip', [ 'copy:build', 'compress:zip', 'clean:build' ] );
+	grunt.registerTask( 'zip-only', [ 'copy:build', 'compress:zip', 'clean:build' ] );
+	grunt.registerTask( 'tar-only', [ 'copy:build', 'compress:tarGz', 'clean:build' ] );
 
 	// Build Plugin.
-	grunt.registerTask( 'build', [ 'version', 'update-pot', 'zip' ] );
+	grunt.registerTask( 'compress-all', [ 'copy:build', 'compress:zip', 'compress:tarGz', 'clean:build' ] );
+	grunt.registerTask( 'build', [ 'version', 'update-pot', 'compress-all' ] );
 
 	// Ready for release.
-	grunt.registerTask( 'ready', [ 'version', 'stable', 'update-pot', 'zip' ] );
+	grunt.registerTask( 'ready', [ 'version', 'stable', 'update-pot', 'compress-all' ] );
 
+	// Register a custom task for generating the checksum
+	grunt.registerTask( 'checksum', [ 'clean:checksum', 'shell:generateChecksum' ]);
 };
