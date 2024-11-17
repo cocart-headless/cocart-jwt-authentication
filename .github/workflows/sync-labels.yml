@@ -9,5 +9,5 @@ jobs:
         - name: Sync repository labels
           uses: cocart-headless/wp-repo-labels@v1
           with:
-            labels-path: ./.github/labels.json
+            labels-path: .github/labels.json
             github-token: ${{ secrets.GITHUB_TOKEN }}
