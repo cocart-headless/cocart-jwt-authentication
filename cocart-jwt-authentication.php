@@ -13,6 +13,10 @@
  * CoCart requires at least: 4.2
  * CoCart tested up to: 4.3
  *
+ * Copyright:   CoCart Headless, LLC
+ * License:     GNU General Public License v3.0
+ * License URI: https://www.gnu.org/licenses/gpl-3.0.html
+ *
  * @package CoCart JWT Authentication
  */
 
