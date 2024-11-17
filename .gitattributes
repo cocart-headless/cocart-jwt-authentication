@@ -6,10 +6,13 @@
 
 # Remove files for archives generated using `git archive`.
 /.*                 export-ignore
+CHANGELOG.md        export-ignore
 composer.*          export-ignore
 Gruntfile.js        export-ignore
 package.json        export-ignore
 package-lock.json   export-ignore
 phpcs.xml           export-ignore
+phpstan.neon        export-ignore
 README.md           export-ignore
 renovate.json       export-ignore
+SECURITY.md         export-ignore

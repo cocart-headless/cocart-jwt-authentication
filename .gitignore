@@ -24,4 +24,3 @@ Thumbs.db
 
 # Various file types to ignore when exporting.
 .gitconfig
-*.yml
