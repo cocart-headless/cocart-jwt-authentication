@@ -15,7 +15,6 @@ Thumbs.db
 /vendor/
 
 # Languages
-/languages/*
 !/languages/README.md
 
 # Build & Releases

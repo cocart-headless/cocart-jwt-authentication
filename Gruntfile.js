@@ -31,36 +31,43 @@ module.exports = function (grunt) {
 			}
 		},
 
+		// Download translations
+		glotpress_download: {
+			stable: {
+				options: {
+					domainPath: 'languages',
+					url: 'https://translate.cocartapi.com',
+					slug: '<%= pkg.name %>',
+				}
+			},
+		},
+
 		// Generate .pot file
 		makepot: {
 			target: {
 				options: {
 					cwd: '',
-					domainPath: 'languages',                                  // Where to save the POT file.
-					exclude: [
-						'releases',
-						'node_modules',
-						'vendor'
-					],
+					domainPath: 'languages', // Where to save the POT file.
+					exclude: [ 'releases', 'node_modules', 'vendor' ], // List of files or directories to ignore.
 					mainFile: '<%= pkg.name %>.php', // Main project file.
-					potComments: 'Copyright (c) {year} Sébastien Dumont\nThis file is distributed under the same license as the CoCart package.', // The copyright at the beginning of the POT file.
+					potComments: 'Copyright (c) {year} CoCart Headless, LLC\nThis file is distributed under the same license as the CoCart package.', // The copyright at the beginning of the POT file.
 					potFilename: '<%= pkg.name %>.pot', // Name of the POT file.
 					potHeaders: {
 						'poedit': true,                                       // Includes common Poedit headers.
 						'x-poedit-keywordslist': true,                        // Include a list of all possible gettext functions.
 						'Report-Msgid-Bugs-To': 'https://github.com/cocart-headless/cocart-jwt-authentication/issues',
-						'language-team': 'Sébastien Dumont <translate@cocart.xyz>',
+						'language-team': 'CoCart Headless, LLC <support@cocartapi.com>',
 						'language': 'en_US'
 					},
-					processPot: function ( pot ) {
+					processPot: function( pot ) {
 						var translation,
-							excluded_meta = [
-								'Plugin Name of the plugin/theme',
-								'Plugin URI of the plugin/theme',
-								'Description of the plugin/theme',
-								'Author of the plugin/theme',
-								'Author URI of the plugin/theme'
-							];
+						excluded_meta = [
+							'Plugin Name of the plugin/theme',
+							'Plugin URI of the plugin/theme',
+							'Description of the plugin/theme',
+							'Author of the plugin/theme',
+							'Author URI of the plugin/theme'
+						];
 
 						for ( translation in pot.translations[''] ) {
 							if ( 'undefined' !== typeof pot.translations[''][ translation ].comments.extracted ) {
@@ -356,6 +363,7 @@ module.exports = function (grunt) {
 	 * This includes extracting translatable strings, updating the master pot file.
 	 * If this is part of a deploy process, it should come before zipping everything up.
 	 */
+	grunt.registerTask( 'get-translations', [ 'glotpress_download:stable' ] );
 	grunt.registerTask( 'update-pot', [ 'checktextdomain', 'makepot' ] );
 
 	/**
