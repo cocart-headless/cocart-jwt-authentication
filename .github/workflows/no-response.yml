@@ -9,8 +9,7 @@ on:
   issue_comment:
     types: [created]
   schedule:
-    # Schedule for five minutes after the hour, every hour
-    - cron: '5 * * * *'
+    - cron: '0 6,18 * * *' # Every day at 6:00 AM and 6:00 PM
 
 jobs:
   noResponse:
@@ -18,14 +17,11 @@ jobs:
     steps:
       - uses: lee-dohm/no-response@v0.5.0
         with:
-          token: ${{ github.token }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           daysUntilClose: 14 # Number of days of inactivity before an Issue is closed for lack of response
           responseRequiredLabel: "needs: author feedback" # Label indicating that a response from the original author is required
           closeComment: >
             This issue has been automatically closed because there has been no response
-            to our request for more information. With only the information that is 
-            currently in the issue, we don't have enough information to take action.
-            Please reach out if you have or find the answers we need so that we can 
-            investigate further. See [this blog post on bug reports and the importance 
-            of repro steps](https://www.lee-dohm.com/2015/01/04/writing-good-bug-reports/)
-            for more information about the kind of information that may be helpful.
+            to our request for more information after 14 days. Please reopen if you can provide the
+            requested information. See [this blog post](https://www.lee-dohm.com/2015/01/04/writing-good-bug-reports/)
+            for tips on how to write effective bug reports.
