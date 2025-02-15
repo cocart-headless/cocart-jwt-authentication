@@ -38,11 +38,30 @@ RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
 ### WPEngine
 
-To enable this option you'll need to edit your **.htaccess** file by adding the following (see [this issue](https://github.com/Tmeister/wp-api-jwt-auth/issues/1)):
+To enable this option you'll need to edit your **.htaccess** file by adding the following outside of IfModule:
 
 ```
 SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 ```
+
+Example of what that looks like.
+
+`
+# BEGIN WordPress
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule ^(.*) - [E=HTTP_AUTHORIZATION:%1]
+</IfModule>
+
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+# END WordPress
+`
 
 ## Configuration
 
@@ -51,13 +70,13 @@ SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 
 ### Token Expiration
 
-By default, the token expires after two full days but can be filtered to change to your preference using this hook `cocart_jwt_auth_expire`.
+By default, the token expires after 10 full days but can be filtered to change to your preference using this hook `cocart_jwt_auth_expire`.
 
-Here is an example changing it to expire after just 2 hours.
+Here is an example changing it to expire after just 2 days.
 
 ```php
 add_filter( 'cocart_jwt_auth_expire', function() {
-  return MINUTE_IN_SECONDS * 120
+  return DAYS_IN_SECONDS * 2
 });
 ```
 
