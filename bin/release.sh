@@ -198,6 +198,7 @@ rm -f Gruntfile.js
 rm -f .jscrsrc
 rm -f .jshintrc
 rm -f phpunit.xml.dist
+rm -f .phpcs.xml.dist
 rm -f .editorconfig
 rm -f apigen.neon
 rm -f screenshot-*.jpg
