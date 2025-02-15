@@ -1,4 +1,25 @@
 # Changelog for CoCart JWT Authentication
+## v2.0.0 - ?? ??, 2025
+
+📢 This update will invalidate previous tokens as they will no longer be valid.
+
+### What's New?
+
+* Bind tokens to specific IP addresses or devices to mitigate token misuse.
+
+### Changes
+
+* Token expires after 10 days by default not 2.
+
+### Improvements
+
+* Authentication errors have been simplified so they are harder to identify.
+
+### Compatibility and Requirements
+
+* Tested with WordPress 6.7
+* Tested with WooCommerce 9.8
+* Requires CoCart v4.2 minimum.
 
 ## v1.0.3 - 5th June, 2024
 

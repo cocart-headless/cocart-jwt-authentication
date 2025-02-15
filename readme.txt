@@ -3,10 +3,10 @@ Contributors: cocartforwc, sebd86
 Tags: woocommerce, rest-api, decoupled, headless, jwt
 Requires at least: 5.6
 Requires PHP: 7.4
-Tested up to: 6.5
+Tested up to: 6.7
 Stable tag: 1.0.3
-WC requires at least: 6.4
-WC tested up to: 8.9
+WC requires at least: 7.0
+WC tested up to: 9.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -14,7 +14,7 @@ JWT Authentication for CoCart.
 
 == Description ==
 
-This free add-on for [CoCart](https://wordpress.org/plugins/cart-rest-api-for-woocommerce/) allows you to authenticate via a simple JWT Token.
+This free add-on for [CoCart](https://wordpress.org/plugins/cart-rest-api-for-woocommerce/) allows you to authenticate the Cart API via a simple JWT Token.
 
 ★★★★★
 > An excellent plugin, which makes building a headless WooCommerce experience a breeze. Easy to use, nearly zero setup time. [Harald Schneider](https://wordpress.org/support/topic/excellent-plugin-8062/)
@@ -42,10 +42,29 @@ RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
 ### WPEngine
 
-To enable this option you'll need to edit your **.htaccess** file by adding the following (see [this issue](https://github.com/Tmeister/wp-api-jwt-auth/issues/1)):
+To enable this option you'll need to edit your **.htaccess** file by adding the following outside of IfModule:
 
 `
 SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+`
+
+Example of what that looks like.
+
+`
+# BEGIN WordPress
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule ^(.*) - [E=HTTP_AUTHORIZATION:%1]
+</IfModule>
+
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+# END WordPress
 `
 
 ## 🧰 Configuration
@@ -55,19 +74,19 @@ SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 
 ### Token Expiration
 
-By default, the token expires after two full days but can be filtered to change to your preference using this hook `cocart_jwt_auth_expire`.
+By default, the token expires after 10 full days but can be filtered to change to your preference using this hook `cocart_jwt_auth_expire`.
 
-Here is an example changing it to expire after just 2 hours.
+Here is an example changing it to expire after just 2 days.
 
 `
 add_filter( 'cocart_jwt_auth_expire', function() {
-  return MINUTE_IN_SECONDS * 120
+  return DAYS_IN_SECONDS * 2
 });
 `
 
 ## 📄 Usage
 
-1. Authenticate via basic method with the login endpoint to get your token.
+1. Authenticate via basic method with the CoCart login endpoint `cocart/v2/login` to get your token.
 2. Store the given token under `jwt_token` in your application.
 3. Now authenticate any cart route with `Bearer` authentication with the token given.
 
@@ -120,14 +139,14 @@ Founder of [CoCart Headless, LLC](https://twitter.com/cocartheadless).
 = Minimum Requirements =
 
 * WordPress v5.6
-* WooCommerce v6.4
+* WooCommerce v7.0
 * PHP v7.4
-* CoCart v3.8.1
+* CoCart v4.2
 
 = Recommended Requirements =
 
 * WordPress v6.0 or higher.
-* WooCommerce v7.0 or higher.
+* WooCommerce v9.0 or higher.
 * PHP v8.0 or higher.
 
 = Automatic installation =
@@ -155,3 +174,9 @@ You can read more about the details of Semver at [semver.org](https://semver.org
 == Changelog ==
 
 [View the full changelog here](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/CHANGELOG.md).
+
+== Upgrade Notice ==
+
+= 2.0.0 =
+
+Update CoCart to version 4.2 before updating this plugin.
