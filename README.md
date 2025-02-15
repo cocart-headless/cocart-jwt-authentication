@@ -46,7 +46,7 @@ SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 
 Example of what that looks like.
 
-`
+```
 # BEGIN WordPress
 <IfModule mod_rewrite.c>
 RewriteEngine On
@@ -61,7 +61,7 @@ RewriteRule ^(.*) - [E=HTTP_AUTHORIZATION:%1]
 
 SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 # END WordPress
-`
+```
 
 ## Configuration
 
