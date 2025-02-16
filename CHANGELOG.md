@@ -6,14 +6,20 @@
 ### What's New?
 
 * Bind tokens to specific IP addresses or devices to mitigate token misuse.
+* Algorithm can be changed to any other supported. See: https://www.rfc-editor.org/rfc/rfc7518#section-3
 
 ### Changes
 
-* Token expires after 10 days by default not 2.
+* Token expires after 10 days by default not 2 hours.
 
 ### Improvements
 
 * Authentication errors have been simplified so they are harder to identify.
+
+### For Developers
+
+* Introduced new filter `cocart_jwt_auth_not_before` to change the timestamp.
+* Introduced new filter `cocart_jwt_auth_algorithm` to change to any other supported algorithms.
 
 ### Compatibility and Requirements
 
