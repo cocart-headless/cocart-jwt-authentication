@@ -36,6 +36,8 @@ final class Plugin {
 	/**
 	 * JWT algorithm to generate signature.
 	 *
+	 * Default is HS256
+	 *
 	 * @var string
 	 */
 	private static $algorithm = 'HS256';
@@ -63,6 +65,32 @@ final class Plugin {
 		'HTTP_DEVICE_STOCK_UA',
 		'HTTP_X_UCBROWSER_DEVICE_UA',
 	);
+
+	/**
+	 * Supported algorithms to sign the token.
+	 *
+	 * @access private
+	 *
+	 * @since 2.0.0 Introduced.
+	 *
+	 * @see https://www.rfc-editor.org/rfc/rfc7518#section-3
+	 *
+	 * @var array|string[]
+	 */
+	private static array $supported_algorithms = [
+		'HS256',
+		'HS384',
+		'HS512',
+		'RS256',
+		'RS384',
+		'RS512',
+		'ES256',
+		'ES384',
+		'ES512',
+		'PS256',
+		'PS384',
+		'PS512'
+	];
 
 	/**
 	 * Initiate CoCart JWT Authentication.
@@ -280,6 +308,18 @@ final class Plugin {
 					'secret_key' => $secret_key,
 				),
 			) ) );
+
+			/** Let the user modify the token data before the sign. */
+			$algorithm = self::get_algorithm();
+
+			if ( $algorithm === false ) {
+				// See https://www.rfc-editor.org/rfc/rfc7518#section-3
+				return new \WP_Error(
+					'cocart_authentication_error',
+					__( 'Algorithm not supported', 'cocart-jwt-authentication' ),
+					array( 'status' => 401 )
+				);
+			}
 			$signature = self::to_base_64_url( self::generate_signature( $header . '.' . $payload, $secret_key ) );
 
 			return $header . '.' . $payload . '.' . $signature;
@@ -287,6 +327,31 @@ final class Plugin {
 
 		return time();
 	} // END generate_token()
+
+	/**
+	 * Get the algorithm used to sign the token and validate that
+	 * the algorithm is in the supported list.
+	 *
+	 * @access private
+	 *
+	 * @static
+	 *
+	 * @return false|mixed|null
+	 */
+	private static function get_algorithm() {
+		/**
+		 * Filter the algorithm to one of the supported.
+		 *
+		 * @since 2.0.0 Introduced.
+		 */
+		$algorithm = apply_filters( 'cocart_jwt_auth_algorithm', self::$algorithm );
+
+		if ( ! in_array( $algorithm, self::$supported_algorithms ) ) {
+			return false;
+		}
+
+		return $algorithm;
+	} // END get_algorithm()
 
 	/**
 	 * Generate refresh token.
@@ -455,7 +520,7 @@ final class Plugin {
 			! property_exists( $parts->header, 'typ' ) ||
 			! property_exists( $parts->header, 'alg' ) ||
 			'JWT' !== $parts->header->typ ||
-			self::$algorithm !== $parts->header->alg
+			self::get_algorithm() !== $parts->header->alg
 		) {
 			return false;
 		}
@@ -509,7 +574,7 @@ final class Plugin {
 	private static function generate_header() {
 		return wp_json_encode(
 			array(
-				'alg' => self::$algorithm,
+				'alg' => self::get_algorithm(),
 				'typ' => 'JWT',
 			)
 		);
