@@ -328,6 +328,8 @@ final class Plugin {
 					array( 'status' => 401 )
 				);
 			}
+
+			/** The token is signed, now generate the signature to the response */
 			$signature = self::to_base_64_url( self::generate_signature( $header . '.' . $payload, $secret_key ) );
 
 			return $header . '.' . $payload . '.' . $signature;
