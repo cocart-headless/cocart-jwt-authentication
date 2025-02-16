@@ -284,6 +284,13 @@ final class Plugin {
 			$issued_at = time();
 
 			/**
+			 * Authorization expires not before the time the token was created.
+			 *
+			 * @since 2.0.0 Introduced.
+			 */
+			$not_before = apply_filters( 'cocart_jwt_auth_not_before', $issued_at );
+
+			/**
 			 * Authorization expiration.
 			 *
 			 * Expires after 10 days by default.
@@ -297,6 +304,7 @@ final class Plugin {
 			$payload   = self::to_base_64_url( wp_json_encode( array(
 				'iss'  => self::get_iss(),
 				'iat'  => $issued_at,
+				'nbf'  => $not_before,
 				'exp'  => $expire,
 				'data' => array(
 					'user'       => array(
