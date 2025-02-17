@@ -474,8 +474,15 @@ final class Plugin {
 		$secret_key = defined( 'COCART_JWT_AUTH_SECRET_KEY' ) ? COCART_JWT_AUTH_SECRET_KEY : false;
 
 		if ( $secret_key ) {
-			$extras['jwt_token']   = self::generate_token( $secret_key );
-			$extras['jwt_refresh'] = self::generate_refresh( $user->ID );
+			$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
+
+			if ( empty( $token ) || self::is_token_expired( $token ) ) {
+				$token = self::generate_token( $secret_key );
+				update_user_meta( $user->ID, 'cocart_jwt_token', $token );
+			}
+
+			$extras['jwt_token']   = $token;
+			$extras['jwt_refresh'] = self::generate_refresh_token( $user->ID );
 		}
 
 		return $extras;
