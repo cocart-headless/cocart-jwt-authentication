@@ -1,5 +1,6 @@
 # Changelog for CoCart JWT Authentication
-## v2.0.0 - ?? ??, 2025
+
+## v2.0.0 - ?? February, 2025
 
 📢 This update will invalidate previous tokens as they will no longer be valid.
 
@@ -7,6 +8,7 @@
 
 * Bind tokens to specific IP addresses or devices to mitigate token misuse.
 * Algorithm can be changed to any other supported. See: https://www.rfc-editor.org/rfc/rfc7518#section-3
+* Refresh token with new REST API endpoint `cocart/jwt/refresh-token`.
 
 ### Changes
 
