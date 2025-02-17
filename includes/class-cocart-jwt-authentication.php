@@ -109,6 +109,8 @@ final class Plugin {
 		// Send tokens to login response.
 		add_filter( 'cocart_login_extras', array( __CLASS__, 'send_tokens' ), 0, 2 );
 
+		// Delete tokens when user logs out.
+		add_action( 'wp_logout', array( __CLASS__, 'destroy_tokens' ) );
 		// Delete token when user logs out.
 		add_action( 'wp_logout', array( __CLASS__, 'destroy_token' ) );
 	} // END init()
@@ -489,7 +491,7 @@ final class Plugin {
 	} // END send_tokens()
 
 	/**
-	 * Destroys the refresh token when the user logs out.
+	 * Destroys both the token and refresh token when the user logs out.
 	 *
 	 * @access public
 	 *
@@ -501,9 +503,10 @@ final class Plugin {
 	 *
 	 * @param int $user_id User ID.
 	 */
-	public static function destroy_token( $user_id ) {
+	public static function destroy_tokens( $user_id ) {
+		delete_user_meta( $user_id, 'cocart_jwt_token' );
 		delete_user_meta( $user_id, 'cocart_jwt_refresh_token' );
-	} // END destroy_token()
+	} // END destroy_tokens()
 
 	/**
 	 * Validates a provided token against the provided secret key.
