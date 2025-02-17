@@ -77,7 +77,7 @@ final class Plugin {
 	 *
 	 * @var array|string[]
 	 */
-	private static array $supported_algorithms = [
+	private static array $supported_algorithms = array(
 		'HS256',
 		'HS384',
 		'HS512',
@@ -89,8 +89,8 @@ final class Plugin {
 		'ES512',
 		'PS256',
 		'PS384',
-		'PS512'
-	];
+		'PS512',
+	);
 
 	/**
 	 * Initiate CoCart JWT Authentication.
@@ -598,7 +598,7 @@ final class Plugin {
 			}
 
 			return false;
-		} catch (Exception $e) {
+		} catch ( Exception $e ) {
 			return true;
 		}
 	} // END is_token_expired()
