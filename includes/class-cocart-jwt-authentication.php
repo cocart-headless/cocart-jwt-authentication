@@ -120,8 +120,11 @@ final class Plugin {
 
 		// Delete tokens when user logs out.
 		add_action( 'wp_logout', array( __CLASS__, 'destroy_tokens' ) );
-		// Delete token when user logs out.
-		add_action( 'wp_logout', array( __CLASS__, 'destroy_token' ) );
+
+		// Schedule cron job for cleaning up expired tokens.
+		add_action( 'cocart_jwt_cleanup_cron', array( __CLASS__, 'cleanup_expired_tokens' ) );
+		register_activation_hook( COCART_JWT_AUTHENTICATION_FILE, array( __CLASS__, 'schedule_cron_job' ) );
+		register_deactivation_hook( COCART_JWT_AUTHENTICATION_FILE, array( __CLASS__, 'clear_scheduled_cron_job' ) );
 	} // END init()
 
 	/**
@@ -820,6 +823,59 @@ final class Plugin {
 
 		return $user_agent_header;
 	} // END get_user_agent_header()
+
+	/**
+	 * Clean up expired tokens.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 2.0.0 Introduced.
+	 */
+	public static function cleanup_expired_tokens() {
+		$users = get_users( array(
+			'meta_key'     => 'cocart_jwt_token',
+			'meta_compare' => 'EXISTS',
+		) );
+
+		foreach ( $users as $user ) {
+			$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
+
+			if ( ! empty( $token ) && self::is_token_expired( $token ) ) {
+				delete_user_meta( $user->ID, 'cocart_jwt_token' );
+			}
+		}
+	} // END cleanup_expired_tokens()
+
+	/**
+	 * Schedule cron job for cleaning up expired tokens.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 2.0.0 Introduced.
+	 */
+	public static function schedule_cron_job() {
+		if ( ! wp_next_scheduled( 'cocart_jwt_cleanup_cron' ) ) {
+			wp_schedule_event( time(), 'daily', 'cocart_jwt_cleanup_cron' );
+		}
+	} // END schedule_cron_job()
+
+	/**
+	 * Clear scheduled cron job on plugin deactivation.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 2.0.0 Introduced.
+	 */
+	public static function clear_scheduled_cron_job() {
+		$timestamp = wp_next_scheduled( 'cocart_jwt_cleanup_cron' );
+		wp_unschedule_event( $timestamp, 'cocart_jwt_cleanup_cron' );
+	} // END clear_scheduled_cron_job()
 
 	/**
 	 * Load the plugin translations if any ready.
