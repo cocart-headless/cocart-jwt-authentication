@@ -32,7 +32,7 @@ if ( ! defined( 'COCART_JWT_AUTHENTICATION_FILE' ) ) {
 
 // Include the main CoCart JWT Authentication class.
 if ( ! class_exists( 'CoCart\JWTAuthentication\Plugin', false ) ) {
-	include_once untrailingslashit( plugin_dir_path( COCART_JWT_AUTHENTICATION_FILE ) ) . '/includes/class-cocart-jwt-authentication.php';
+	include_once untrailingslashit( __DIR__ ) . '/includes/class-cocart-jwt-authentication.php';
 }
 
 /**
