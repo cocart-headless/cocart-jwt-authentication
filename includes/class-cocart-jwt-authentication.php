@@ -106,8 +106,8 @@ final class Plugin {
 		// Filter in first before anyone else.
 		add_filter( 'cocart_authenticate', array( __CLASS__, 'perform_jwt_authentication' ), 0, 3 );
 
-		// Send token to login response.
-		add_filter( 'cocart_login_extras', array( __CLASS__, 'send_token' ), 0, 2 );
+		// Send tokens to login response.
+		add_filter( 'cocart_login_extras', array( __CLASS__, 'send_tokens' ), 0, 2 );
 
 		// Delete token when user logs out.
 		add_action( 'wp_logout', array( __CLASS__, 'destroy_token' ) );
@@ -470,7 +470,7 @@ final class Plugin {
 	 *
 	 * @return array $extras
 	 */
-	public static function send_token( $extras, $user ) {
+	public static function send_tokens( $extras, $user ) {
 		$secret_key = defined( 'COCART_JWT_AUTH_SECRET_KEY' ) ? COCART_JWT_AUTH_SECRET_KEY : false;
 
 		if ( $secret_key ) {
@@ -486,7 +486,7 @@ final class Plugin {
 		}
 
 		return $extras;
-	} // END send_token()
+	} // END send_tokens()
 
 	/**
 	 * Destroys the refresh token when the user logs out.
