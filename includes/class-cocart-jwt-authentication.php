@@ -103,6 +103,15 @@ final class Plugin {
 		// Load translation files.
 		add_action( 'init', array( __CLASS__, 'load_plugin_textdomain' ), 0 );
 
+		// Register REST API endpoint to refresh tokens.
+		add_action( 'rest_api_init', function () {
+			register_rest_route( 'cocart/jwt', '/refresh-token', array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'refresh_token' ),
+				'permission_callback' => '__return_true',
+			) );
+		} );
+
 		// Filter in first before anyone else.
 		add_filter( 'cocart_authenticate', array( __CLASS__, 'perform_jwt_authentication' ), 0, 3 );
 
@@ -262,82 +271,92 @@ final class Plugin {
 	} // END get_iss()
 
 	/**
-	 * Generates a token for user otherwise returns a timestamp.
+	 * Generates a JWT token for the user if found.
 	 *
 	 * @access public
 	 *
 	 * @static
 	 *
 	 * @param string $secret_key Secret Key to use for encoding the token.
+	 * @param string $username   Known username of the user to generate token for.
+	 *
+	 * @return string Generated JWT token.
 	 */
-	public static function generate_token( string $secret_key ) {
+	public static function generate_token( string $secret_key, string $username = '' ) {
 		$auth_header = \CoCart_Authentication::get_auth_header();
 
 		// Validating authorization header and get username and password.
-		if ( ! empty( $auth_header ) && 0 === stripos( $auth_header, 'basic ' ) ) {
+		if ( empty( $username ) && ! empty( $auth_header ) && 0 === stripos( $auth_header, 'basic ' ) ) {
 			$exploded = explode( ':', base64_decode( substr( $auth_header, 6 ) ), 2 ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			list( $username, $password ) = $exploded;
 
+			// Get username from basic authentication.
 			$username = \CoCart_Authentication::get_username( $username );
-
-			// Generate a token from provided data and secret key.
-			$user      = get_user_by( 'login', $username );
-			$issued_at = time();
-
-			/**
-			 * Authorization expires not before the time the token was created.
-			 *
-			 * @since 2.0.0 Introduced.
-			 */
-			$not_before = apply_filters( 'cocart_jwt_auth_not_before', $issued_at );
-
-			/**
-			 * Authorization expiration.
-			 *
-			 * Expires after 10 days by default.
-			 *
-			 * @since 1.0.0 Introduced.
-			 */
-			$auth_expires = apply_filters( 'cocart_jwt_auth_expire', DAY_IN_SECONDS * 10 );
-
-			$expire    = $issued_at + intval( $auth_expires );
-			$header    = self::to_base_64_url( self::generate_header() );
-			$payload   = self::to_base_64_url( wp_json_encode( array(
-				'iss'  => self::get_iss(),
-				'iat'  => $issued_at,
-				'nbf'  => $not_before,
-				'exp'  => $expire,
-				'data' => array(
-					'user'       => array(
-						'id'       => $user->ID,
-						'username' => $username,
-						'ip'       => \CoCart_Authentication::get_ip_address(),
-						'device'   => ! empty( self::get_user_agent_header() ) ? sanitize_text_field( wp_unslash( self::get_user_agent_header() ) ) : '',
-					),
-					'secret_key' => $secret_key,
-				),
-			) ) );
-
-			/** Let the user modify the token data before the sign. */
-			$algorithm = self::get_algorithm();
-
-			if ( $algorithm === false ) {
-				// See https://www.rfc-editor.org/rfc/rfc7518#section-3
-				return new \WP_Error(
-					'cocart_authentication_error',
-					__( 'Algorithm not supported', 'cocart-jwt-authentication' ),
-					array( 'status' => 401 )
-				);
-			}
-
-			/** The token is signed, now generate the signature to the response */
-			$signature = self::to_base_64_url( self::generate_signature( $header . '.' . $payload, $secret_key ) );
-
-			return $header . '.' . $payload . '.' . $signature;
 		}
 
-		return time();
+		if ( empty( $username ) ) {
+			return new \WP_Error(
+				'cocart_authentication_error',
+				__( 'Token lost!', 'cocart-jwt-authentication' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		// Generate a token from provided data and secret key.
+		$user      = get_user_by( 'login', $username );
+		$issued_at = time();
+
+		/**
+		 * Authorization expires not before the time the token was created.
+		 *
+		 * @since 2.0.0 Introduced.
+		 */
+		$not_before = apply_filters( 'cocart_jwt_auth_not_before', $issued_at );
+
+		/**
+		 * Authorization expiration.
+		 *
+		 * Expires after 10 days by default.
+		 *
+		 * @since 1.0.0 Introduced.
+		 */
+		$auth_expires = apply_filters( 'cocart_jwt_auth_expire', DAY_IN_SECONDS * 10 );
+
+		$expire  = $issued_at + intval( $auth_expires );
+		$header  = self::to_base_64_url( self::generate_header() );
+		$payload = self::to_base_64_url( wp_json_encode( array(
+			'iss'  => self::get_iss(),
+			'iat'  => $issued_at,
+			'nbf'  => $not_before,
+			'exp'  => $expire,
+			'data' => array(
+				'user'       => array(
+					'id'       => $user->ID,
+					'username' => $username,
+					'ip'       => \CoCart_Authentication::get_ip_address(),
+					'device'   => ! empty( self::get_user_agent_header() ) ? sanitize_text_field( wp_unslash( self::get_user_agent_header() ) ) : '',
+				),
+				'secret_key' => $secret_key,
+			),
+		) ) );
+
+		/** Let the user modify the token data before the sign. */
+		$algorithm = self::get_algorithm();
+
+		if ( $algorithm === false ) {
+			// See https://www.rfc-editor.org/rfc/rfc7518#section-3
+			return new \WP_Error(
+				'cocart_authentication_error',
+				__( 'Algorithm not supported', 'cocart-jwt-authentication' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		/** The token is signed, now generate the signature to the response */
+		$signature = self::to_base_64_url( self::generate_signature( $header . '.' . $payload, $secret_key ) );
+
+		return $header . '.' . $payload . '.' . $signature;
 	} // END generate_token()
 
 	/**
@@ -384,6 +403,75 @@ final class Plugin {
 
 		return $refresh_token;
 	} // END generate_refresh_token()
+
+	/**
+	 * Refresh the JWT token.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 2.0.0 Introduced.
+	 *
+	 * @param \WP_REST_Request $request The request object.
+	 *
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public static function refresh_token( \WP_REST_Request $request ) {
+		$refresh_token = $request->get_param( 'refresh_token' );
+		$user_id       = self::validate_refresh_token( $refresh_token );
+
+		if ( is_wp_error( $user_id ) ) {
+			return $user_id;
+		}
+
+		$secret_key = defined( 'COCART_JWT_AUTH_SECRET_KEY' ) ? COCART_JWT_AUTH_SECRET_KEY : false;
+
+		if ( ! $secret_key ) {
+			return new \WP_Error( 'cocart_jwt_auth_bad_config', __( 'JWT configuration error.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
+		}
+
+		$user = get_user_by( 'id', $user_id );
+
+		$token         = self::generate_token( $secret_key, $user->user_login );
+		$refresh_token = self::generate_refresh_token( $user_id );
+
+		return rest_ensure_response(
+			array(
+				'token'         => $token,
+				'refresh_token' => $refresh_token,
+			)
+		);
+	} // END refresh_token()
+
+	/**
+	 * Validate the refresh token.
+	 *
+	 * @access private
+	 *
+	 * @static
+	 *
+	 * @since 2.0.0 Introduced.
+	 *
+	 * @param string $refresh_token The refresh token.
+	 *
+	 * @return int|WP_Error User ID if valid, WP_Error otherwise.
+	 */
+	private static function validate_refresh_token( string $refresh_token ) {
+		$user_query = new \WP_User_Query( array(
+			'meta_key'   => 'cocart_jwt_refresh_token',
+			'meta_value' => $refresh_token,
+			'number'     => 1,
+		) );
+
+		$users = $user_query->get_results();
+
+		if ( empty( $users ) ) {
+			return new \WP_Error( 'cocart_authentication_error', __( 'Invalid refresh token.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
+		}
+
+		return $users[0]->ID;
+	} // END validate_refresh_token()
 
 	/**
 	 * Finds a user based on a matching billing phone number.
