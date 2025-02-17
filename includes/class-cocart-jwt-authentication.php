@@ -378,12 +378,12 @@ final class Plugin {
 	 *
 	 * @return int User ID
 	 */
-	public static function generate_refresh( $user_id ) {
+	public static function generate_refresh_token( $user_id ) {
 		$refresh_token = bin2hex( random_bytes( 64 ) ); // Generates a random 64-byte string.
 		update_user_meta( $user_id, 'cocart_jwt_refresh_token', $refresh_token );
 
 		return $refresh_token;
-	} // END generate_refresh()
+	} // END generate_refresh_token()
 
 	/**
 	 * Finds a user based on a matching billing phone number.
