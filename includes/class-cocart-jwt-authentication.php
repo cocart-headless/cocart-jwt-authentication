@@ -491,6 +491,31 @@ final class Plugin {
 	} // END send_tokens()
 
 	/**
+	 * Check if the token is expired.
+	 *
+	 * @access private
+	 *
+	 * @static
+	 *
+	 * @param string $token The JWT token.
+	 *
+	 * @return bool True if expired, false otherwise.
+	 */
+	private static function is_token_expired( $token ) {
+		try {
+			$parts = self::decode_token( $token );
+
+			if ( ! property_exists( $parts->payload, 'exp' ) || (int) $parts->payload->exp < time() ) {
+				return true;
+			}
+
+			return false;
+		} catch (Exception $e) {
+			return true;
+		}
+	} // END is_token_expired()
+
+	/**
 	 * Destroys both the token and refresh token when the user logs out.
 	 *
 	 * @access public
