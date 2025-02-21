@@ -267,7 +267,7 @@ final class Plugin {
 	} // END perform_jwt_authentication()
 
 	/**
-	 * Get the token issuer.
+	 * Get the token issuer (iss claim).
 	 *
 	 * @access public
 	 *
@@ -276,7 +276,12 @@ final class Plugin {
 	 * @return string The token issuer (iss).
 	 */
 	public static function get_iss() {
-		return get_bloginfo( 'url' );
+		/**
+		 * Allows you to change the token issuer (iss claim) for multi-site setups or custom API endpoints.
+		 *
+		 * @since 2.0.0 Introduced.
+		 */
+		return apply_filters( 'cocart_jwt_auth_issuer', get_bloginfo( 'url' ) );
 	} // END get_iss()
 
 	/**
@@ -313,24 +318,33 @@ final class Plugin {
 		}
 
 		// Generate a token from provided data and secret key.
-		$user      = get_user_by( 'login', $username );
-		$issued_at = time();
+		$user = get_user_by( 'login', $username );
+
+		/**
+		 * Allows you to change the token issuance timestamp (iat claim) for token timing synchronization.
+		 *
+		 * @since 2.0.0 Introduced.
+		 */
+		$issued_at = apply_filters( 'cocart_jwt_auth_issued_at', time() );
 
 		/**
 		 * Authorization expires not before the time the token was created.
 		 *
+		 * Filter allows you to set when the token becomes valid (nbf claim) for token activation control.
+		 *
 		 * @since 2.0.0 Introduced.
 		 */
-		$not_before = apply_filters( 'cocart_jwt_auth_not_before', $issued_at );
+		$not_before = apply_filters( 'cocart_jwt_auth_not_before', time(), $issued_at );
 
 		/**
-		 * Authorization expiration.
+		 * Authorization expiration expires after 10 days by default.
 		 *
-		 * Expires after 10 days by default.
+		 * Filter allows you to customize when the token will expire (exp claim) based on roles or conditions.
 		 *
 		 * @since 1.0.0 Introduced.
+		 * @since 2.0.0 Added `$issued_at` parameter.
 		 */
-		$auth_expires = apply_filters( 'cocart_jwt_auth_expire', DAY_IN_SECONDS * 10 );
+		$auth_expires = apply_filters( 'cocart_jwt_auth_expire', DAY_IN_SECONDS * 10, $issued_at );
 
 		$expire  = $issued_at + intval( $auth_expires );
 		$header  = self::to_base_64_url( self::generate_header() );
@@ -672,7 +686,7 @@ final class Plugin {
 		$new_user_data = get_userdata( $user_id );
 
 		// Check if the password was changed.
-		if ( $new_user_data->user_pass !== $old_user_data->user_pass || $new_user_data->user_email !== $old_user_data->user_email  ) {
+		if ( $new_user_data->user_pass !== $old_user_data->user_pass || $new_user_data->user_email !== $old_user_data->user_email ) {
 			self::destroy_tokens( $user_id );
 		}
 	} // END maybe_destroy_tokens()
