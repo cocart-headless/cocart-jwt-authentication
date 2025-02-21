@@ -396,6 +396,8 @@ final class Plugin {
 	/**
 	 * Generate refresh token.
 	 *
+	 * By default a random 64-byte string is generated.
+	 *
 	 * @access public
 	 *
 	 * @static
@@ -407,8 +409,23 @@ final class Plugin {
 	 * @return int User ID
 	 */
 	public static function generate_refresh_token( $user_id ) {
-		$refresh_token = bin2hex( random_bytes( 64 ) ); // Generates a random 64-byte string.
+		/**
+		 * Filter allows you to change how refresh tokens are generated.
+		 *
+		 * @since 2.0.0 Introduced.
+		 */
+		$refresh_token = apply_filters( 'cocart_jwt_auth_refresh_token_generation', bin2hex( random_bytes( 64 ) ) );
 		update_user_meta( $user_id, 'cocart_jwt_refresh_token', $refresh_token );
+
+		/**
+		 * Filter allows you to customize refresh token lifetime based on roles or conditions.
+		 *
+		 * Default is 30 days.
+		 *
+		 * @since 2.0.0 Introduced.
+		 */
+		$expiration = time() + apply_filters( 'cocart_jwt_refresh_token_expiration', DAY_IN_SECONDS * 30 );
+		update_user_meta( $user_id, 'cocart_jwt_refresh_token_expiration', $expiration );
 
 		return $refresh_token;
 	} // END generate_refresh_token()
@@ -479,7 +496,14 @@ final class Plugin {
 			return new \WP_Error( 'cocart_authentication_error', __( 'Invalid refresh token.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
 		}
 
-		return $users[0]->ID;
+		$user_id    = $users[0]->ID;
+		$expiration = get_user_meta( $user_id, 'cocart_jwt_refresh_token_expiration', true );
+
+		if ( time() > $expiration ) {
+			return new \WP_Error( 'cocart_authentication_error', __( 'Refresh token expired.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
+		}
+
+		return $user_id;
 	} // END validate_refresh_token()
 
 	/**
