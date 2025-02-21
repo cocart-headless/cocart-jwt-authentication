@@ -121,6 +121,9 @@ final class Plugin {
 		// Delete tokens when user logs out.
 		add_action( 'wp_logout', array( __CLASS__, 'destroy_tokens' ) );
 
+		// Delete tokens when user changes password/email.
+		add_action( 'profile_update', array( __CLASS__, 'maybe_destroy_tokens' ), 10, 2 );
+
 		// Schedule cron job for cleaning up expired tokens.
 		add_action( 'cocart_jwt_cleanup_cron', array( __CLASS__, 'cleanup_expired_tokens' ) );
 		register_activation_hook( COCART_JWT_AUTHENTICATION_FILE, array( __CLASS__, 'schedule_cron_job' ) );
@@ -623,6 +626,29 @@ final class Plugin {
 		delete_user_meta( $user_id, 'cocart_jwt_token' );
 		delete_user_meta( $user_id, 'cocart_jwt_refresh_token' );
 	} // END destroy_tokens()
+
+	/**
+	 * Maybe destroys tokens when user changes password/email.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 2.0.0 Introduced.
+	 *
+	 * @hooked: profile_update
+	 *
+	 * @param int    $user_id       User ID.
+	 * @param object $old_user_data User data.
+	 */
+	public static function maybe_destroy_tokens( $user_id, $old_user_data ) {
+		$new_user_data = get_userdata( $user_id );
+
+		// Check if the password was changed.
+		if ( $new_user_data->user_pass !== $old_user_data->user_pass || $new_user_data->user_email !== $old_user_data->user_email  ) {
+			self::destroy_tokens( $user_id );
+		}
+	} // END maybe_destroy_tokens()
 
 	/**
 	 * Validates a provided token against the provided secret key.
