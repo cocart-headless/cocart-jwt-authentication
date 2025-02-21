@@ -124,6 +124,9 @@ final class Plugin {
 		// Delete tokens when user changes password/email.
 		add_action( 'profile_update', array( __CLASS__, 'maybe_destroy_tokens' ), 10, 2 );
 
+		// Add rate limits for JWT refresh token.
+		add_filter( 'cocart_api_rate_limit_options', array( __CLASS__, 'jwt_rate_limits' ), 0 );
+
 		// Schedule cron job for cleaning up expired tokens.
 		add_action( 'cocart_jwt_cleanup_cron', array( __CLASS__, 'cleanup_expired_tokens' ) );
 		register_activation_hook( COCART_JWT_AUTHENTICATION_FILE, array( __CLASS__, 'schedule_cron_job' ) );
@@ -649,6 +652,29 @@ final class Plugin {
 			self::destroy_tokens( $user_id );
 		}
 	} // END maybe_destroy_tokens()
+
+	/**
+	 * Add rate limits for JWT refresh token.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 2.0.0 Introduced.
+	 *
+	 * @return array
+	 */
+	public static function jwt_rate_limits( $options ) {
+		if ( preg_match( '/cocart\/jwt\/refresh-token/', $GLOBALS['wp']->query_vars['rest_route'] ) ) {
+			$options = array(
+				'enabled' => true,
+				'limit'   => 10,
+				'seconds' => MINUTE_IN_SECONDS,
+			);
+		}
+
+		return $options;
+	} // END jwt_rate_limits()
 
 	/**
 	 * Validates a provided token against the provided secret key.
