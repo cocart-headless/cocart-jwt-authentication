@@ -25,7 +25,7 @@
 		"authentication",
 		"jwt"
 	],
-	"license": "GPL-3.0-only",
+	"license": "GPL-2.0",
 	"prefer-stable": true,
 	"minimum-stability": "stable",
 	"authors": [
@@ -38,12 +38,6 @@
 	"support": {
 		"issues": "https://github.com/cocart-headless/cocart-jwt-authentication/issues"
 	},
-	"funding": [
-		{
-			"type": "polar",
-			"url": "https://polar.sh/cocartheadless"
-		}
-	],
 	"autoload": {
 		"classmap": [
 			"includes/"
