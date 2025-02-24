@@ -302,7 +302,7 @@ final class Plugin {
 
 		// Validating authorization header and get username and password.
 		if ( empty( $username ) && ! empty( $auth_header ) && 0 === stripos( $auth_header, 'basic ' ) ) {
-			$exploded = explode( ':', base64_decode( substr( $auth_header, 6 ) ), 2 ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$exploded = explode( ':', base64_decode( substr( $auth_header, 6 ) ), 2 ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 
 			list( $username, $password ) = $exploded;
 
@@ -368,7 +368,7 @@ final class Plugin {
 		/** Let the user modify the token data before the sign. */
 		$algorithm = self::get_algorithm();
 
-		if ( $algorithm === false ) {
+		if ( false === $algorithm ) {
 			// See https://www.rfc-editor.org/rfc/rfc7518#section-3
 			return new \WP_Error(
 				'cocart_authentication_error',
@@ -500,8 +500,8 @@ final class Plugin {
 	 */
 	private static function validate_refresh_token( string $refresh_token ) {
 		$user_query = new \WP_User_Query( array(
-			'meta_key'   => 'cocart_jwt_refresh_token',
-			'meta_value' => $refresh_token,
+			'meta_key'   => 'cocart_jwt_refresh_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value' => $refresh_token, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 			'number'     => 1,
 		) );
 
@@ -603,8 +603,8 @@ final class Plugin {
 	 *
 	 * @static
 	 *
-	 * @param array  $extras       Other extras filtered with `cocart_login_extras`.
-	 * @param object $current_user The current user.
+	 * @param array  $extras Other extras filtered with `cocart_login_extras`.
+	 * @param object $user   The current user.
 	 *
 	 * @return array $extras
 	 */
@@ -943,7 +943,7 @@ final class Plugin {
 	 */
 	public static function cleanup_expired_tokens() {
 		$users = get_users( array(
-			'meta_key'     => 'cocart_jwt_token',
+			'meta_key'     => 'cocart_jwt_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'meta_compare' => 'EXISTS',
 		) );
 
