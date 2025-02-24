@@ -13,6 +13,7 @@
 ### Changes
 
 * Token expires after 10 days by default not 2 hours.
+* Filter `cocart_jwt_auth_expire` added token issuance timestamp as parameter.
 
 ### Improvements
 
@@ -20,8 +21,14 @@
 
 ### For Developers
 
+[See documentation](docs/filters.md) for examples on how to use these filters.
+
+* Introduced new filter `cocart_jwt_auth_issuer` to change the token issuer (iss claim) for multi-site setups or custom API endpoints.
+* Introduced new filter `cocart_jwt_auth_issued_at` to change the token issuance timestamp (iat claim) for token timing synchronization.
 * Introduced new filter `cocart_jwt_auth_not_before` to change the timestamp.
 * Introduced new filter `cocart_jwt_auth_algorithm` to change to any other supported algorithms.
+* Introduced new filter `cocart_jwt_auth_refresh_token_generation` to change how refresh tokens are generated.
+* Introduced new filter `cocart_jwt_refresh_token_expiration` to customize refresh token lifetime based on roles or conditions.
 
 ### Compatibility and Requirements
 
