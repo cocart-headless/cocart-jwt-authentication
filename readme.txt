@@ -4,7 +4,7 @@ Tags: woocommerce, rest-api, decoupled, headless, jwt
 Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 6.7
-Stable tag: 1.0.3
+Stable tag: 2.0.0
 WC requires at least: 7.0
 WC tested up to: 9.6
 License: GPLv3
