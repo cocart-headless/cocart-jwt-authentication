@@ -8,7 +8,7 @@
  * Version:     2.0.0
  * Text Domain: cocart-jwt-authentication
  * Domain Path: /languages/
- * Requires at least: 5.6
+ * Requires at least: 6.0
  * Requires PHP: 7.4
  * CoCart requires at least: 4.2
  * CoCart tested up to: 4.3

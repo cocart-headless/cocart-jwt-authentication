@@ -1,7 +1,7 @@
 === CoCart - JWT Authentication === 
 Contributors: cocartforwc, sebd86
 Tags: woocommerce, rest-api, decoupled, headless, jwt
-Requires at least: 5.6
+Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 6.7
 Stable tag: 1.0.3
