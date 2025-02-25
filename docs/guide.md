@@ -1,13 +1,23 @@
 # Guide for CoCart JWT Authentication
 
-## Minimum Requirements
+## Prerequisites
 
-You will need CoCart v3.8.1 or above to use this plugin.
+Before installing CoCart JWT Authentication, ensure your system meets these requirements:
 
-## Configuration
+- WordPress 6.0 or higher.
+- PHP 7.4 or higher.
+- CoCart v4.2 or higher.
+- Valid SSL certificate for production use.
 
-1. Set a unique secret key in your `wp-config.php` file defined to `COCART_JWT_AUTH_SECRET_KEY`.
-2. Install and activate plugin.
+## Secret Key Configuration
+
+Add the following code to your wp-config.php file:
+
+```php
+define( 'COCART_JWT_AUTH_SECRET_KEY', 'YOUR-UNIQUE-SECRET-KEY' );
+```
+
+> Never share or commit your secret key. Keep it secure and unique for each environment.
 
 ## Enable PHP HTTP Authorization Header
 
