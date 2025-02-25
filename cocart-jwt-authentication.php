@@ -10,7 +10,7 @@
  * Domain Path: /languages/
  * Requires at least: 6.0
  * Requires PHP: 7.4
- * CoCart requires at least: 4.2
+ * CoCart requires at least: 4.3
  * CoCart tested up to: 4.3
  *
  * Copyright:   CoCart Headless, LLC

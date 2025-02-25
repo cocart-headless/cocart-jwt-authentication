@@ -6,7 +6,8 @@ Before installing CoCart JWT Authentication, ensure your system meets these requ
 
 - WordPress 6.0 or higher.
 - PHP 7.4 or higher.
-- CoCart v4.2 or higher.
+- WooCommerce 7.0 or higher.
+- CoCart 4.2 or higher.
 - Valid SSL certificate for production use.
 
 ## Secret Key Configuration

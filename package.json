@@ -22,7 +22,7 @@
 	"tested_up_to": "6.7",
 	"wc_requires": "7.0",
 	"wc_tested_up_to": "9.6",
-	"cocart_requires": "4.2",
+	"cocart_requires": "4.3",
 	"cocart_tested_up_to": "4.3",
 	"license": "GPL-3.0",
 	"copyright": "Copyright (c) 2025, CoCart Headless, LLC",

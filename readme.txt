@@ -141,7 +141,7 @@ Founder of [CoCart Headless, LLC](https://twitter.com/cocartheadless).
 * WordPress v5.6
 * WooCommerce v7.0
 * PHP v7.4
-* CoCart v4.2
+* CoCart v4.3
 
 = Recommended Requirements =
 

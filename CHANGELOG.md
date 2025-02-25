@@ -33,8 +33,8 @@
 ### Compatibility and Requirements
 
 * Tested with WordPress 6.7
-* Tested with WooCommerce 9.8
-* Requires CoCart v4.2 minimum.
+* Tested with WooCommerce 9.6
+* Requires CoCart v4.3 minimum.
 
 ## v1.0.3 - 5th June, 2024
 
