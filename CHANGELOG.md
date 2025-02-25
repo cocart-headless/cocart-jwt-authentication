@@ -1,6 +1,6 @@
 # Changelog for CoCart JWT Authentication
 
-## v2.0.0 - ?? February, 2025
+## v2.0.0 - 25th February, 2025
 
 📢 This update will invalidate previous tokens as they will no longer be valid.
 
