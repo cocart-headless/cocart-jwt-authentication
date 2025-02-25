@@ -4,7 +4,12 @@ Full details of the CoCart Security Policy can be found on [cocartapi.com/securi
 
 ## Supported Versions
 
-Generally, only the latest version of CoCart JWT Authentication has continued support. If a critical vulnerability is found in the current version of CoCart JWT Authentication, we may opt to backport any patches to previous versions.
+The CoCart Headless Security Team believes in Responsible Disclosure by alerting the security team immediately and privately of any potential vulnerabilities. If a critical vulnerability is found in the current version of CoCart JWT Authentication, we may opt to backport any patches to previous versions.
+
+| Version | Supported |
+|---------| --------- |
+| 2.0.x   | Yes       |
+| < 1.0.x | No        |
 
 ## Reporting a Vulnerability
 
