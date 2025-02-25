@@ -11,84 +11,13 @@
 
 <p align="center">JWT Authentication for CoCart.</p>
 
-## Minimum Requirements
+### For Developers
 
-You will need CoCart v3.8.1 or above to use this plugin.
+See documentation on [how to use](docs/guide.md) and [filters](docs/filters.md) for examples to configure JWT Authentication to your needs.
 
-## Enable PHP HTTP Authorization Header
+## Bugs and Security
 
-### Shared Hosts
-
-Most shared hosts have disabled the **HTTP Authorization Header** by default.
-
-To enable this option you'll need to edit your **.htaccess** file by adding the following:
-
-```
-RewriteEngine on
-RewriteCond %{HTTP:Authorization} ^(.*)
-RewriteRule ^(.*) - [E=HTTP_AUTHORIZATION:%1]
-```
-
-or
-
-```
-RewriteEngine On
-RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-```
-
-### WPEngine
-
-To enable this option you'll need to edit your **.htaccess** file by adding the following outside of IfModule:
-
-```
-SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
-```
-
-Example of what that looks like.
-
-```
-# BEGIN WordPress
-<IfModule mod_rewrite.c>
-RewriteEngine On
-RewriteBase /
-RewriteRule ^index\.php$ - [L]
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /index.php [L]
-RewriteCond %{HTTP:Authorization} ^(.*)
-RewriteRule ^(.*) - [E=HTTP_AUTHORIZATION:%1]
-</IfModule>
-
-SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
-# END WordPress
-```
-
-## Configuration
-
-1. Set a unique secret key in your `wp-config.php` file defined to `COCART_JWT_AUTH_SECRET_KEY`.
-2. Install and activate plugin.
-
-### Token Expiration
-
-By default, the token expires after 10 full days but can be filtered to change to your preference using this hook `cocart_jwt_auth_expire`.
-
-Here is an example changing it to expire after just 2 days.
-
-```php
-add_filter( 'cocart_jwt_auth_expire', function() {
-  return DAYS_IN_SECONDS * 2
-});
-```
-
-## Usage
-
-1. Authenticate via basic method with the login endpoint to get your token.
-2. Store the given token under `jwt_token` in your application.
-3. Now authenticate any cart route with `Bearer` authentication with the token given.
-
-## Bugs
-
-If you find an issue, please [report the issue](https://github.com/cocart-headless/cocart-jwt-authentication/issues/new). Thank you.
+If you find an issue, please [report the issue](https://github.com/cocart-headless/cocart-jwt-authentication/issues/new). If you believe you have found a security issue then [read the security policy](SECURITY.md).
 
 ---
 
