@@ -72,15 +72,15 @@ SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 
 Here’s how the authentication process works in your WordPress application:
 
-1. Authentication Request
+**1. Authentication Request**
 
 Client authenticates the login endpoint via Authorization header using the basic method to obtain JWT tokens.
 
-1. Token Usage
+**2. Token Usage**
 
 Use the JWT token to authenticate any REST API requests via Authorization header using bearer method.
 
-3. Token Refresh
+**3. Token Refresh**
 
 Use refresh token to obtain new access tokens without re-authentication via the refresh-token endpoint.
 
