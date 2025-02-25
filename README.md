@@ -9,11 +9,17 @@
 	</a>
 </p>
 
-<p align="center">JWT Authentication for CoCart.</p>
+This free add-on for [CoCart](https://cocartapi.com/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart) allows you to authenticate the Cart API via JSON Web Tokens as an authentication method.
+
+JSON Web Tokens are an open standard [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519) for securely transmitting information between parties.
+
+[Read the core concept for more information](docs/concepts.md) on what this plugin does and can do.
 
 ### For Developers
 
 See documentation on [how to use](docs/guide.md) and [filters](docs/filters.md) for examples to configure JWT Authentication to your needs.
+
+Once ready to use, see the [quick start guide](docs/quick-start.md).
 
 ## Bugs and Security
 

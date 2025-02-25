@@ -27,6 +27,8 @@ JSON Web Tokens are an open standard [RFC 7519](https://datatracker.ietf.org/doc
 
 See documentation on [how to use](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/guide.md) and [filters](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/filters.md) for examples to configure JWT Authentication to your needs.
 
+Once ready to use, see the [quick start guide](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/quick-start.md).
+
 ★★★★★
 > Amazing Plugin. I’m using it to create a react-native app with WooCommerce as back-end. This plugin is a life-saver! [Daniel Loureiro](https://wordpress.org/support/topic/amazing-plugin-1562/)
 
