@@ -40,8 +40,8 @@
 	},
 	"funding": [
 		{
-			"type": "polar",
-			"url": "https://polar.sh/cocartheadless"
+			"type": "custom",
+			"url": "https://buy.polar.sh/polar_cl_IYhy2I5MvstK9VnlpuKShgw9bJY8jvM2GujAL2ZAzaJ"
 		}
 	],
 	"autoload": {
@@ -86,6 +86,9 @@
 			"composer/installers": true,
 			"dealerdirect/phpcodesniffer-composer-installer": true,
 			"phpstan/extension-installer": true
-		}
+		},
+		"preferred-install": "dist",
+		"prepend-autoloader": false,
+		"sort-packages": true
 	}
 }
