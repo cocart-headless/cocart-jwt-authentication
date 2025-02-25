@@ -7,7 +7,7 @@
 ### What's New?
 
 * Bind tokens to specific IP addresses or devices to mitigate token misuse.
-* Algorithm can be changed to any other supported. See: https://www.rfc-editor.org/rfc/rfc7518#section-3
+* Algorithm can be changed to any other supported. See: https://datatracker.ietf.org/doc/html/rfc7518#section-3
 * Refresh token with new REST API endpoint `cocart/jwt/refresh-token`.
 
 ### Changes

@@ -73,7 +73,7 @@ final class Plugin {
 	 *
 	 * @since 2.0.0 Introduced.
 	 *
-	 * @see https://www.rfc-editor.org/rfc/rfc7518#section-3
+	 * @see https://datatracker.ietf.org/doc/html/rfc7518#section-3
 	 *
 	 * @var array|string[]
 	 */
@@ -369,7 +369,7 @@ final class Plugin {
 		$algorithm = self::get_algorithm();
 
 		if ( false === $algorithm ) {
-			// See https://www.rfc-editor.org/rfc/rfc7518#section-3
+			// See https://datatracker.ietf.org/doc/html/rfc7518#section-3
 			return new \WP_Error(
 				'cocart_authentication_error',
 				__( 'Algorithm not supported', 'cocart-jwt-authentication' ),
