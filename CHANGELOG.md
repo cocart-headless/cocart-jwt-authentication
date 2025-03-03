@@ -1,5 +1,21 @@
 # Changelog for CoCart JWT Authentication
 
+## v2.1.0 - 3rd March, 2025
+
+## Improvements
+
+* Added support for getting username when authenticating basic via simple headers or URL.
+* Added error response should the user to look up suddenly no longer exist in the middle of a request.
+
+### For Developers
+
+Added a set of actions that allow you to hook into various events. [See hooks](docs/hooks.md) with its description and usage example.
+
+### Compatibility
+
+* Tested with CoCart v4.3
+* Tested with WooCommerce 9.7
+
 ## v2.0.0 - 25th February, 2025
 
 📢 This update will invalidate previous tokens as they will no longer be valid.

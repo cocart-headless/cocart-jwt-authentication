@@ -31,7 +31,7 @@ final class Plugin {
 	 *
 	 * @var string
 	 */
-	public static $version = '2.0.0';
+	public static $version = '2.1.0';
 
 	/**
 	 * JWT algorithm to generate signature.
@@ -380,13 +380,12 @@ final class Plugin {
 			'nbf'  => $not_before,
 			'exp'  => $expire,
 			'data' => array(
-				'user'       => array(
+				'user' => array(
 					'id'       => $user->ID,
 					'username' => $username,
 					'ip'       => \CoCart_Authentication::get_ip_address(),
 					'device'   => ! empty( self::get_user_agent_header() ) ? sanitize_text_field( wp_unslash( self::get_user_agent_header() ) ) : '',
 				),
-				'secret_key' => $secret_key,
 			),
 		) ) );
 

@@ -2,10 +2,10 @@
 # This file is distributed under the same license as the CoCart package.
 msgid ""
 msgstr ""
-"Project-Id-Version: CoCart JWT Authentication 2.0.0\n"
+"Project-Id-Version: CoCart JWT Authentication 2.1.0\n"
 "Report-Msgid-Bugs-To: "
 "https://github.com/cocart-headless/cocart-jwt-authentication/issues\n"
-"POT-Creation-Date: 2025-02-24 01:26:42+00:00\n"
+"POT-Creation-Date: 2025-03-03 02:34:21+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -31,26 +31,28 @@ msgstr ""
 #: includes/class-cocart-jwt-authentication.php:244
 #: includes/class-cocart-jwt-authentication.php:253
 #: includes/class-cocart-jwt-authentication.php:260
+#: includes/class-cocart-jwt-authentication.php:346
+#: includes/class-cocart-jwt-authentication.php:515
 msgid "Authentication failed."
 msgstr ""
 
 #: includes/class-cocart-jwt-authentication.php:218
-#: includes/class-cocart-jwt-authentication.php:472
+#: includes/class-cocart-jwt-authentication.php:508
 msgid "JWT configuration error."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:316
+#: includes/class-cocart-jwt-authentication.php:336
 msgid "Token lost!"
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:375
+#: includes/class-cocart-jwt-authentication.php:399
 msgid "Algorithm not supported"
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:511
+#: includes/class-cocart-jwt-authentication.php:562
 msgid "Invalid refresh token."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:518
+#: includes/class-cocart-jwt-authentication.php:569
 msgid "Refresh token expired."
 msgstr ""
