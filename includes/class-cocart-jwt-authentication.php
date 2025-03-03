@@ -301,10 +301,21 @@ final class Plugin {
 		$auth_header = \CoCart_Authentication::get_auth_header();
 
 		// Validating authorization header and get username and password.
-		if ( empty( $username ) && ! empty( $auth_header ) && 0 === stripos( $auth_header, 'basic ' ) ) {
-			$exploded = explode( ':', base64_decode( substr( $auth_header, 6 ) ), 2 ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+		if ( empty( $username ) ) {
+			if ( ! empty( $auth_header ) && 0 === stripos( $auth_header, 'basic ' ) ) {
+				$exploded = explode( ':', base64_decode( substr( $auth_header, 6 ) ), 2 ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 
-			list( $username, $password ) = $exploded;
+				// If valid return username and password.
+				if ( 2 === \count( $exploded ) ) {
+					list( $username, $password ) = $exploded;
+				}
+			} elseif ( ! empty( $_SERVER['PHP_AUTH_USER'] ) && ! empty( $_SERVER['PHP_AUTH_PW'] ) ) {
+				// Check that we're trying to authenticate via simple headers.
+				$username = trim( sanitize_user( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			} elseif ( ! empty( $_REQUEST['username'] ) && ! empty( $_REQUEST['password'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				// Fallback to check if the username and password was passed via URL.
+				$username = trim( sanitize_user( wp_unslash( $_REQUEST['username'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			}
 
 			// Get username from basic authentication.
 			$username = \CoCart_Authentication::get_username( $username );
