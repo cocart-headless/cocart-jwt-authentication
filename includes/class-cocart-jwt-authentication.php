@@ -260,6 +260,15 @@ final class Plugin {
 				$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
 			}
 
+			/**
+			 * Fires when a token is successfully validated.
+			 *
+			 * @since 2.1.0 Introduced.
+			 *
+			 * @param object $payload Payload decoded object.
+			 */
+			do_action( 'cocart_jwt_auth_token_validated', $payload );
+
 			// User is authenticated.
 			return $user->ID;
 		}
@@ -396,7 +405,19 @@ final class Plugin {
 		/** The token is signed, now generate the signature to the response */
 		$signature = self::to_base_64_url( self::generate_signature( $header . '.' . $payload, $secret_key ) );
 
-		return $header . '.' . $payload . '.' . $signature;
+		$token = $header . '.' . $payload . '.' . $signature;
+
+		/**
+		 * Fires when a new JWT token is generated after successful authentication.
+		 *
+		 * @since 2.1.0 Introduced.
+		 *
+		 * @param string   $token Refreshed token.
+		 * @param \WC_User $user  User object.
+		 */
+		do_action( 'cocart_jwt_token_generated', $token, $user );
+
+		return $token;
 	} // END generate_token()
 
 	/**
@@ -497,6 +518,16 @@ final class Plugin {
 
 		$token         = self::generate_token( $secret_key, $user->user_login );
 		$refresh_token = self::generate_refresh_token( $user_id );
+
+		/**
+		 * Fires when a token is refreshed using a refresh token.
+		 *
+		 * @since 2.1.0 Introduced.
+		 *
+		 * @param string   $token Refreshed token.
+		 * @param \WC_User $user  User object.
+		 */
+		do_action( 'cocart_jwt_auth_token_refreshed', $token, $user );
 
 		return rest_ensure_response(
 			array(
@@ -688,6 +719,15 @@ final class Plugin {
 	public static function destroy_tokens( $user_id ) {
 		delete_user_meta( $user_id, 'cocart_jwt_token' );
 		delete_user_meta( $user_id, 'cocart_jwt_refresh_token' );
+
+		/**
+		 * Fires when a token is deleted.
+		 *
+		 * @since 2.1.0 Introduced.
+		 *
+		 * @param int $user_id User ID.
+		 */
+		do_action( 'cocart_jwt_auth_token_deleted', $user_id );
 	} // END destroy_tokens()
 
 	/**
