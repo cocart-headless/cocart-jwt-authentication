@@ -321,6 +321,11 @@ final class Plugin {
 		// Generate a token from provided data and secret key.
 		$user = get_user_by( 'login', $username );
 
+		if ( empty( $user ) ) {
+			// Error: The user doesn't exist.
+			return new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
+		}
+
 		/**
 		 * Allows you to change the token issuance timestamp (iat claim) for token timing synchronization.
 		 *
@@ -473,6 +478,11 @@ final class Plugin {
 		}
 
 		$user = get_user_by( 'id', $user_id );
+
+		if ( empty( $user ) ) {
+			// Error: The user doesn't exist.
+			return new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
+		}
 
 		$token         = self::generate_token( $secret_key, $user->user_login );
 		$refresh_token = self::generate_refresh_token( $user_id );
