@@ -17,7 +17,7 @@ JSON Web Tokens are an open standard [RFC 7519](https://datatracker.ietf.org/doc
 
 ### For Developers
 
-See documentation on [get setup](docs/guide.md), [filters](docs/filters.md) and [hooks](docs/hooks.md) for examples to configure JWT Authentication to your needs.
+See documentation to [get setup](docs/guide.md), [filters](docs/filters.md) and [hooks](docs/hooks.md) for examples to configure JWT Authentication to your needs.
 
 Once ready to use, see the [quick start guide](docs/quick-start.md).
 

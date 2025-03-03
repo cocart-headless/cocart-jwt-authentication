@@ -23,7 +23,7 @@ JSON Web Tokens are an open standard [RFC 7519](https://datatracker.ietf.org/doc
 
 ## 📄 Documentation
 
-See documentation on [get setup](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/guide.md), [filters](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/filters.md) and [hooks](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/hooks.md) for examples to configure JWT Authentication to your needs.
+See documentation to [get setup](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/guide.md), [filters](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/filters.md) and [hooks](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/hooks.md) for examples to configure JWT Authentication to your needs.
 
 Once ready to use, see the [quick start guide](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/quick-start.md).
 
