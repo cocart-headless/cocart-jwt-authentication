@@ -1,5 +1,7 @@
 # Filters
 
+CoCart JWT Authentication provides a comprehensive set of filters that allow you to customize its behavior. Each filter is documented below with its description and usage example.
+
 `cocart_jwt_auth_issued_at`
 
 Allows you to change the token issuance timestamp (iat claim) for token timing synchronization.

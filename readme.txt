@@ -5,8 +5,6 @@ Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 6.7
 Stable tag: 2.0.0
-WC requires at least: 7.0
-WC tested up to: 9.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -25,7 +23,7 @@ JSON Web Tokens are an open standard [RFC 7519](https://datatracker.ietf.org/doc
 
 ## 📄 Documentation
 
-See documentation on [how to use](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/guide.md) and [filters](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/filters.md) for examples to configure JWT Authentication to your needs.
+See documentation on [get setup](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/guide.md), [filters](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/filters.md) and [hooks](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/hooks.md) for examples to configure JWT Authentication to your needs.
 
 Once ready to use, see the [quick start guide](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/quick-start.md).
 
