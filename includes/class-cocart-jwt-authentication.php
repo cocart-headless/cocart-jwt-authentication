@@ -122,8 +122,9 @@ final class Plugin {
 		add_action( 'wp_logout', array( __CLASS__, 'destroy_tokens' ) );
 
 		// Delete tokens when user changes password/email or user is deleted.
+		add_action( 'after_password_reset', array( __CLASS__, 'destroy_tokens' ) );
 		add_action( 'profile_update', array( __CLASS__, 'maybe_destroy_tokens' ), 10, 2 );
-		add_action( 'delete_user', array( __CLASS__, 'destroy_tokens_when_user_deleted' ), 10, 1 );
+		add_action( 'delete_user', array( __CLASS__, 'destroy_tokens' ), 10, 1 );
 
 		// Add rate limits for JWT refresh token.
 		add_filter( 'cocart_api_rate_limit_options', array( __CLASS__, 'jwt_rate_limits' ), 0 );
@@ -749,7 +750,7 @@ final class Plugin {
 	} // END is_token_expired()
 
 	/**
-	 * Destroys both the token and refresh token when the user logs out.
+	 * Destroys both the token and refresh token when the user changes.
 	 *
 	 * @access public
 	 *
@@ -797,23 +798,6 @@ final class Plugin {
 			self::destroy_tokens( $user_id );
 		}
 	} // END maybe_destroy_tokens()
-
-	/**
-	 * Destroys tokens when user is deleted.
-	 *
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @since 2.0.0 Introduced.
-	 *
-	 * @hooked: delete_user
-	 *
-	 * @param int $user_id User ID.
-	 */
-	public static function destroy_tokens_when_user_deleted( $user_id ) {
-		self::destroy_tokens( $user_id );
-	} // END destroy_tokens_when_user_deleted()
 
 	/**
 	 * Add rate limits for JWT refresh token.
