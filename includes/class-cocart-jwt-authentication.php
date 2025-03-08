@@ -382,7 +382,7 @@ final class Plugin {
 			'data' => array(
 				'user' => array(
 					'id'       => $user->ID,
-					'username' => $username,
+					'username' => $user->user_login,
 					'ip'       => \CoCart_Authentication::get_ip_address(),
 					'device'   => ! empty( self::get_user_agent_header() ) ? sanitize_text_field( wp_unslash( self::get_user_agent_header() ) ) : '',
 				),
