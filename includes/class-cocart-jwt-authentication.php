@@ -217,7 +217,6 @@ final class Plugin {
 			if ( ! $secret_key ) {
 				// Error: JWT is not configured properly.
 				$auth->set_error( new \WP_Error( 'cocart_jwt_auth_bad_config', __( 'JWT configuration error.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
-
 				return false;
 			}
 
@@ -259,6 +258,7 @@ final class Plugin {
 			if ( \CoCart_Authentication::get_ip_address() !== $payload->data->user->ip || sanitize_text_field( wp_unslash( $_SERVER[ self::get_user_agent_header() ] ) ) !== $payload->data->user->device ) {
 				// Error: IP or Device mismatch.
 				$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
+				return false;
 			}
 
 			/**
@@ -421,8 +421,10 @@ final class Plugin {
 		 */
 		$auth_expires = apply_filters( 'cocart_jwt_auth_expire', DAY_IN_SECONDS * 10, $issued_at );
 
-		$expire  = $issued_at + intval( $auth_expires );
-		$header  = self::to_base_64_url( self::generate_header() );
+		$expire = $issued_at + intval( $auth_expires );
+		$header = self::to_base_64_url( self::generate_header() );
+
+		// Generate a token from provided data.
 		$payload = self::to_base_64_url( wp_json_encode( array(
 			'iss'  => self::get_iss(),
 			'iat'  => $issued_at,
