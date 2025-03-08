@@ -295,54 +295,102 @@ final class Plugin {
 	} // END get_iss()
 
 	/**
-	 * Generates a JWT token for the user if found.
+	 * Lookup the username from the authorization header.
+	 *
+	 * @access protected
+	 *
+	 * @static
+	 *
+	 * @return string The username if found.
+	 */
+	protected static function lookup_username() {
+		$auth_header = \CoCart_Authentication::get_auth_header();
+		$username    = ''; // Initialize the variable
+
+		// Validating authorization header and get username and password.
+		if ( ! empty( $auth_header ) && 0 === stripos( $auth_header, 'basic ' ) ) {
+			$exploded = explode( ':', base64_decode( substr( $auth_header, 6 ) ), 2 ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+
+			// If valid return username and password.
+			if ( 2 === \count( $exploded ) ) {
+				list( $username, $password ) = $exploded;
+			}
+		} elseif ( ! empty( $_SERVER['PHP_AUTH_USER'] ) && ! empty( $_SERVER['PHP_AUTH_PW'] ) ) {
+			// Check that we're trying to authenticate via simple headers.
+			$username = trim( sanitize_user( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		} elseif ( ! empty( $_REQUEST['username'] ) && ! empty( $_REQUEST['password'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			// Fallback to check if the username and password was passed via URL.
+			$username = trim( sanitize_user( wp_unslash( $_REQUEST['username'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
+
+		// Get username from basic authentication.
+		$username = \CoCart_Authentication::get_username( $username );
+
+		return $username;
+	} // END lookup_username()
+
+	/**
+	 * Validate if the user exists.
+	 *
+	 * @access protected
+	 *
+	 * @static
+	 *
+	 * @param int|string $user The user ID or username.
+	 *
+	 * @return \WP_User|false The user object if valid, false otherwise.
+	 */
+	protected static function is_user_valid( $user ) {
+		if ( empty( $user ) ) {
+			return new \WP_Error(
+				'cocart_authentication_error',
+				__( 'User unknown!', 'cocart-jwt-authentication' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$get_user_by = 'login';
+		if ( is_numeric( $user ) ) {
+			$get_user_by = 'id';
+		}
+
+		$user = get_user_by( $get_user_by, $user );
+
+		// Error: The user doesn't exist.
+		if ( empty( $user ) ) {
+			return false;
+		}
+
+		return $user;
+	} // END is_user_valid()
+
+	/**
+	 * Generates a JWT token for the user.
 	 *
 	 * @access public
 	 *
 	 * @static
 	 *
-	 * @param string $secret_key Secret Key to use for encoding the token.
-	 * @param string $username   Known username of the user to generate token for.
+	 * @param int|string $user The user to generate token for.
 	 *
 	 * @return string Generated JWT token.
 	 */
-	public static function generate_token( string $secret_key, string $username = '' ) {
-		$auth_header = \CoCart_Authentication::get_auth_header();
+	public static function generate_token( int|string $user = '' ) {
+		$secret_key = defined( 'COCART_JWT_AUTH_SECRET_KEY' ) ? COCART_JWT_AUTH_SECRET_KEY : false;
 
-		// Validating authorization header and get username and password.
-		if ( empty( $username ) ) {
-			if ( ! empty( $auth_header ) && 0 === stripos( $auth_header, 'basic ' ) ) {
-				$exploded = explode( ':', base64_decode( substr( $auth_header, 6 ) ), 2 ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
-
-				// If valid return username and password.
-				if ( 2 === \count( $exploded ) ) {
-					list( $username, $password ) = $exploded;
-				}
-			} elseif ( ! empty( $_SERVER['PHP_AUTH_USER'] ) && ! empty( $_SERVER['PHP_AUTH_PW'] ) ) {
-				// Check that we're trying to authenticate via simple headers.
-				$username = trim( sanitize_user( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			} elseif ( ! empty( $_REQUEST['username'] ) && ! empty( $_REQUEST['password'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				// Fallback to check if the username and password was passed via URL.
-				$username = trim( sanitize_user( wp_unslash( $_REQUEST['username'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			}
-
-			// Get username from basic authentication.
-			$username = \CoCart_Authentication::get_username( $username );
+		if ( ! $secret_key ) {
+			return new \WP_Error( 'cocart_jwt_auth_bad_config', __( 'JWT configuration error.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
 		}
 
-		if ( empty( $username ) ) {
-			return new \WP_Error(
-				'cocart_authentication_error',
-				__( 'Token lost!', 'cocart-jwt-authentication' ),
-				array( 'status' => 404 )
-			);
-		}
-
-		// Generate a token from provided data and secret key.
-		$user = get_user_by( 'login', $username );
-
+		// See if we can lookup the username if no user provided.
 		if ( empty( $user ) ) {
-			// Error: The user doesn't exist.
+			$user = self::lookup_username();
+		}
+
+		// Check if user is valid.
+		$user = self::is_user_valid( $user );
+
+		if ( ! $user ) {
 			return new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
 		}
 
@@ -405,6 +453,9 @@ final class Plugin {
 		$signature = self::to_base_64_url( self::generate_signature( $header . '.' . $payload, $secret_key ) );
 
 		$token = $header . '.' . $payload . '.' . $signature;
+
+		// Save user token.
+		update_user_meta( $user->ID, 'cocart_jwt_token', $token );
 
 		/**
 		 * Fires when a new JWT token is generated after successful authentication.
@@ -515,8 +566,8 @@ final class Plugin {
 			return new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
 		}
 
-		$token         = self::generate_token( $secret_key, $user->user_login );
-		$refresh_token = self::generate_refresh_token( $user_id );
+		$token         = self::generate_token( $user->ID );
+		$refresh_token = self::generate_refresh_token( $user->ID );
 
 		/**
 		 * Fires when a token is refreshed using a refresh token.
@@ -660,19 +711,14 @@ final class Plugin {
 	 * @return array $extras
 	 */
 	public static function send_tokens( $extras, $user ) {
-		$secret_key = defined( 'COCART_JWT_AUTH_SECRET_KEY' ) ? COCART_JWT_AUTH_SECRET_KEY : false;
+		$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
 
-		if ( $secret_key ) {
-			$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
-
-			if ( empty( $token ) || self::is_token_expired( $token ) ) {
-				$token = self::generate_token( $secret_key );
-				update_user_meta( $user->ID, 'cocart_jwt_token', $token );
-			}
-
-			$extras['jwt_token']   = $token;
-			$extras['jwt_refresh'] = self::generate_refresh_token( $user->ID );
+		if ( empty( $token ) || self::is_token_expired( $token ) ) {
+			$token = self::generate_token( $user->ID );
 		}
+
+		$extras['jwt_token']   = $token;
+		$extras['jwt_refresh'] = self::generate_refresh_token( $user->ID );
 
 		return $extras;
 	} // END send_tokens()
