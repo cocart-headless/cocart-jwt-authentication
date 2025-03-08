@@ -1025,27 +1025,38 @@ final class Plugin {
 	} // END get_user_agent_header()
 
 	/**
-	 * Clean up expired tokens.
+	 * Clean up expired tokens in batches.
 	 *
 	 * @access public
 	 *
 	 * @static
 	 *
 	 * @since 2.0.0 Introduced.
+	 * @since 2.2.0 Improved to work in batches.
+	 *
+	 * @param int $batch_size Number of users to process per batch.
 	 */
-	public static function cleanup_expired_tokens() {
-		$users = get_users( array(
-			'meta_key'     => 'cocart_jwt_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			'meta_compare' => 'EXISTS',
-		) );
+	public static function cleanup_expired_tokens( $batch_size = 100 ) {
+		$offset = 0;
 
-		foreach ( $users as $user ) {
-			$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
+		do {
+			$users = get_users( array(
+				'meta_key'     => 'cocart_jwt_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_compare' => 'EXISTS',
+				'number'       => $batch_size,
+				'offset'       => $offset,
+			) );
 
-			if ( ! empty( $token ) && self::is_token_expired( $token ) ) {
-				delete_user_meta( $user->ID, 'cocart_jwt_token' );
+			foreach ( $users as $user ) {
+				$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
+
+				if ( ! empty( $token ) && self::is_token_expired( $token ) ) {
+					delete_user_meta( $user->ID, 'cocart_jwt_token' );
+				}
 			}
-		}
+
+			$offset += $batch_size;
+		} while ( count( $users ) === $batch_size );
 	} // END cleanup_expired_tokens()
 
 	/**
