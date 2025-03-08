@@ -255,7 +255,7 @@ final class Plugin {
 			}
 
 			// Validate IP or Device.
-			if ( \CoCart_Authentication::get_ip_address() !== $payload->data->user->ip || sanitize_text_field( wp_unslash( self::get_user_agent_header() ) ) !== $payload->data->user->device ) {
+			if ( \CoCart_Authentication::get_ip_address() !== $payload->data->user->ip || sanitize_text_field( wp_unslash( $_SERVER[ self::get_user_agent_header() ] ) ) !== $payload->data->user->device ) {
 				// Error: IP or Device mismatch.
 				$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
 			}
@@ -384,7 +384,7 @@ final class Plugin {
 					'id'       => $user->ID,
 					'username' => $user->user_login,
 					'ip'       => \CoCart_Authentication::get_ip_address(),
-					'device'   => ! empty( self::get_user_agent_header() ) ? sanitize_text_field( wp_unslash( self::get_user_agent_header() ) ) : '',
+					'device'   => ! empty( $_SERVER[ self::get_user_agent_header() ] ) ? sanitize_text_field( wp_unslash( $_SERVER[ self::get_user_agent_header() ] ) ) : '',
 				),
 			),
 		) ) );
@@ -984,7 +984,7 @@ final class Plugin {
 		$user_agent_header = '';
 
 		foreach ( self::get_user_agent_headers() as $ua_header ) {
-			if ( ! empty( $ua_header ) ) {
+			if ( ! empty( $_SERVER[ $ua_header ] ) ) {
 				$user_agent_header = $ua_header;
 			}
 		}
