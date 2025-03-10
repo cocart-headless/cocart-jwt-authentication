@@ -55,6 +55,20 @@ add_filter( 'cocart_jwt_auth_algorithm', function( $algorithm ) {
 });
 ```
 
+`cocart_jwt_auth_token_user_data`
+
+Allows additional user data to be applied to the payload before the token is generated.
+
+```php
+add_filter( 'cocart_jwt_auth_token_user_data', function( $data, $user ) {
+    return array_merge( $data, array(
+        'role'         => $user->roles[0],
+        'display_name' => $user->display_name,
+        'email'        => $user->user_email
+    ) );
+}, 10, 2);
+```
+
 `cocart_jwt_auth_refresh_token_generation`
 
 Allows you to change how refresh tokens are generated.

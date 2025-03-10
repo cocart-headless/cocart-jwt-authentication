@@ -427,8 +427,8 @@ final class Plugin {
 		$expire = $issued_at + intval( $auth_expires );
 		$header = self::to_base_64_url( self::generate_header() );
 
-		// Generate a token from provided data.
-		$payload = self::to_base_64_url( wp_json_encode( array(
+		// Prepare the payload.
+		$payload = array(
 			'iss'  => self::get_iss(),
 			'iat'  => $issued_at,
 			'nbf'  => $not_before,
@@ -441,7 +441,19 @@ final class Plugin {
 					'device'   => ! empty( $_SERVER[ self::get_user_agent_header() ] ) ? sanitize_text_field( wp_unslash( $_SERVER[ self::get_user_agent_header() ] ) ) : '',
 				),
 			),
-		) ) );
+		);
+
+		/**
+		 * Filter allows additional user data to be applied to the payload before the token is generated.
+		 *
+		 * @since 2.2.0 Introduced.
+		 *
+		 * @param \WP_User $user User object.
+		 */
+		$payload['data']['user'] = array_merge( $payload['data']['user'], apply_filters( 'cocart_jwt_auth_token_user_data', array(), $user ) );
+
+		// Generate a token from provided data.
+		$payload = self::to_base_64_url( wp_json_encode( $payload ) );
 
 		/** Let the user modify the token data before the sign. */
 		$algorithm = self::get_algorithm();
