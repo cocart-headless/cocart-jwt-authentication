@@ -133,6 +133,9 @@ final class Plugin {
 		add_action( 'cocart_jwt_cleanup_cron', array( __CLASS__, 'cleanup_expired_tokens' ) );
 		register_activation_hook( COCART_JWT_AUTHENTICATION_FILE, array( __CLASS__, 'schedule_cron_job' ) );
 		register_deactivation_hook( COCART_JWT_AUTHENTICATION_FILE, array( __CLASS__, 'clear_scheduled_cron_job' ) );
+
+		// WP-CLI Commands.
+		self::register_cli_commands();
 	} // END init()
 
 	/**
@@ -1087,6 +1090,345 @@ final class Plugin {
 		$timestamp = wp_next_scheduled( 'cocart_jwt_cleanup_cron' );
 		wp_unschedule_event( $timestamp, 'cocart_jwt_cleanup_cron' );
 	} // END clear_scheduled_cron_job()
+
+	/**
+	 * Clean up expired tokens.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--batch-size=<number>]
+	 * : Number of users to process per batch.
+	 * ---
+	 * default: 100
+	 *
+	 * [--force]
+	 * : Force cleanup of all tokens.
+	 *
+	 * ## EXAMPLES
+	 *
+	 * wp cocart jwt cleanup --batch-size=50
+	 * wp cocart jwt cleanup --force
+	 *
+	 * @when after_wp_load
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @param array $args       WP-CLI positional arguments.
+	 * @param array $assoc_args WP-CLI associative arguments.
+	 */
+	public function cli_clean_up_tokens( $args, $assoc_args ) {
+		$batch_size  = isset( $assoc_args['batch-size'] ) ? intval( $assoc_args['batch-size'] ) : 100;
+		$force       = isset( $assoc_args['force'] ) ? (bool) $assoc_args['force'] : false;
+		$total_users = count( get_users( array(
+			'meta_key'     => 'cocart_jwt_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_compare' => 'EXISTS',
+			'fields'       => 'ID',
+		) ) );
+
+		$progress = \WP_CLI\Utils\make_progress_bar( 'Cleaning up tokens', $total_users );
+
+		$offset = 0;
+
+		do {
+			$users = get_users( array(
+				'meta_key'     => 'cocart_jwt_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_compare' => 'EXISTS',
+				'number'       => $batch_size,
+				'offset'       => $offset,
+			) );
+
+			foreach ( $users as $user ) {
+				$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
+
+				if ( $force || ( ! empty( $token ) && self::is_token_expired( $token ) ) ) {
+					delete_user_meta( $user->ID, 'cocart_jwt_token' );
+				}
+
+				$progress->tick();
+			}
+
+			$offset += $batch_size;
+		} while ( count( $users ) === $batch_size );
+
+		$progress->finish();
+	} // END cli_clean_up_tokens()
+
+	/**
+	 * View details of a JWT token.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <token>
+	 * : The JWT token to view.
+	 *
+	 * ## EXAMPLES
+	 *
+	 * wp cocart jwt view <token>
+	 *
+	 * @when after_wp_load
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @param array $args       WP-CLI positional arguments.
+	 * @param array $assoc_args WP-CLI associative arguments.
+	 */
+	public function cli_view_token( $args, $assoc_args ) {
+		list( $token ) = $args;
+
+		if ( empty( $token ) ) {
+			\WP_CLI::error( __( 'Token is required.', 'cocart-jwt-authentication' ) );
+		}
+
+		try {
+			$decoded_token = self::decode_token( $token );
+			\WP_CLI::log( '# Token details' );
+			\WP_CLI::log( 'Header Encoded: ' . $decoded_token->header_encoded );
+
+			$header_table = array();
+			foreach ( $decoded_token->header as $key => $value ) {
+				$header_table[] = array(
+					'Key'   => $key,
+					'Value' => $value,
+				);
+			}
+
+			$payload_table = array();
+			foreach ( $decoded_token->payload as $key => $value ) {
+				if ( is_object( $value ) || is_array( $value ) ) {
+					$value = wp_json_encode( $value, JSON_PRETTY_PRINT );
+				}
+				$payload_table[] = array(
+					'Key'   => $key,
+					'Value' => $value,
+				);
+			}
+
+			\WP_CLI::log( 'Header:' );
+			\WP_CLI\Utils\format_items( 'table', $header_table, array( 'Key', 'Value' ) );
+
+			\WP_CLI::log( '------------------------' );
+
+			\WP_CLI::log( 'Payload:' );
+			\WP_CLI\Utils\format_items( 'table', $payload_table, array( 'Key', 'Value' ) );
+		} catch ( Exception $e ) {
+			\WP_CLI::error( __( 'Invalid token.', 'cocart-jwt-authentication' ) );
+		}
+	} // END cli_view_token()
+
+	/**
+	 * List all active JWT tokens.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--page=<number>]
+	 * : Page number to display.
+	 * ---
+	 * default: 1
+	 *
+	 * [--per-page=<number>]
+	 * : Number of tokens to display per page.
+	 * ---
+	 * default: 20
+	 *
+	 * ## EXAMPLES
+	 *
+	 * wp cocart jwt list --page=2 --per-page=10
+	 *
+	 * @when after_wp_load
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @param array $args       WP-CLI positional arguments.
+	 * @param array $assoc_args WP-CLI associative arguments.
+	 */
+	public function cli_list_tokens( $args, $assoc_args ) {
+		$page     = isset( $assoc_args['page'] ) ? intval( $assoc_args['page'] ) : 1;
+		$per_page = isset( $assoc_args['per-page'] ) ? intval( $assoc_args['per-page'] ) : 20;
+
+		$users = get_users( array(
+			'meta_key'     => 'cocart_jwt_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_compare' => 'EXISTS',
+			'number'       => $per_page,
+			'offset'       => ( $page - 1 ) * $per_page,
+		) );
+
+		$tokens = array();
+
+		foreach ( $users as $user ) {
+			$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
+
+			if ( ! empty( $token ) && ! self::is_token_expired( $token ) ) {
+				$tokens[] = array(
+					'user_id' => $user->ID,
+					'token'   => $token,
+				);
+			}
+		}
+
+		if ( empty( $tokens ) ) {
+			\WP_CLI::success( __( 'No tokens found.', 'cocart-jwt-authentication' ) );
+		} else {
+			\WP_CLI::log( '# Tokens' );
+			\WP_CLI\Utils\format_items( 'table', $tokens, array( 'user_id', 'token' ) );
+		}
+	} // END cli_list_tokens()
+
+	/**
+	 * Generate a new JWT token for a user.
+	 *
+	 * ## OPTIONS
+	 *
+	 * --user=<id>
+	 * : The user ID to generate the token for.
+	 *
+	 * [--ip=<ip>]
+	 * : The IP address to override the server IP.
+	 *
+	 * [--user-agent=<user-agent>]
+	 * : The User Agent to override the server User Agent.
+	 *
+	 * ## EXAMPLES
+	 *
+	 * wp cocart jwt create --user=123 --ip=<ip> --user-agent=<user-agent>
+	 *
+	 * @when after_wp_load
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @param array $args       WP-CLI positional arguments.
+	 * @param array $assoc_args WP-CLI associative arguments.
+	 */
+	public function cli_create_token( $args, $assoc_args ) {
+		$user_ID    = isset( $assoc_args['user_id'] ) ? intval( $assoc_args['user_id'] ) : null;
+
+		if ( empty( $user_ID ) ) {
+			\WP_CLI::error( __( 'User ID is required.', 'cocart-jwt-authentication' ) );
+		}
+
+		$user = get_user_by( 'id', $user_ID );
+
+		if ( ! $user ) {
+			\WP_CLI::error( __( 'User not found.', 'cocart-jwt-authentication' ) );
+		}
+
+		$existing_token = get_user_meta( $user_ID, 'cocart_jwt_token', true );
+
+		if ( ! empty( $existing_token ) ) {
+			\WP_CLI::confirm( __( 'The user already has a token. Do you want to generate a new one?', 'cocart-jwt-authentication' ) );
+		}
+
+		$token = self::generate_token( $user_ID );
+
+		\WP_CLI::success( __( 'Token generated successfully.', 'cocart-jwt-authentication' ) );
+		\WP_CLI::log( $token );
+	} // END cli_create_token()
+
+	/**
+	 * Register WP-CLI command for cleaning up expired tokens with progress bar.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 */
+	public static function register_cli_commands() {
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			\WP_CLI::add_command(
+				'cocart jwt cleanup',
+				array( __CLASS__, 'cli_clean_up_tokens' ),
+				array(
+					'shortdesc' => __( 'Cleans up expired JWT tokens.', 'cocart-jwt-authentication' ),
+					'synopsis'  => array(
+						array(
+							'type'        => 'assoc',
+							'name'        => 'batch-size',
+							'description' => __( 'Number of users to process per batch.', 'cocart-jwt-authentication' ),
+							'optional'    => true,
+							'default'     => 100,
+						),
+						array(
+							'type'        => 'flag',
+							'name'        => 'force',
+							'description' => __( 'Force cleanup of all tokens.', 'cocart-jwt-authentication' ),
+							'optional'    => true,
+						),
+					),
+					'examples'  => array(
+						'wp cocart jwt cleanup --batch-size=50',
+						'wp cocart jwt cleanup --force',
+					),
+				)
+			);
+
+			\WP_CLI::add_command(
+				'cocart jwt view',
+				array( __CLASS__, 'cli_view_token' ),
+				array(
+					'shortdesc' => __( 'Displays details of a JWT token.', 'cocart-jwt-authentication' ),
+					'synopsis'  => array(
+						array(
+							'type'        => 'positional',
+							'name'        => 'token',
+							'description' => __( 'The JWT token to view.', 'cocart-jwt-authentication' ),
+							'optional'    => false,
+						),
+					),
+					'examples'  => array(
+						'wp cocart jwt view <token>',
+					),
+				)
+			);
+
+			\WP_CLI::add_command(
+				'cocart jwt list',
+				array( __CLASS__, 'cli_list_tokens' ),
+				array(
+					'shortdesc' => __( 'Lists all active JWT tokens.', 'cocart-jwt-authentication' ),
+					'synopsis'  => array(
+						array(
+							'type'        => 'assoc',
+							'name'        => 'page',
+							'description' => __( 'Page number to display.', 'cocart-jwt-authentication' ),
+							'optional'    => true,
+							'default'     => 1,
+						),
+						array(
+							'type'        => 'assoc',
+							'name'        => 'per-page',
+							'description' => __( 'Number of tokens to display per page.', 'cocart-jwt-authentication' ),
+							'optional'    => true,
+							'default'     => 20,
+						),
+					),
+					'examples'  => array(
+						'wp cocart jwt list --page=2 --per-page=10',
+					),
+				)
+			);
+
+			\WP_CLI::add_command(
+				'cocart jwt create',
+				array( __CLASS__, 'cli_create_token' ),
+				array(
+					'shortdesc' => __( 'Generates a new JWT token for a user.', 'cocart-jwt-authentication' ),
+					'synopsis'  => array(
+						array(
+							'type'        => 'assoc',
+							'name'        => 'user_id',
+							'description' => __( 'The user ID to generate the token for.', 'cocart-jwt-authentication' ),
+							'optional'    => false,
+						),
+					),
+					'examples'  => array(
+						'wp cocart jwt create --user_id=123',
+					),
+				)
+			);
+		}
+	} // END register_cli_commands()
 
 	/**
 	 * Load the plugin translations if any ready.
