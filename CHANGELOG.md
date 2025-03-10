@@ -1,5 +1,25 @@
 # Changelog for CoCart JWT Authentication
 
+## v2.2.0 - ?? March, 2025
+
+### What's New?
+
+* WP-CLI: New commands to help list, view, validate, clear expired (or force all) and create tokens.
+
+### Bug Fix
+
+* Fixed user agent not checking the value of header.
+
+### Improvements
+
+* Improved creating token and user identification.
+* Improved destroying token when user changes password.
+* Improved the cleanup of expired tokens to work in batches of 100.
+
+### For Developers
+
+* Introduced new filter `cocart_jwt_auth_token_user_data` to allow additional user data to be applied to the payload before the token is generated.
+
 ## v2.1.0 - 3rd March, 2025
 
 ## Improvements
