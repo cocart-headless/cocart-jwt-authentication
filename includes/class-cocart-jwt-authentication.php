@@ -544,7 +544,7 @@ final class Plugin {
 		 *
 		 * @since 2.0.0 Introduced.
 		 */
-		$expiration = time() + apply_filters( 'cocart_jwt_refresh_token_expiration', DAY_IN_SECONDS * 30 );
+		$expiration = time() + apply_filters( 'cocart_jwt_auth_refresh_token_expiration', DAY_IN_SECONDS * 30 );
 		update_user_meta( $user_id, 'cocart_jwt_refresh_token_expiration', $expiration );
 
 		return $refresh_token;

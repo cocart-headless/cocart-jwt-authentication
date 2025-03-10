@@ -79,12 +79,12 @@ add_filter( 'cocart_jwt_auth_refresh_token_generation', function( $token ) {
 });
 ```
 
-`cocart_jwt_refresh_token_expiration`
+`cocart_jwt_auth_refresh_token_expiration`
 
 Allows you to customize refresh token lifetime based on roles or conditions.
 
 ```php
-add_filter( 'cocart_jwt_refresh_token_expiration', function( $expiration ) {
+add_filter( 'cocart_jwt_auth_refresh_token_expiration', function( $expiration ) {
     return 60 * DAY_IN_SECONDS; // Set to 60 days
 });
 ```
