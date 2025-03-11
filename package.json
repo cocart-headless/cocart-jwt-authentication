@@ -1,7 +1,7 @@
 {
 	"title": "CoCart JWT Authentication",
 	"name": "cocart-jwt-authentication",
-	"version": "2.1.0",
+	"version": "2.2.0",
 	"private": false,
 	"contributors": [
 		"sebd86",
@@ -48,23 +48,23 @@
 		"headless-woocommerce"
 	],
 	"scripts": {
-		"packages:update": "npm install -g npm-check-updates & ncu -u & npm update & npm install"
-	},
-	"dependencies": {
-		"grunt-cli": "^1.5.0"
+		"makepot": "@wordpress/env run cli wp i18n make-pot . languages/cocart-jwt-authentication.pot --exclude=node_modules,vendor,tests",
+		"get-translations": "node ./bin/get-translations.js",
+		"version:update": "node ./bin/update-version.js",
+		"version:stable": "node ./bin/update-stable.js",
+		"build:prepare": "rm -rf build && mkdir build",
+		"build:copy": "rsync -av --exclude-from='.distignore' ./ build/",
+		"build:zip": "cd build && zip -r ../releases/cocart-jwt-authentication-v$npm_package_version.zip .",
+		"build:targz": "cd build && tar -czf ../releases/cocart-jwt-authentication-v$npm_package_version.tar.gz .",
+		"build:clean": "rm -rf build",
+		"build:checksum": "find . -type f ! -path '*/.*' ! -name '*.dist' ! -name '*.gif' ! -name '*.html' ! -name '*.jpg' ! -name '*.jpeg' ! -name '*.js' ! -name '*.json' ! -name '*.log' ! -name '*.lock' ! -name '*.md' ! -name '*.png' ! -name '*.scss' ! -name '*.sh' ! -name '*.txt' ! -name '*.xml' ! -name '*.zip' ! -name '*.md5' ! -name '*.neon' ! -name '*.yml' ! -path '*/bin/*' ! -path '*/node_modules/*' ! -path '*/releases/*' ! -path '*/tests/*' ! -path '*/vendor/*' ! -path '*/unit-tests/*' -exec md5sum {} + > checksum.md5",
+		"build": "npm run version:update && npm run makepot && npm run build:prepare && npm run build:copy && npm run build:zip && npm run build:targz && npm run build:clean && npm run build:checksum",
+		"release": "npm run version:update && npm run version:stable && npm run build"
 	},
 	"devDependencies": {
-		"grunt": "~1.6.1",
-		"grunt-shell": "4.0.0",
-		"grunt-checktextdomain": "1.0.1",
-		"grunt-contrib-clean": "^2.0.1",
-		"grunt-contrib-compress": "^2.0.0",
-		"grunt-contrib-copy": "^1.0.0",
-		"grunt-glotpress": "^0.2.2",
-		"grunt-newer": "^1.3.0",
-		"grunt-text-replace": "^0.4.0",
-		"grunt-wp-i18n": "~1.0.3",
-		"load-grunt-tasks": "~5.1.0",
-		"wp-textdomain": "~1.0.1"
+		"@wordpress/env": "^8.7.0",
+		"@wordpress/i18n": "^4.30.0",
+		"replace-in-file": "^7.0.1",
+		"rsync": "^0.6.1"
 	}
 }
