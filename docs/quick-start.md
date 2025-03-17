@@ -32,6 +32,8 @@ curl -X POST \
 }
 ```
 
+> If you require to pass the user-agent header when making requests. Applying it when logging in must be done for the token to remain valid. If you decide to pass the user-agent header after, then the token will no longer be valid and you will have to request a new one.
+
 **2. Use the Token**
 
 Make authenticated requests using the token. Here’s an example using Cart endpoint to get the current user’s cart:
@@ -61,3 +63,33 @@ curl -X POST \
 ```
 
 > Remember to never expose your JWT secret key or store tokens in plain text. Always use secure storage methods appropriate for your platform.
+
+**4. Validate Token**
+
+To keep check of a valid token:
+
+```
+curl -X POST \
+  https://your-site.com/wp-json/cocart/jwt/validate-token \
+  -H "Authorization: Bearer YOUR-JWT-TOKEN"
+```
+
+**Successful**
+
+```json
+{
+  "message": "Token is valid."
+}
+```
+
+**Invalid Token**
+
+```json
+{
+  "code": "cocart_authentication_error",
+  "message": "Authentication failed.",
+  "data": {
+    "status": 401
+  }
+}
+```
