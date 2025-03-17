@@ -1,6 +1,6 @@
 # Changelog for CoCart JWT Authentication
 
-## v2.2.0 - ?? March, 2025
+## v2.2.0 - 17th March, 2025
 
 ### What's New?
 
