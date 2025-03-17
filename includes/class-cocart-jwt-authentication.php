@@ -830,13 +830,14 @@ final class Plugin {
 	} // END maybe_destroy_tokens()
 
 	/**
-	 * Add rate limits for JWT refresh token.
+	 * Add rate limits for JWT refresh and validate token.
 	 *
 	 * @access public
 	 *
 	 * @static
 	 *
 	 * @since 2.0.0 Introduced.
+	 * @since 2.2.0 Added rate limit for validating token.
 	 *
 	 * @return array
 	 */
@@ -845,6 +846,13 @@ final class Plugin {
 			$options = array(
 				'enabled' => true,
 				'limit'   => 10,
+				'seconds' => MINUTE_IN_SECONDS,
+			);
+		}
+		if ( preg_match( '/cocart\/jwt\/validate-token/', $GLOBALS['wp']->query_vars['rest_route'] ) ) {
+			$options = array(
+				'enabled' => true,
+				'limit'   => 2,
 				'seconds' => MINUTE_IN_SECONDS,
 			);
 		}
