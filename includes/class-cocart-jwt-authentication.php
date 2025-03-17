@@ -1219,32 +1219,35 @@ final class Plugin {
 			\WP_CLI::log( '# Token details' );
 			\WP_CLI::log( 'Header Encoded: ' . $decoded_token->header_encoded );
 
-			$header_table = array();
+			$table = array();
+
+			// Add header data.
 			foreach ( $decoded_token->header as $key => $value ) {
-				$header_table[] = array(
+				$table[] = array(
 					'Key'   => $key,
 					'Value' => $value,
 				);
 			}
 
-			$payload_table = array();
+			// Add payload data.
 			foreach ( $decoded_token->payload as $key => $value ) {
-				if ( is_object( $value ) || is_array( $value ) ) {
-					$value = wp_json_encode( $value, JSON_PRETTY_PRINT );
+				if ( 'data' === $key && isset( $value->user ) ) {
+					// Handle user data separately.
+					foreach ( get_object_vars( $value->user ) as $user_key => $user_value ) {
+						$table[] = array(
+							'Key'   => "user.$user_key",
+							'Value' => $user_value,
+						);
+					}
+				} else {
+					$table[] = array(
+						'Key'   => $key,
+						'Value' => is_scalar( $value ) ? $value : wp_json_encode( $value ),
+					);
 				}
-				$payload_table[] = array(
-					'Key'   => $key,
-					'Value' => $value,
-				);
 			}
 
-			\WP_CLI::log( 'Header:' );
-			\WP_CLI\Utils\format_items( 'table', $header_table, array( 'Key', 'Value' ) );
-
-			\WP_CLI::log( '------------------------' );
-
-			\WP_CLI::log( 'Payload:' );
-			\WP_CLI\Utils\format_items( 'table', $payload_table, array( 'Key', 'Value' ) );
+			\WP_CLI\Utils\format_items( 'table', $table, array( 'Key', 'Value' ) );
 		} catch ( Exception $e ) {
 			\WP_CLI::error( __( 'Invalid token.', 'cocart-jwt-authentication' ) );
 		}
