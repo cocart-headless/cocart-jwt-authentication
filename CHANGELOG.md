@@ -4,17 +4,18 @@
 
 ### What's New?
 
+* REST-API: Added validation endpoint `cocart/jwt/validate-token`.
 * WP-CLI: New commands to help list, view, validate, clear expired (or force all) and create tokens.
 
 ### Bug Fix
 
-* Fixed user agent not checking the value of header.
+* Fixed user agent not checking the value of the header.
 
 ### Improvements
 
 * Improved creating token and user identification.
 * Improved destroying token when user changes password.
-* Improved the cleanup of expired tokens to work in batches of 100.
+* Improved the cleanup of expired tokens to work in batches of 100 for performance.
 
 ### For Developers
 
