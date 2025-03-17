@@ -271,7 +271,7 @@ final class Plugin {
 			}
 
 			// Validate IP or Device.
-			if ( \CoCart_Authentication::get_ip_address() !== $payload->data->user->ip || sanitize_text_field( wp_unslash( $_SERVER[ self::get_user_agent_header() ] ) ) !== $payload->data->user->device ) {
+			if ( \CoCart_Authentication::get_ip_address() !== $payload->data->user->ip || ( isset( $_SERVER[ self::get_user_agent_header() ] ) && sanitize_text_field( wp_unslash( $_SERVER[ self::get_user_agent_header() ] ) ) !== $payload->data->user->device ) ) {
 				// Error: IP or Device mismatch.
 				$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
 				return false;
@@ -322,7 +322,7 @@ final class Plugin {
 	 */
 	protected static function lookup_username() {
 		$auth_header = \CoCart_Authentication::get_auth_header();
-		$username    = ''; // Initialize the variable
+		$username    = ''; // Initialize the variable.
 
 		// Validating authorization header and get username and password.
 		if ( ! empty( $auth_header ) && 0 === stripos( $auth_header, 'basic ' ) ) {
@@ -839,6 +839,8 @@ final class Plugin {
 	 * @since 2.0.0 Introduced.
 	 * @since 2.2.0 Added rate limit for validating token.
 	 *
+	 * @param array $options Array of option values.
+	 *
 	 * @return array
 	 */
 	public static function jwt_rate_limits( $options ) {
@@ -1083,6 +1085,8 @@ final class Plugin {
 				'offset'       => $offset,
 			) );
 
+			$users_count = count( $users );
+
 			foreach ( $users as $user ) {
 				$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
 
@@ -1092,7 +1096,7 @@ final class Plugin {
 			}
 
 			$offset += $batch_size;
-		} while ( count( $users ) === $batch_size );
+		} while ( $users_count === $batch_size );
 	} // END cleanup_expired_tokens()
 
 	/**
@@ -1171,6 +1175,8 @@ final class Plugin {
 				'offset'       => $offset,
 			) );
 
+			$users_count = count( $users );
+
 			foreach ( $users as $user ) {
 				$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
 
@@ -1182,7 +1188,7 @@ final class Plugin {
 			}
 
 			$offset += $batch_size;
-		} while ( count( $users ) === $batch_size );
+		} while ( $users_count === $batch_size );
 
 		$progress->finish();
 	} // END cli_clean_up_tokens()
