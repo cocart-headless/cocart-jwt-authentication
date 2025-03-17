@@ -112,6 +112,19 @@ final class Plugin {
 			) );
 		} );
 
+		// Register REST API endpoint to validate tokens.
+		add_action( 'rest_api_init', function () {
+			register_rest_route( 'cocart/jwt', '/validate-token', array(
+				'methods'             => 'POST',
+				'callback'            => function () {
+					return rest_ensure_response( array( 'message' => __( 'Token is valid.', 'cocart-jwt-authentication' ) ) );
+				},
+				'permission_callback' => function () {
+					return get_current_user_id() > 0;
+				},
+			) );
+		} );
+
 		// Filter in first before anyone else.
 		add_filter( 'cocart_authenticate', array( __CLASS__, 'perform_jwt_authentication' ), 0, 3 );
 
