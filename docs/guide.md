@@ -84,6 +84,10 @@ Use the JWT token to authenticate any REST API requests via Authorization header
 
 Use refresh token to obtain new access tokens without re-authentication via the refresh-token endpoint.
 
+**4. Validate Token**
+
+Validate the token in the background of your application from time to time to check the users authentication session is still valid.
+
 ## Security Best Practices
 
 CoCart JWT Authentication comes with built-in security features to protect your WordPress application. Here are the key security measures you should be aware of:
