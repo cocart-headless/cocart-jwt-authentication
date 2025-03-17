@@ -1305,7 +1305,7 @@ final class Plugin {
 		}
 
 		if ( empty( $tokens ) ) {
-			\WP_CLI::success( __( 'No tokens found.', 'cocart-jwt-authentication' ) );
+			\WP_CLI::log( __( 'No tokens found.', 'cocart-jwt-authentication' ) );
 		} else {
 			\WP_CLI::log( '# Tokens' );
 			\WP_CLI\Utils\format_items( 'table', $tokens, array( 'user_id', 'token' ) );
@@ -1352,7 +1352,8 @@ final class Plugin {
 		$existing_token = get_user_meta( $user_ID, 'cocart_jwt_token', true );
 
 		if ( ! empty( $existing_token ) ) {
-			\WP_CLI::confirm( __( 'The user already has a token. Do you want to generate a new one?', 'cocart-jwt-authentication' ) );
+			\WP_CLI::warning( __( 'Generating another token will kick the user out of session', 'cocart-jwt-authentication' ) );
+			\WP_CLI::confirm( __( 'Are you sure you want to generate a new one?', 'cocart-jwt-authentication' ) );
 		}
 
 		// Set User agent.
@@ -1362,7 +1363,7 @@ final class Plugin {
 
 		$token = self::generate_token( $user_ID );
 
-		\WP_CLI::success( __( 'Token generated successfully.', 'cocart-jwt-authentication' ) );
+		\WP_CLI::success( __( 'Token generated.', 'cocart-jwt-authentication' ) );
 		\WP_CLI::log( $token );
 	} // END cli_create_token()
 
