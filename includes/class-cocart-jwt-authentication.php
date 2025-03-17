@@ -1320,15 +1320,12 @@ final class Plugin {
 	 * --user=<id>
 	 * : The user ID to generate the token for.
 	 *
-	 * [--ip=<ip>]
-	 * : The IP address to override the server IP.
-	 *
 	 * [--user-agent=<user-agent>]
 	 * : The User Agent to override the server User Agent.
 	 *
 	 * ## EXAMPLES
 	 *
-	 * wp cocart jwt create --user=123 --ip=<ip> --user-agent=<user-agent>
+	 * wp cocart jwt create --user=123 --user-agent=<user-agent>
 	 *
 	 * @when after_wp_load
 	 * @access public
@@ -1340,6 +1337,7 @@ final class Plugin {
 	 */
 	public function cli_create_token( $args, $assoc_args ) {
 		$user_ID    = isset( $assoc_args['user_id'] ) ? intval( $assoc_args['user_id'] ) : null;
+		$user_agent = isset( $assoc_args['user-agent'] ) ? $assoc_args['user-agent'] : '';
 
 		if ( empty( $user_ID ) ) {
 			\WP_CLI::error( __( 'User ID is required.', 'cocart-jwt-authentication' ) );
@@ -1355,6 +1353,11 @@ final class Plugin {
 
 		if ( ! empty( $existing_token ) ) {
 			\WP_CLI::confirm( __( 'The user already has a token. Do you want to generate a new one?', 'cocart-jwt-authentication' ) );
+		}
+
+		// Set User agent.
+		if ( ! empty( $user_agent ) ) {
+			$_SERVER['HTTP_USER_AGENT'] = $user_agent;
 		}
 
 		$token = self::generate_token( $user_ID );
@@ -1456,6 +1459,12 @@ final class Plugin {
 							'name'        => 'user_id',
 							'description' => __( 'The user ID to generate the token for.', 'cocart-jwt-authentication' ),
 							'optional'    => false,
+						),
+						array(
+							'type'        => 'assoc',
+							'name'        => 'user-agent',
+							'description' => __( 'The User Agent to override the server User Agent.', 'cocart-jwt-authentication' ),
+							'optional'    => true,
 						),
 					),
 					'examples'  => array(
