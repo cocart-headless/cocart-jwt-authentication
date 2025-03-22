@@ -1,0 +1,196 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "CoCart JWT Authentication",
+        "version": "2.2.0",
+        "description": "JWT Authentication for CoCart REST API"
+    },
+    "servers": [
+        {
+            "url": "{protocol}://{host}",
+            "variables": {
+                "protocol": {
+                    "enum": ["http", "https"],
+                    "default": "https"
+                },
+                "host": {
+                    "default": "example-store.com"
+                }
+            }
+        }
+    ],
+    "paths": {
+        "/cocart/jwt/refresh-token": {
+            "post": {
+                "summary": "Refresh JWT token",
+                "description": "Generate a new JWT token using a refresh token",
+                "tags": [
+                    "authentication"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "refresh_token": {
+                                        "type": "string",
+                                        "description": "The refresh token"
+                                    }
+                                },
+                                "required": [
+                                    "refresh_token"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "x-rateLimit": {
+                    "limit": 10,
+                    "period": "60 seconds"
+                },
+                "responses": {
+                    "200": {
+                        "description": "Token refreshed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "description": "New JWT token"
+                                        },
+                                        "refresh_token": {
+                                            "type": "string",
+                                            "description": "New refresh token"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid or expired refresh token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string",
+                                            "example": "cocart_authentication_error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid refresh token."
+                                        },
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 401
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/cocart/jwt/validate-token": {
+            "post": {
+                "summary": "Validate JWT token",
+                "description": "Validate an existing JWT token",
+                "tags": [
+                    "authentication"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "x-rateLimit": {
+                    "limit": 2,
+                    "period": "60 seconds"
+                },
+                "responses": {
+                    "200": {
+                        "description": "Token is valid",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token is valid."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string",
+                                            "example": "cocart_authentication_error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Authentication failed."
+                                        },
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 401
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        },
+        "schemas": {
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "Error code"
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "Error message"
+                    },
+                    "status": {
+                        "type": "integer",
+                        "description": "HTTP status code"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "authentication",
+            "description": "JWT Authentication endpoints"
+        }
+    ]
+}
