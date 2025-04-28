@@ -15,11 +15,22 @@ JSON Web Tokens are an open standard [RFC 7519](https://datatracker.ietf.org/doc
 
 [Read the core concept for more information](docs/concepts.md) on what this plugin does and can do.
 
+### Key Features
+
+* **Standard JWT Authentication**: Implements the industry-standard RFC 7519 for secure claims representation.
+* **Simple Endpoints**: Offers clear endpoints for generating and validating tokens.
+* **Configurable Secret Key**: Define your unique secret key via `wp-config.php` for secure token signing.
+* **Multiple signing algorithms**: `HS256`, `HS384`, `HS512`, `RS256`, `RS384`, `RS512`, `ES256`, `ES384`, `ES512`, `PS256`, `PS384`, `PS512`
+* **Rate Limiting**: Controlled specifically for refreshing and validating tokens. Requires [CoCart Plus](https://cocartapi.com/?utm_medium=gh&utm_source=github&utm_campaign=readme&utm_content=cocart)
+* **Developer Hooks**: Provides [filters](docs/filters.md) and [hooks](docs/hooks.md) for more configuration to your requirements.
+
+For support, please join the [community on Discord](https://cocartapi.com/community/?utm_medium=gh&utm_source=github&utm_campaign=readme&utm_content=cocart). For priority support, consider upgrading to [CoCart Plus](https://cocartapi.com/?utm_medium=gh&utm_source=github&utm_campaign=readme&utm_content=cocart).
+
 ### For Developers
 
-See documentation to [get setup](docs/guide.md), [filters](docs/filters.md) and [hooks](docs/hooks.md) for examples to configure JWT Authentication to your needs.
+See documentation on how to [get setup](docs/guide.md), [filters](docs/filters.md) and [hooks](docs/hooks.md) with examples to help configure JWT Authentication to your needs.
 
-Once ready to use, see the [quick start guide](docs/quick-start.md).
+Once ready to use, see the [quick start guide](docs/quick-start.md). There is also an [advanced configuration](docs/advanced-configuration.md) for using RSA Keys.
 
 ## Bugs and Security
 
@@ -52,7 +63,7 @@ Released under [GNU General Public License v3.0](http://www.gnu.org/licenses/gpl
 
 ## Credits
 
-Website [cocartapi.com](https://cocartapi.com) &nbsp;&middot;&nbsp;
+Website [cocartapi.com](https://cocartapi.com/?ref=github) &nbsp;&middot;&nbsp;
 GitHub [@co-cart](https://github.com/co-cart) &nbsp;&middot;&nbsp;
 Twitter [@cocartapi](https://twitter.com/cocartapi)
 

@@ -1,5 +1,25 @@
 # Changelog for CoCart JWT Authentication
 
+## v2.3.0 - 28th April, 2025
+
+### What's New?
+
+* Added support for more advanced RSA-based configuration.
+
+### Developers
+
+* Introduced new filter `cocart_jwt_auth_token_before_sign` that allows the token data to be altered before the sign.
+* Introduced new filter `cocart_jwt_auth_secret_private_key` that allows you to set the secret private key for token signing.
+* Introduced new filter `cocart_jwt_auth_secret_public_key` that allows you to set the public key for token validation.
+* Introduced new filter `cocart_jwt_auth_revoke_tokens_on_email_change` that allows you to control token revocation on email changes.
+* Introduced new filter `cocart_jwt_auth_revoke_tokens_on_password_change` that allows you to control token revocation on password changes for security policies.
+* Introduced new filter `cocart_jwt_auth_revoke_tokens_on_after_password_reset` that allows you to control token revocation on.
+* Introduced new filter `cocart_jwt_auth_revoke_tokens_on_profile_update` that allows you to control token revocation on profile update.
+* Introduced new filter `cocart_jwt_auth_revoke_tokens_on_delete_user` that allows you to control token revocation on user delete.
+* Introduced new filter `cocart_jwt_auth_revoke_tokens_on_wp_logout` that allows you to control token revocation when a user logs out.
+
+* Renamed `cocart_jwt_token_generated` action hook to `cocart_jwt_auth_token_generated` to be consistent with other action hooks. (This is considered a typo correction)
+
 ## v2.2.0 - 17th March, 2025
 
 ### What's New?

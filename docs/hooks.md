@@ -2,18 +2,24 @@
 
 CoCart JWT Authentication provides a set of actions that allow you to hook into various events. Each action is documented below with its description and usage example.
 
-`cocart_jwt_token_generated`
+## Token Events
+
+`cocart_jwt_auth_token_generated`
+
+> Made available since v2.1.0
 
 Fires when a new JWT token is generated after successful authentication.
 
 ```php
-add_action( 'cocart_jwt_token_generated', function( $token, $user ) {
+add_action( 'cocart_jwt_auth_token_generated', function( $token, $user ) {
     // Log token generation
     error_log("New token generated for user: {$user->ID}");
 }, 10, 2 );
 ```
 
 `cocart_jwt_auth_token_refreshed`
+
+> Made available since v2.1.0
 
 Fires when a token is refreshed using a refresh token.
 
@@ -26,6 +32,8 @@ add_action( 'cocart_jwt_auth_token_refreshed', function( $token, $user ) {
 
 `cocart_jwt_auth_token_validated`
 
+> Made available since v2.1.0
+
 Fires when a token is successfully validated.
 
 ```php
@@ -36,7 +44,11 @@ add_action( 'cocart_jwt_auth_token_validated', function( $decoded ) {
 } );
 ```
 
+## Token Management
+
 `cocart_jwt_auth_token_deleted`
+
+> Made available since v2.1.0
 
 Fires when a token is deleted.
 

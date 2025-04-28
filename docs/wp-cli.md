@@ -2,6 +2,8 @@
 
 The following WP CLI commands are available for CoCart JWT Authentication.
 
+> Made available since v2.2.0
+
 ## Clean up tokens
 
 Cleans up expired JWT tokens.

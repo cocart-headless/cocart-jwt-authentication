@@ -3,8 +3,8 @@ Contributors: cocartforwc, sebd86
 Tags: woocommerce, rest-api, decoupled, headless, jwt
 Requires at least: 6.0
 Requires PHP: 7.4
-Tested up to: 6.7
-Stable tag: 2.2.0
+Tested up to: 6.8
+Stable tag: 2.3.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -21,11 +21,22 @@ JSON Web Tokens are an open standard [RFC 7519](https://datatracker.ietf.org/doc
 ★★★★★
 > An excellent plugin, which makes building a headless WooCommerce experience a breeze. Easy to use, nearly zero setup time. [Harald Schneider](https://wordpress.org/support/topic/excellent-plugin-8062/)
 
+### Key Features
+
+* **Standard JWT Authentication**: Implements the industry-standard RFC 7519 for secure claims representation.
+* **Simple Endpoints**: Offers clear endpoints for generating and validating tokens.
+* **Configurable Secret Key**: Define your unique secret key via `wp-config.php` for secure token signing.
+* **Multiple signing algorithms**: `HS256`, `HS384`, `HS512`, `RS256`, `RS384`, `RS512`, `ES256`, `ES384`, `ES512`, `PS256`, `PS384`, `PS512`
+* **Rate Limiting**: Controlled specifically for refreshing and validating tokens. Requires [CoCart Plus](https://cocartapi.com/?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink)
+* **Developer Hooks**: Provides [filters](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/filters.md) and [hooks](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/hooks.md) for more configuration to your requirements.
+
+For support, please join the [community on Discord](https://cocartapi.com/community/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart). For priority support, consider upgrading to [CoCart Plus](https://cocartapi.com/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart).
+
 ## 📄 Documentation
 
-See documentation to [get setup](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/guide.md), [filters](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/filters.md) and [hooks](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/hooks.md) for examples to configure JWT Authentication to your needs.
+See documentation on how to [get setup](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/guide.md), [filters](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/filters.md) and [hooks](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/hooks.md) with examples to help configure JWT Authentication to your needs.
 
-Once ready to use, see the [quick start guide](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/quick-start.md).
+Once ready to use, see the [quick start guide](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/quick-start.md). There is also an [advanced configuration](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/advanced-configuration.md) for using RSA Keys.
 
 ★★★★★
 > Amazing Plugin. I’m using it to create a react-native app with WooCommerce as back-end. This plugin is a life-saver! [Daniel Loureiro](https://wordpress.org/support/topic/amazing-plugin-1562/)

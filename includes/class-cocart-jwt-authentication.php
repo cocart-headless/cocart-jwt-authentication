@@ -31,7 +31,7 @@ final class Plugin {
 	 *
 	 * @var string
 	 */
-	public static $version = '2.2.0';
+	public static $version = '2.3.0';
 
 	/**
 	 * JWT algorithm to generate signature.
@@ -227,7 +227,7 @@ final class Plugin {
 				return false;
 			}
 
-			$secret_key = defined( 'COCART_JWT_AUTH_SECRET_KEY' ) ? COCART_JWT_AUTH_SECRET_KEY : false;
+			$secret_key = $this->get_secret_public_key();
 
 			// First thing, check the secret key, if not exist return error.
 			if ( ! $secret_key ) {
@@ -393,7 +393,7 @@ final class Plugin {
 	 * @return string Generated JWT token.
 	 */
 	public static function generate_token( int|string $user = '' ) {
-		$secret_key = defined( 'COCART_JWT_AUTH_SECRET_KEY' ) ? COCART_JWT_AUTH_SECRET_KEY : false;
+		$secret_key = $this->get_secret_private_key();
 
 		if ( ! $secret_key ) {
 			return new \WP_Error( 'cocart_jwt_auth_bad_config', __( 'JWT configuration error.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
@@ -465,10 +465,19 @@ final class Plugin {
 		 */
 		$payload['data']['user'] = array_merge( $payload['data']['user'], apply_filters( 'cocart_jwt_auth_token_user_data', array(), $user ) );
 
+		/**
+		 * Filter the token data before the sign.
+		 *
+		 * @since 2.3.0 Introduced.
+		 *
+		 * @param array    $payload The token data.
+		 * @param \WP_User $user    User object.
+		 */
+		$payload = apply_filters( 'cocart_jwt_auth_token_before_sign', $payload, $user );
+
 		// Generate a token from provided data.
 		$payload = self::to_base_64_url( wp_json_encode( $payload ) );
 
-		/** Let the user modify the token data before the sign. */
 		$algorithm = self::get_algorithm();
 
 		if ( false === $algorithm ) {
@@ -496,7 +505,7 @@ final class Plugin {
 		 * @param string   $token Refreshed token.
 		 * @param \WC_User $user  User object.
 		 */
-		do_action( 'cocart_jwt_token_generated', $token, $user );
+		do_action( 'cocart_jwt_auth_token_generated', $token, $user );
 
 		return $token;
 	} // END generate_token()
@@ -525,6 +534,42 @@ final class Plugin {
 
 		return $algorithm;
 	} // END get_algorithm()
+
+	/**
+	 * Get the secret private key for token signing.
+	 *
+	 * @access private
+	 *
+	 * @since 2.3.0 Introduced.
+	 *
+	 * @return string|null The public key
+	 */
+	private function get_secret_private_key() {
+		/**
+		 * Allows you to set the private key for token signing.
+		 *
+		 * @since 2.3.0 Introduced.
+		 */
+		return apply_filters( 'cocart_jwt_auth_secret_private_key', defined( 'COCART_JWT_AUTH_SECRET_KEY' ) ? COCART_JWT_AUTH_SECRET_KEY : null );
+	} // END get_secret_private_key()
+
+	/**
+	 * Get the public key for token validation.
+	 *
+	 * @access private
+	 *
+	 * @since 2.3.0 Introduced.
+	 *
+	 * @return string|null The public key
+	 */
+	private function get_secret_public_key() {
+		/**
+		 * Allows you to set the public key for token validation.
+		 *
+		 * @since 2.3.0 Introduced.
+		 */
+		return apply_filters( 'cocart_jwt_auth_secret_public_key', defined( 'COCART_JWT_AUTH_SECRET_KEY' ) ? COCART_JWT_AUTH_SECRET_KEY : null );
+	} // END get_secret_public_key()
 
 	/**
 	 * Generate refresh token.
@@ -584,7 +629,7 @@ final class Plugin {
 			return $user_id;
 		}
 
-		$secret_key = defined( 'COCART_JWT_AUTH_SECRET_KEY' ) ? COCART_JWT_AUTH_SECRET_KEY : false;
+		$secret_key = $this->get_secret_public_key();
 
 		if ( ! $secret_key ) {
 			return new \WP_Error( 'cocart_jwt_auth_bad_config', __( 'JWT configuration error.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
@@ -787,12 +832,30 @@ final class Plugin {
 	 * @static
 	 *
 	 * @since 2.0.0 Introduced.
+	 * @since 2.3.0 Added filter to allow control over token revocation.
 	 *
 	 * @hooked: wp_logout
 	 *
 	 * @param int $user_id User ID.
 	 */
 	public static function destroy_tokens( $user_id ) {
+		// Get current action hook.
+		$current_action = current_action();
+
+		/**
+		 * Filter allows you to control token revocation based on the action triggered.
+		 *
+		 * @since 2.3.0 Introduced.
+		 *
+		 * @param bool         True if allowed to destroy tokens.
+		 * @param int $user_id User ID.
+		 */
+		$allow_action = apply_filters( 'cocart_jwt_auth_revoke_tokens_on_' . $current_action, true, $user_id );
+
+		if ( ! $allow_action ) {
+			return;
+		}
+
 		delete_user_meta( $user_id, 'cocart_jwt_token' );
 		delete_user_meta( $user_id, 'cocart_jwt_refresh_token' );
 
@@ -814,6 +877,7 @@ final class Plugin {
 	 * @static
 	 *
 	 * @since 2.0.0 Introduced.
+	 * @since 2.3.0 Added filter to allow control over token revocation.
 	 *
 	 * @hooked: profile_update
 	 *
@@ -823,8 +887,41 @@ final class Plugin {
 	public static function maybe_destroy_tokens( $user_id, $old_user_data ) {
 		$new_user_data = get_userdata( $user_id );
 
+		// Check if the email was changed.
+		if ( $new_user_data->user_email !== $old_user_data->user_email ) {
+			/**
+			 * Filter allows you to control token revocation on email changes.
+			 *
+			 * @since 2.3.0 Introduced.
+			 *
+			 * @param bool         True if allowed to destroy tokens.
+			 * @param int $user_id User ID.
+			 */
+			$allow_email_change = apply_filters( 'cocart_jwt_auth_revoke_tokens_on_email_change', true, $user_id );
+
+			if ( ! $allow_email_change ) {
+				return;
+			}
+
+			self::destroy_tokens( $user_id );
+		}
+
 		// Check if the password was changed.
-		if ( $new_user_data->user_pass !== $old_user_data->user_pass || $new_user_data->user_email !== $old_user_data->user_email ) {
+		if ( $new_user_data->user_pass !== $old_user_data->user_pass ) {
+			/**
+			 * Filter allows you to control token revocation on password changes for security policies.
+			 *
+			 * @since 2.3.0 Introduced.
+			 *
+			 * @param bool         True if allowed to destroy tokens.
+			 * @param int $user_id User ID.
+			 */
+			$allow_password_change = apply_filters( 'cocart_jwt_auth_revoke_tokens_on_password_change', true, $user_id );
+
+			if ( ! $allow_password_change ) {
+				return;
+			}
+
 			self::destroy_tokens( $user_id );
 		}
 	} // END maybe_destroy_tokens()
@@ -961,16 +1058,26 @@ final class Plugin {
 	 *
 	 * @static
 	 *
+	 * @since 2.3.0 Added support for more advanced RSA-based configuration.
+	 *
 	 * @param string $header_encoded Header + Payload token substring.
-	 * @param string $secret         The secret used to generate the signature.
+	 * @param string $secret_key     The secret key used to generate the signature.
 	 *
 	 * @return false|string
 	 */
-	private static function generate_signature( string $header_encoded, string $secret ) {
+	private static function generate_signature( string $header_encoded, string $secret_key ) {
+		$algorithm = self::get_algorithm();
+
+		if ( strpos( $algorithm, 'RS' ) === 0 ) {
+			$signature = '';
+			openssl_sign( $header_encoded, $signature, $secret_key, OPENSSL_ALGO_SHA256 );
+			return $signature;
+		}
+
 		return hash_hmac(
 			'sha256',
 			$header_encoded,
-			$secret,
+			$secret_key,
 			true
 		);
 	} // END generate_signature()

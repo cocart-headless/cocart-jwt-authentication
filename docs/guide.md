@@ -12,7 +12,7 @@ Before installing CoCart JWT Authentication, ensure your system meets these requ
 
 ## Secret Key Configuration
 
-Add the following code to your wp-config.php file:
+Add the following code to your `wp-config.php` file:
 
 ```php
 define( 'COCART_JWT_AUTH_SECRET_KEY', 'YOUR-UNIQUE-SECRET-KEY' );
@@ -97,3 +97,12 @@ CoCart JWT Authentication comes with built-in security features to protect your 
 * Automatic token revocation on user logout.
 * Configurable token expiration times.
 * Secure refresh token rotation.
+
+## Troubleshooting
+
+If you encounter any issues during installation, check these common solutions:
+
+* Ensure your WordPress version is compatible.
+* Verify PHP version requirements.
+* Check if REST API is accessible.
+* Confirm SSL certificate is valid.
