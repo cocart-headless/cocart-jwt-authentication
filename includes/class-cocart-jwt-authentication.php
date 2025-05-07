@@ -227,7 +227,7 @@ final class Plugin {
 				return false;
 			}
 
-			$secret_key = $this->get_secret_public_key();
+			$secret_key = self::get_secret_public_key();
 
 			// First thing, check the secret key, if not exist return error.
 			if ( ! $secret_key ) {
@@ -393,7 +393,7 @@ final class Plugin {
 	 * @return string Generated JWT token.
 	 */
 	public static function generate_token( int|string $user = '' ) {
-		$secret_key = $this->get_secret_private_key();
+		$secret_key = self::get_secret_private_key();
 
 		if ( ! $secret_key ) {
 			return new \WP_Error( 'cocart_jwt_auth_bad_config', __( 'JWT configuration error.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
@@ -540,11 +540,13 @@ final class Plugin {
 	 *
 	 * @access private
 	 *
+	 * @static
+	 *
 	 * @since 2.3.0 Introduced.
 	 *
 	 * @return string|null The public key
 	 */
-	private function get_secret_private_key() {
+	private static function get_secret_private_key() {
 		/**
 		 * Allows you to set the private key for token signing.
 		 *
@@ -558,11 +560,13 @@ final class Plugin {
 	 *
 	 * @access private
 	 *
+	 * @static
+	 *
 	 * @since 2.3.0 Introduced.
 	 *
 	 * @return string|null The public key
 	 */
-	private function get_secret_public_key() {
+	private static function get_secret_public_key() {
 		/**
 		 * Allows you to set the public key for token validation.
 		 *
@@ -629,7 +633,7 @@ final class Plugin {
 			return $user_id;
 		}
 
-		$secret_key = $this->get_secret_public_key();
+		$secret_key = self::get_secret_public_key();
 
 		if ( ! $secret_key ) {
 			return new \WP_Error( 'cocart_jwt_auth_bad_config', __( 'JWT configuration error.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
