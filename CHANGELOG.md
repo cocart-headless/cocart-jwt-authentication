@@ -1,5 +1,11 @@
 # Changelog for CoCart JWT Authentication
 
+## v2.3.1 - 7th May, 2025
+
+### Bug Fix
+
+* Fixed uncaught error.
+
 ## v2.3.0 - 28th April, 2025
 
 ### What's New?
