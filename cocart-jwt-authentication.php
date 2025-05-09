@@ -5,7 +5,7 @@
  * Description: JWT Authentication for CoCart.
  * Author:      CoCart Headless, LLC
  * Author URI:  https://cocartapi.com
- * Version:     2.3.1
+ * Version:     2.4.0
  * Text Domain: cocart-jwt-authentication
  * Domain Path: /languages/
  * Requires at least: 6.0

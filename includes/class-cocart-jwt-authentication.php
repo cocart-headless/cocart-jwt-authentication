@@ -31,7 +31,7 @@ final class Plugin {
 	 *
 	 * @var string
 	 */
-	public static $version = '2.3.1';
+	public static $version = '2.4.0';
 
 	/**
 	 * JWT algorithm to generate signature.

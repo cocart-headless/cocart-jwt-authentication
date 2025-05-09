@@ -1,5 +1,12 @@
 # Changelog for CoCart JWT Authentication
 
+## v2.4.0 - 9th May, 2025
+
+### What's New?
+
+* Added debug logs for when authentication fails to help developers identify where the token failed.
+* Added WooCommerce System Status data and a button to clear expired tokens manually under "Tools".
+
 ## v2.3.1 - 7th May, 2025
 
 ### Bug Fix
