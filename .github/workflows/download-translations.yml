@@ -1,5 +1,10 @@
 name: Update Translations
 
+# The permissions block should be here, at the workflow level
+permissions:
+  contents: write
+  pull-requests: write
+
 on:
   schedule:
     - cron: "0 0 * * 1" # Runs every Monday at midnight UTC
@@ -56,16 +61,4 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         commit-message: "Update translations from GlotPress"
-        branch: update-translations
-        title: "Update translations from GlotPress"
-        body: |
-          This PR updates the translations from [GlotPress](https://translate.cocartapi.com/).
-        labels: "translations, automation"
-
-    - name: Auto Merge Pull Request
-      if: steps.cpr.outputs.pull-request-operation == 'created'
-      uses: peter-evans/enable-pull-request-automerge@v3
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
-        merge-method: merge
+       
