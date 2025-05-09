@@ -223,6 +223,7 @@ final class Plugin {
 			// If the token is malformed then return error.
 			if ( ! $token ) {
 				// Error: Authorization header malformed. Please check the authentication token and try again.
+				\CoCart_Logger::log( esc_html__( 'Authorization header malformed. Please check the authentication token and try again.', 'cocart-jwt-authentication' ), 'error', 'jwt-authentication' );
 				$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
 				return false;
 			}
@@ -232,6 +233,7 @@ final class Plugin {
 			// First thing, check the secret key, if not exist return error.
 			if ( ! $secret_key ) {
 				// Error: JWT is not configured properly.
+				\CoCart_Logger::log( esc_html__( 'JWT is not configured properly.', 'cocart-jwt-authentication' ), 'error', 'jwt-authentication' );
 				$auth->set_error( new \WP_Error( 'cocart_jwt_auth_bad_config', __( 'JWT configuration error.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
 				return false;
 			}
@@ -239,6 +241,7 @@ final class Plugin {
 			// Check if the token is valid using the secret key.
 			if ( ! self::validate_token( $token, $secret_key ) ) {
 				// Error: JWT Token is not valid or has expired.
+				\CoCart_Logger::log( esc_html__( 'JWT Token is not valid or has expired.', 'cocart-jwt-authentication' ), 'error', 'jwt-authentication' );
 				$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
 				return false;
 			}
@@ -250,6 +253,7 @@ final class Plugin {
 			// The token is decoded now validate the iss.
 			if ( self::get_iss() !== $payload->iss ) {
 				// Error: The token issuer does not match with this server.
+				\CoCart_Logger::log( esc_html__( 'The token issuer does not match with this server.', 'cocart-jwt-authentication' ), 'error', 'jwt-authentication' );
 				$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
 				return false;
 			}
@@ -257,6 +261,7 @@ final class Plugin {
 			// Check the user id existence in the token.
 			if ( ! isset( $payload->data->user->id ) ) {
 				// Error: The token does not identify any user.
+				\CoCart_Logger::log( esc_html__( 'The token does not identify any user.', 'cocart-jwt-authentication' ), 'error', 'jwt-authentication' );
 				$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
 				return false;
 			}
@@ -266,6 +271,7 @@ final class Plugin {
 
 			if ( ! $user ) {
 				// Error: The user doesn't exist.
+				\CoCart_Logger::log( esc_html__( 'User does not exist.', 'cocart-jwt-authentication' ), 'error', 'jwt-authentication' );
 				$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
 				return false;
 			}
@@ -273,6 +279,7 @@ final class Plugin {
 			// Validate IP or Device.
 			if ( \CoCart_Authentication::get_ip_address() !== $payload->data->user->ip || ( isset( $_SERVER[ self::get_user_agent_header() ] ) && sanitize_text_field( wp_unslash( $_SERVER[ self::get_user_agent_header() ] ) ) !== $payload->data->user->device ) ) {
 				// Error: IP or Device mismatch.
+				\CoCart_Logger::log( esc_html__( 'Unable to validate IP or User-Agent.', 'cocart-jwt-authentication' ), 'error', 'jwt-authentication' );
 				$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
 				return false;
 			}
