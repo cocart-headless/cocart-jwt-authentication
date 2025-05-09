@@ -100,6 +100,8 @@ final class Plugin {
 	 * @static
 	 */
 	public static function init() {
+		include_once __DIR__ . '/admin/class-cocart-jwt-wc-admin-system-status.php';
+
 		// Load translation files.
 		add_action( 'init', array( __CLASS__, 'load_plugin_textdomain' ), 0 );
 
