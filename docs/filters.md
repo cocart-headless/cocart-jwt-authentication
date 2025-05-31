@@ -50,8 +50,8 @@ Allows you to customize when the token will expire (exp claim) based on roles or
 
 ```php
 add_filter( 'cocart_jwt_auth_expire', function( $expiration, $issued_at ) {
-    // Set expiration to 14 days
-    return $issued_at + (14 * DAY_IN_SECONDS);
+    // Set expiration to 2 days
+    return 2 * DAY_IN_SECONDS;
 }, 10, 2);
 ```
 
