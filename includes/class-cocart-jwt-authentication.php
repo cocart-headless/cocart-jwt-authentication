@@ -93,6 +93,17 @@ final class Plugin {
 	);
 
 	/**
+	 * Bearer token pattern.
+	 *
+	 * @access private
+	 *
+	 * @since 2.5.0 Introduced.
+	 *
+	 * @var string
+	 */
+	private const BEARER_TOKEN_PATTERN = '/^Bearer\s+([a-zA-Z0-9\-_=]+\.[a-zA-Z0-9\-_=]+\.[a-zA-Z0-9\-_=]+)$/i';
+
+	/**
 	 * Initiate CoCart JWT Authentication.
 	 *
 	 * @access public
@@ -191,6 +202,50 @@ final class Plugin {
 	public static function get_path() {
 		return dirname( __DIR__ );
 	} // END get_path()
+
+	/**
+	 * Extract Bearer token from authorization header.
+	 *
+	 * @access private
+	 *
+	 * @since 2.5.0 Introduced.
+	 *
+	 * @param string $auth Authorization header value.
+	 *
+	 * @return string|null Token if found, null otherwise.
+	 */
+	private static function extract_bearer_token( string $auth ): ?string {
+		if ( preg_match( self::BEARER_TOKEN_PATTERN, $auth, $matches ) ) {
+			return $matches[1];
+		}
+
+		return null;
+	} // END extract_bearer_token()
+
+	/**
+	 * Handle Bearer token authentication.
+	 *
+	 * @access private
+	 *
+	 * @since 2.5.0 Introduced.
+	 *
+	 * @param string $auth Authorization header value.
+	 *
+	 * @return mixed Authentication result.
+	 */
+	private static function handle_bearer_token( $auth ) {
+		$auth_header = \CoCart_Authentication::get_auth_header();
+
+		$token = self::extract_bearer_token( $auth_header );
+
+		// Validating authorization header and token.
+		if ( ! empty( $auth_header ) && 0 === stripos( $auth_header, 'bearer ' ) && is_null( $token ) ) {
+			\CoCart_Logger::log( esc_html__( 'Authorization header present but no Bearer token.', 'cocart-jwt-authentication' ), 'error', 'jwt-authentication' );
+			$auth->set_error( new \WP_Error( 'cocart_authentication_error', 'Authentication failed.', array( 'status' => 401 ) ) );
+		}
+
+		return $token;
+	} // END handle_bearer_token()
 
 	/**
 	 * JWT Authentication.
