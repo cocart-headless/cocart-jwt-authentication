@@ -1,5 +1,19 @@
 # Changelog for CoCart JWT Authentication
 
+## v2.5.0 - ?? ??, 2025
+
+### Improvements
+
+* Token value checks against an improved pattern.
+* Improved current debug logs.
+* Improved token validation.
+* Added more debug logs.
+
+### Compatibility
+
+* Tested with CoCart v4.6
+* Tested with WooCommerce 9.9
+
 ## v2.4.0 - 9th May, 2025
 
 ### What's New?
