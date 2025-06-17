@@ -1064,12 +1064,18 @@ final class Plugin {
 	 *
 	 * @static
 	 *
+	 * @since 1.0.0 Introduced.
+	 *
+	 * @deprecated 2.5.0 Replaced with `is_token_valid()`.
+	 *
 	 * @param string $token      Full token string.
 	 * @param string $secret_key The secret key used to generate the signature.
 	 *
 	 * @return bool
 	 */
 	public static function validate_token( string $token, string $secret_key ) {
+		cocart_deprecated_function( 'CoCart\JWTAuthentication\Plugin::validate_token', '2.5.0', 'CoCart\JWTAuthentication\Plugin::is_token_valid' );
+
 		/**
 		 * Confirm the structure of a JSON Web Token, it has three parts separated
 		 * by dots and complies with Base64URL standards.
