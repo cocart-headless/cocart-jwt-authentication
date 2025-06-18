@@ -8,6 +8,8 @@ The CoCart Headless Security Team believes in Responsible Disclosure by alerting
 
 | Version | Supported |
 |---------| --------- |
+| 2.5.x   | Yes       |
+| 2.4.x   | Yes       |
 | 2.3.x   | Yes       |
 | 2.2.x   | Yes       |
 | 2.1.x   | Yes       |
