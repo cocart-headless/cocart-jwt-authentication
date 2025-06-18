@@ -271,8 +271,8 @@ final class Plugin {
 			return false;
 		}
 
-		// Decode token provided using the secret key.
-		$decoded_token = self::decode_token( $token, $secret_key );
+		// Decode token provided.
+		$decoded_token = self::decode_token( $token );
 
 		// Check if header declares a supported JWT by this class.
 		if (
@@ -374,11 +374,13 @@ final class Plugin {
 		// Handle Bearer token authentication.
 		$token = self::handle_bearer_token( $auth );
 
-		$user = self::is_token_valid( $token );
+		if ( ! is_null( $token ) ) {
+			$user = self::is_token_valid( $token );
 
-		if ( ! empty( $user ) ) {
-			// User is authenticated.
-			return $user->ID;
+			if ( ! empty( $user ) ) {
+				// User is authenticated.
+				return $user->ID;
+			}
 		}
 
 		return $user_id;
