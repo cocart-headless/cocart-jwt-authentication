@@ -583,7 +583,7 @@ final class Plugin {
 		/** The token is signed, now generate the signature to the response */
 		$signature = self::to_base_64_url( self::generate_signature( $header . '.' . $payload, $secret_key ) );
 
-		$token = $header . '.' . $payload . '.' . $signature;
+		$token = self::get_token_prefix() . $header . '.' . $payload . '.' . $signature;
 
 		// Save user token.
 		update_user_meta( $user->ID, 'cocart_jwt_token', $token );
@@ -600,6 +600,49 @@ final class Plugin {
 
 		return $token;
 	} // END generate_token()
+
+	/**
+	 * Get the token prefix.
+	 *
+	 * This prefix is added to the token when it is generated.
+	 * It is not required to use a prefix, but it can help to distinguish
+	 * tokens from different sources or implementations.
+	 *
+	 * @access private
+	 *
+	 * @static
+	 *
+	 * @since 2.5.0 Introduced.
+	 *
+	 * @return string The token prefix.
+	 */
+	private static function get_token_prefix() {
+		/**
+		 * Filter allows you to change the token prefix.
+		 *
+		 * @since 2.5.0 Introduced.
+		 *
+		 * @return string The token prefix.
+		 */
+		return apply_filters( 'cocart_jwt_auth_token_prefix', '' );
+	} // END get_token_prefix()
+
+	/**
+	 * Check if the token prefix is enabled.
+	 *
+	 * This is used to determine if the token prefix should be added to the token when it is generated.
+	 *
+	 * @access private
+	 *
+	 * @static
+	 *
+	 * @since 2.5.0 Introduced.
+	 *
+	 * @return bool True if the prefix is enabled, false otherwise.
+	 */
+	private static function is_prefix_enabled() {
+		return ! empty( self::get_token_prefix() );
+	} // END is_prefix_enabled()
 
 	/**
 	 * Get the algorithm used to sign the token and validate that
@@ -1122,7 +1165,24 @@ final class Plugin {
 	 * @return object
 	 */
 	public static function decode_token( string $token ) {
+		// Only validate prefix if enabled.
+		if ( self::is_prefix_enabled() ) {
+			if ( strpos( $token, self::get_token_prefix() ) !== 0 ) {
+				\CoCart_Logger::log( esc_html__( 'Token does not have a matching prefix.', 'cocart-jwt-authentication' ), 'error', 'jwt-authentication' );
+				throw new \Exception( 'Invalid token' );
+			}
+
+			// Remove prefix safely.
+			$token = substr( $token, strlen( self::get_token_prefix() ) );
+		}
+
+		// Validate token structure.
 		$parts = explode( '.', $token );
+
+		if ( count( $parts ) !== 3 ) {
+			\CoCart_Logger::log( esc_html__( 'Token was incomplete.', 'cocart-jwt-authentication' ), 'error', 'jwt-authentication' );
+			throw new \Exception( 'Invalid token format' );
+		}
 
 		return (object) array(
 			'header'            => json_decode( self::from_base_64_url( $parts[0] ) ),

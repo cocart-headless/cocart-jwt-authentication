@@ -9,6 +9,10 @@
 * Improved token validation.
 * Added more debug logs.
 
+### Developers
+
+* Introduced new filter `cocart_jwt_auth_token_prefix` that allows you to set a prefix to the token to help distinguish from other tokens from other sources.
+
 ### Compatibility
 
 * Tested with CoCart v4.6

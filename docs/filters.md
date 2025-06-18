@@ -224,3 +224,17 @@ add_filter( 'cocart_jwt_auth_revoke_tokens_on_wp_logout', function( $should_revo
 ```
 
 > All filters follow WordPress coding standards and can be used with the standard add_filter() function. The examples above show practical implementations for each filter.
+
+`cocart_jwt_auth_token_prefix`
+
+> Made available since v2.5.0
+
+This prefix is used to identify the token type. It can be useful if you want to use different token types or to avoid conflicts with other JWT implementations.
+
+> It is **NOT required** to use a prefix, but it can help to distinguish tokens from different sources or implementations so use a unique prefix.
+
+```php
+add_filter( 'cocart_jwt_auth_token_prefix', function( $prefix ) {
+    return 'cocart_';
+}, 10, 2);
+```
