@@ -933,8 +933,12 @@ final class Plugin {
 			$token = self::generate_token( $user->ID );
 		}
 
-		$extras['jwt_token']   = $token;
-		$extras['jwt_refresh'] = self::generate_refresh_token( $user->ID );
+		$secret_key = self::get_secret_public_key();
+
+		if ( $secret_key ) {
+			$extras['jwt_token']   = $token;
+			$extras['jwt_refresh'] = self::generate_refresh_token( $user->ID );
+		}
 
 		return $extras;
 	} // END send_tokens()
