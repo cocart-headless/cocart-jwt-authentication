@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: CoCart JWT Authentication 2.5.0\n"
 "Report-Msgid-Bugs-To: "
 "https://github.com/cocart-headless/cocart-jwt-authentication/issues\n"
-"POT-Creation-Date: 2025-06-17 15:16:19+00:00\n"
+"POT-Creation-Date: 2025-06-19 11:40:03+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -63,8 +63,8 @@ msgid "JWT is not configured properly."
 msgstr ""
 
 #: includes/class-cocart-jwt-authentication.php:270
-#: includes/class-cocart-jwt-authentication.php:490
-#: includes/class-cocart-jwt-authentication.php:730
+#: includes/class-cocart-jwt-authentication.php:492
+#: includes/class-cocart-jwt-authentication.php:775
 msgid "JWT configuration error."
 msgstr ""
 
@@ -79,8 +79,8 @@ msgstr ""
 #: includes/class-cocart-jwt-authentication.php:320
 #: includes/class-cocart-jwt-authentication.php:330
 #: includes/class-cocart-jwt-authentication.php:338
-#: includes/class-cocart-jwt-authentication.php:502
-#: includes/class-cocart-jwt-authentication.php:737
+#: includes/class-cocart-jwt-authentication.php:504
+#: includes/class-cocart-jwt-authentication.php:782
 msgid "Authentication failed."
 msgstr ""
 
@@ -108,95 +108,103 @@ msgstr ""
 msgid "Unable to validate IP or User-Agent."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:455
+#: includes/class-cocart-jwt-authentication.php:457
 msgid "User unknown!"
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:578
+#: includes/class-cocart-jwt-authentication.php:580
 msgid "Algorithm not supported"
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:784
+#: includes/class-cocart-jwt-authentication.php:829
 msgid "Invalid refresh token."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:791
+#: includes/class-cocart-jwt-authentication.php:836
 msgid "Refresh token expired."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1428
+#: includes/class-cocart-jwt-authentication.php:1177
+msgid "Token does not have a matching prefix."
+msgstr ""
+
+#: includes/class-cocart-jwt-authentication.php:1189
+msgid "Token was incomplete."
+msgstr ""
+
+#: includes/class-cocart-jwt-authentication.php:1494
 msgid "Token is required."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1466
+#: includes/class-cocart-jwt-authentication.php:1532
 msgid "Invalid token."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1522
+#: includes/class-cocart-jwt-authentication.php:1588
 msgid "No tokens found."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1557
+#: includes/class-cocart-jwt-authentication.php:1623
 msgid "User ID is required."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1563
+#: includes/class-cocart-jwt-authentication.php:1629
 msgid "User not found."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1569
+#: includes/class-cocart-jwt-authentication.php:1635
 msgid "Generating another token will kick the user out of session"
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1570
+#: includes/class-cocart-jwt-authentication.php:1636
 msgid "Are you sure you want to generate a new one?"
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1580
+#: includes/class-cocart-jwt-authentication.php:1646
 msgid "Token generated."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1597
+#: includes/class-cocart-jwt-authentication.php:1663
 msgid "Cleans up expired JWT tokens."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1602
+#: includes/class-cocart-jwt-authentication.php:1668
 msgid "Number of users to process per batch."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1609
+#: includes/class-cocart-jwt-authentication.php:1675
 msgid "Force cleanup of all tokens."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1624
+#: includes/class-cocart-jwt-authentication.php:1690
 msgid "Displays details of a JWT token."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1629
+#: includes/class-cocart-jwt-authentication.php:1695
 msgid "The JWT token to view."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1643
+#: includes/class-cocart-jwt-authentication.php:1709
 msgid "Lists all active JWT tokens."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1648
+#: includes/class-cocart-jwt-authentication.php:1714
 msgid "Page number to display."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1655
+#: includes/class-cocart-jwt-authentication.php:1721
 msgid "Number of tokens to display per page."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1670
+#: includes/class-cocart-jwt-authentication.php:1736
 msgid "Generates a new JWT token for a user."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1675
+#: includes/class-cocart-jwt-authentication.php:1741
 msgid "The user ID to generate the token for."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:1681
+#: includes/class-cocart-jwt-authentication.php:1747
 msgid "The User Agent to override the server User Agent."
 msgstr ""
 
