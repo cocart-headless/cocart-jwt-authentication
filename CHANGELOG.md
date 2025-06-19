@@ -1,6 +1,10 @@
 # Changelog for CoCart JWT Authentication
 
-## v2.5.0 - ?? ??, 2025
+## v2.5.0 - 19th June, 2025
+
+### Corrections
+
+* Corrected plugin slug to identify plugin for the logger.
 
 ### Improvements
 
