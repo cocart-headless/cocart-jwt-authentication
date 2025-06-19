@@ -186,6 +186,8 @@ rm -f .idea
 rm -f *.json
 rm -f *.lock
 rm -f *.md
+rm -f *.md5
+rm -f *.neon
 rm -f *.rb
 rm -f *.sh
 rm -f *.yml
