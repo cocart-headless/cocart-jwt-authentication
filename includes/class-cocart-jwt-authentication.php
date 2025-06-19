@@ -239,7 +239,7 @@ final class Plugin {
 		$token = self::extract_bearer_token( $auth_header );
 
 		// Validating authorization header and token.
-		if ( ! empty( $auth_header ) && 0 === stripos( $auth_header, 'bearer ' ) && is_null( $token ) ) {
+		if ( empty( $auth_header ) && is_null( $token ) ) {
 			\CoCart_Logger::log( esc_html__( 'Authorization header present but no Bearer token.', 'cocart-jwt-authentication' ), 'error', 'jwt-authentication' );
 			$auth->set_error( new \WP_Error( 'cocart_authentication_error', 'Authentication failed.', array( 'status' => 401 ) ) );
 		}
