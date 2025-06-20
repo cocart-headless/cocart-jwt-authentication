@@ -394,15 +394,19 @@ final class Plugin {
 	public static function perform_jwt_authentication( int $user_id, bool $ssl, $auth ) {
 		$auth->set_method( 'jwt_auth' );
 
-		// Handle Bearer token authentication.
-		$token = self::handle_bearer_token( $auth );
+		$auth_header = \CoCart_Authentication::get_auth_header();
 
-		if ( ! is_null( $token ) ) {
-			$user = self::is_token_valid( $token );
+		if ( self::is_bearer_auth( $auth_header ) ) {
+			// Extract Bearer token authentication.
+			$token = self::extract_bearer_token( $auth_header );
 
-			if ( ! empty( $user ) ) {
-				// User is authenticated.
-				return $user->ID;
+			if ( ! is_null( $token ) ) {
+				$user = self::is_token_valid( $token );
+
+				if ( ! empty( $user ) ) {
+					// User is authenticated.
+					return $user->ID;
+				}
 			}
 		}
 
