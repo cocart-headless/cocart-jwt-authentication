@@ -204,6 +204,23 @@ final class Plugin {
 	} // END get_path()
 
 	/**
+	 * Check if the authorization header contains a Bearer authentication.
+	 *
+	 * @access private
+	 *
+	 * @static
+	 *
+	 * @since 2.5.1 Introduced.
+	 *
+	 * @param string $auth Authorization header value.
+	 *
+	 * @return bool
+	 */
+	private static function is_bearer_auth( string $auth ): bool {
+		return ! empty( $auth ) && preg_match( self::BEARER_TOKEN_PATTERN, $auth );
+	} // END is_bearer_auth()
+
+	/**
 	 * Extract Bearer token from authorization header.
 	 *
 	 * @access private
