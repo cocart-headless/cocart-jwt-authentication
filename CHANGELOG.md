@@ -1,5 +1,11 @@
 # Changelog for CoCart JWT Authentication
 
+## v2.5.1 - 20th June, 2025
+
+### 🔥 Hot Patch
+
+Last release broke support for guest users. [Reported](https://github.com/cocart-headless/cocart-jwt-authentication/issues/24) by @marianobitelo MB. This patch resolves it by validating the auth header correctly. If auth header is present but returns an empty value, it will fail safely instead of an error response.
+
 ## v2.5.0 - 19th June, 2025
 
 ### Corrections

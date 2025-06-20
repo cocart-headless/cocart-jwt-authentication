@@ -31,7 +31,7 @@ final class Plugin {
 	 *
 	 * @var string
 	 */
-	public static $version = '2.5.0';
+	public static $version = '2.5.1';
 
 	/**
 	 * JWT algorithm to generate signature.
@@ -280,7 +280,7 @@ final class Plugin {
 	 * @since 2.5.0 Introduced.
 	 *
 	 * @param string $token The JWT token to validate.
-	 * @param object $auth    The Authentication class.
+	 * @param object $auth  The Authentication class.
 	 *
 	 * @return \WP_User|false|WP_Error The user object if valid, false otherwise.
 	 */
