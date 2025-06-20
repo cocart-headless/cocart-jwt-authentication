@@ -280,10 +280,11 @@ final class Plugin {
 	 * @since 2.5.0 Introduced.
 	 *
 	 * @param string $token The JWT token to validate.
+	 * @param object $auth    The Authentication class.
 	 *
 	 * @return \WP_User|false|WP_Error The user object if valid, false otherwise.
 	 */
-	private static function is_token_valid( $token ) {
+	private static function is_token_valid( $token, $auth ) {
 		$secret_key = self::get_secret_public_key();
 
 		// First thing, check the secret key, if not exist return error.
@@ -401,7 +402,7 @@ final class Plugin {
 			$token = self::extract_bearer_token( $auth_header );
 
 			if ( ! is_null( $token ) ) {
-				$user = self::is_token_valid( $token );
+				$user = self::is_token_valid( $token, $auth );
 
 				if ( ! empty( $user ) ) {
 					// User is authenticated.
