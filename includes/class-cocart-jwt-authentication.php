@@ -244,13 +244,19 @@ final class Plugin {
 	 *
 	 * @access private
 	 *
+	 * @static
+	 *
 	 * @since 2.5.0 Introduced.
+	 *
+	 * @deprecated 2.5.1 Failed function.
 	 *
 	 * @param string $auth Authorization header value.
 	 *
 	 * @return mixed Authentication result.
 	 */
 	private static function handle_bearer_token( $auth ) {
+		cocart_deprecated_function( 'CoCart\JWTAuthentication\Plugin::handle_bearer_token', '2.5.1' );
+
 		$auth_header = \CoCart_Authentication::get_auth_header();
 
 		$token = self::extract_bearer_token( $auth_header );
