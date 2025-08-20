@@ -532,6 +532,8 @@ final class Plugin {
 			return new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
 		}
 
+		$user_tokens = (array) get_user_meta( $user->ID, 'cocart_jwt_tokens' );
+
 		/**
 		 * Allows you to change the token issuance timestamp (iat claim) for token timing synchronization.
 		 *
@@ -586,6 +588,9 @@ final class Plugin {
 		 */
 		$payload['data']['user'] = array_merge( $payload['data']['user'], apply_filters( 'cocart_jwt_auth_token_user_data', array(), $user ) );
 
+		// Base64 encode the users IP address to use as the token ID.
+		$token_id = base64_encode( $payload['data']['user']['ip'] );
+
 		/**
 		 * Filter the token data before the sign.
 		 *
@@ -615,8 +620,11 @@ final class Plugin {
 
 		$token = self::get_token_prefix() . $header . '.' . $payload . '.' . $signature;
 
+		// Append the token to the users tokens.
+		$user_tokens[ $token_id ] = $token;
+
 		// Save user token.
-		update_user_meta( $user->ID, 'cocart_jwt_token', $token );
+		update_user_meta( $user->ID, 'cocart_jwt_tokens', $user_tokens );
 
 		/**
 		 * Fires when a new JWT token is generated after successful authentication.
@@ -755,13 +763,14 @@ final class Plugin {
 	 * @return int User ID
 	 */
 	public static function generate_refresh_token( $user_id ) {
+		$refresh_tokens = (array) get_user_meta( $user_id, 'cocart_jwt_refresh_tokens' );
+
 		/**
 		 * Filter allows you to change how refresh tokens are generated.
 		 *
 		 * @since 2.0.0 Introduced.
 		 */
 		$refresh_token = apply_filters( 'cocart_jwt_auth_refresh_token_generation', bin2hex( random_bytes( 64 ) ) );
-		update_user_meta( $user_id, 'cocart_jwt_refresh_token', $refresh_token );
 
 		/**
 		 * Filter allows you to customize refresh token lifetime based on roles or conditions.
@@ -771,7 +780,10 @@ final class Plugin {
 		 * @since 2.0.0 Introduced.
 		 */
 		$expiration = time() + apply_filters( 'cocart_jwt_auth_refresh_token_expiration', DAY_IN_SECONDS * 30 );
-		update_user_meta( $user_id, 'cocart_jwt_refresh_token_expiration', $expiration );
+
+		$refresh_tokens[ $refresh_token ] = $expiration;
+
+		update_user_meta( $user_id, 'cocart_jwt_refresh_tokens', $refresh_tokens );
 
 		return $refresh_token;
 	} // END generate_refresh_token()
@@ -846,19 +858,26 @@ final class Plugin {
 	 */
 	private static function validate_refresh_token( string $refresh_token ) {
 		$user_query = new \WP_User_Query( array(
-			'meta_key'   => 'cocart_jwt_refresh_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			'meta_value' => $refresh_token, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			'meta_query' => array(
+				array(
+					'key'     => 'cocart_jwt_refresh_tokens', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'value'   => $refresh_token,
+					'compare' => 'LIKE',
+				),
+			),
 			'number'     => 1,
 		) );
 
 		$users = $user_query->get_results();
 
 		if ( empty( $users ) ) {
-			return new \WP_Error( 'cocart_authentication_error', __( 'Invalid refresh token.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
+			return new \WP_Error( 'cocart_authentication_error', __( 'Invalid refresh token.', 'cocart-jwt-authentication' ), array( 'status' => 403 ) );
 		}
 
-		$user_id    = $users[0]->ID;
-		$expiration = get_user_meta( $user_id, 'cocart_jwt_refresh_token_expiration', true );
+		$user_id     = $users[0]->ID;
+		$user_tokens = (array) get_user_meta( $user_id, 'cocart_jwt_refresh_tokens' );
+
+		$expiration = $user_tokens[ $refresh_token ];
 
 		if ( time() > $expiration ) {
 			return new \WP_Error( 'cocart_authentication_error', __( 'Refresh token expired.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
@@ -955,15 +974,11 @@ final class Plugin {
 	 * @return array $extras
 	 */
 	public static function send_tokens( $extras, $user ) {
-		$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
-
-		if ( empty( $token ) || self::is_token_expired( $token ) ) {
-			$token = self::generate_token( $user->ID );
-		}
+		$token = self::generate_token( $user->ID );
 
 		$secret_key = self::get_secret_public_key();
 
-		if ( $secret_key ) {
+		if ( $secret_key && ! is_wp_error( $token ) ) {
 			$extras['jwt_token']   = $token;
 			$extras['jwt_refresh'] = self::generate_refresh_token( $user->ID );
 		}
@@ -1028,8 +1043,8 @@ final class Plugin {
 			return;
 		}
 
-		delete_user_meta( $user_id, 'cocart_jwt_token' );
-		delete_user_meta( $user_id, 'cocart_jwt_refresh_token' );
+		delete_user_meta( $user_id, 'cocart_jwt_tokens' );
+		delete_user_meta( $user_id, 'cocart_jwt_refresh_tokens' );
 
 		/**
 		 * Fires when a token is deleted.
@@ -1381,7 +1396,7 @@ final class Plugin {
 
 		do {
 			$users = get_users( array(
-				'meta_key'     => 'cocart_jwt_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_key'     => 'cocart_jwt_tokens', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				'meta_compare' => 'EXISTS',
 				'number'       => $batch_size,
 				'offset'       => $offset,
@@ -1390,11 +1405,15 @@ final class Plugin {
 			$users_count = count( $users );
 
 			foreach ( $users as $user ) {
-				$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
+				$user_tokens = (array) get_user_meta( $user->ID, 'cocart_jwt_tokens' );
 
-				if ( ! empty( $token ) && self::is_token_expired( $token ) ) {
-					delete_user_meta( $user->ID, 'cocart_jwt_token' );
+				foreach ( $user_tokens as $token ) {
+					if ( self::is_token_expired( $token ) ) {
+						unset( $user_tokens[ $token ] );
+					}
 				}
+
+				update_user_meta( $user->ID, 'cocart_jwt_tokens', $user_tokens );
 			}
 
 			$offset += $batch_size;
@@ -1460,7 +1479,7 @@ final class Plugin {
 		$batch_size  = isset( $assoc_args['batch-size'] ) ? intval( $assoc_args['batch-size'] ) : 100;
 		$force       = isset( $assoc_args['force'] ) ? (bool) $assoc_args['force'] : false;
 		$total_users = count( get_users( array(
-			'meta_key'     => 'cocart_jwt_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_key'     => 'cocart_jwt_tokens', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'meta_compare' => 'EXISTS',
 			'fields'       => 'ID',
 		) ) );
@@ -1471,7 +1490,7 @@ final class Plugin {
 
 		do {
 			$users = get_users( array(
-				'meta_key'     => 'cocart_jwt_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_key'     => 'cocart_jwt_tokens', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				'meta_compare' => 'EXISTS',
 				'number'       => $batch_size,
 				'offset'       => $offset,
@@ -1480,10 +1499,18 @@ final class Plugin {
 			$users_count = count( $users );
 
 			foreach ( $users as $user ) {
-				$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
+				if ( $force ) {
+					delete_user_meta( $user->ID, 'cocart_jwt_tokens' );
+				} else {
+					$user_tokens = (array) get_user_meta( $user->ID, 'cocart_jwt_tokens' );
 
-				if ( $force || ( ! empty( $token ) && self::is_token_expired( $token ) ) ) {
-					delete_user_meta( $user->ID, 'cocart_jwt_token' );
+					foreach ( $user_tokens as $token ) {
+						if ( self::is_token_expired( $token ) ) {
+							unset( $user_tokens[ $token ] );
+						}
+					}
+
+					update_user_meta( $user->ID, 'cocart_jwt_tokens', $user_tokens );
 				}
 
 				$progress->tick();
@@ -1593,7 +1620,7 @@ final class Plugin {
 		$per_page = isset( $assoc_args['per-page'] ) ? intval( $assoc_args['per-page'] ) : 20;
 
 		$users = get_users( array(
-			'meta_key'     => 'cocart_jwt_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_key'     => 'cocart_jwt_tokens', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'meta_compare' => 'EXISTS',
 			'number'       => $per_page,
 			'offset'       => ( $page - 1 ) * $per_page,
@@ -1602,13 +1629,16 @@ final class Plugin {
 		$tokens = array();
 
 		foreach ( $users as $user ) {
-			$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
+			$user_tokens = (array) get_user_meta( $user->ID, 'cocart_jwt_tokens' );
 
-			if ( ! empty( $token ) && ! self::is_token_expired( $token ) ) {
-				$tokens[] = array(
-					'user_id' => $user->ID,
-					'token'   => $token,
-				);
+			foreach ( $user_tokens as $token ) {
+				// Check if the token is expired.
+				if ( ! self::is_token_expired( $token ) ) {
+					$tokens[] = array(
+						'user_id' => $user->ID,
+						'token'   => $token,
+					);
+				}
 			}
 		}
 
@@ -1655,13 +1685,6 @@ final class Plugin {
 
 		if ( ! $user ) {
 			\WP_CLI::error( __( 'User not found.', 'cocart-jwt-authentication' ) );
-		}
-
-		$existing_token = get_user_meta( $user_ID, 'cocart_jwt_token', true );
-
-		if ( ! empty( $existing_token ) ) {
-			\WP_CLI::warning( __( 'Generating another token will kick the user out of session', 'cocart-jwt-authentication' ) );
-			\WP_CLI::confirm( __( 'Are you sure you want to generate a new one?', 'cocart-jwt-authentication' ) );
 		}
 
 		// Set User agent.
