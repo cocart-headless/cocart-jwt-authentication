@@ -64,35 +64,7 @@ class REST extends Tokens {
 		// Filter in first before anyone else.
 		add_filter( 'cocart_authenticate', array( $this, 'perform_jwt_authentication' ), 0, 3 );
 
-		add_action( 'cocart_jwt_auth_authenticated', function ( $token, $user ) {
-			\CoCart_Logger::log( sprintf(
-				/* translators: 1: User login, 2: User ID. */
-				esc_html__( 'User %1$s (ID: %2$d) authenticated at %3$s.', 'cocart-jwt-authentication' ),
-				$user->user_login,
-				$user->ID,
-				date_i18n( 'Y-m-d H:i:s' )
-			), 'info', 'cocart-jwt-authentication' );
-
-			// Time is time.
-			$time = time();
-
-			// Update last login.
-			update_user_meta( $user->ID, 'last_login', $time );
-
-			// Check if the token PAT exists.
-			$pat_id   = $this->get_pat_from_token( $token );
-			$pat_data = get_user_meta( $user->ID, '_cocart_jwt_token_pat' );
-
-			if ( ! is_null( $pat_id ) || ! array_key_exists( $pat_id, $pat_data ) ) {
-				return;
-			}
-
-			$updated_pat_data = $pat_data;
-
-			$updated_pat_data[ $pat_id ]['last-used'] = $time; // Update last used time.
-
-			update_user_meta( $user->ID, '_cocart_jwt_token_pat', $updated_pat_data, $pat_data ); // Update the PAT data.
-		}, 10, 2 );
+		add_action( 'cocart_jwt_auth_authenticated', array( $this, 'update_jwt_token_access' ), 10, 2 );
 
 		// Send tokens to login response.
 		add_filter( 'cocart_login_extras', array( $this, 'send_tokens' ), 0, 2 );
@@ -351,6 +323,48 @@ class REST extends Tokens {
 			)
 		);
 	} // END refresh_token()
+
+	/**
+	 * Update the token when it was last used to authenticate with.
+	 *
+	 * @access public
+	 *
+	 * @since 3.0.0 Introduced.
+	 *
+	 * @param string   $token The JWT token.
+	 * @param \WP_User $user  The authenticated user object.
+	 *
+	 * @return void
+	 */
+	public function update_jwt_token_access( $token, $user ) {
+		\CoCart_Logger::log( sprintf(
+			/* translators: 1: User login, 2: User ID. */
+			esc_html__( 'User %1$s (ID: %2$d) authenticated at %3$s.', 'cocart-jwt-authentication' ),
+			$user->user_login,
+			$user->ID,
+			date_i18n( 'Y-m-d H:i:s' )
+		), 'info', 'cocart-jwt-authentication' );
+
+		// Time is time.
+		$time = time();
+
+		// Update last login.
+		update_user_meta( $user->ID, 'last_login', $time );
+
+		// Check if the token PAT exists.
+		$pat_id   = $this->get_pat_from_token( $token );
+		$pat_data = get_user_meta( $user->ID, '_cocart_jwt_token_pat' );
+
+		if ( ! is_null( $pat_id ) || ! array_key_exists( $pat_id, $pat_data ) ) {
+			return;
+		}
+
+		$updated_pat_data = $pat_data;
+
+		$updated_pat_data[ $pat_id ]['last-used'] = $time; // Update last used time.
+
+		update_user_meta( $user->ID, '_cocart_jwt_token_pat', $updated_pat_data, $pat_data ); // Update the PAT data.
+	} // END update_jwt_token_access()
 
 	/**
 	 * Sends the generated token to the login response.
