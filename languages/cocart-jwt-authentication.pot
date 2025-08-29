@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the CoCart package.
 msgid ""
 msgstr ""
-"Project-Id-Version: CoCart JWT Authentication 2.5.1\n"
+"Project-Id-Version: CoCart JWT Authentication 3.0.0-beta.2\n"
 "Report-Msgid-Bugs-To: "
 "https://github.com/cocart-headless/cocart-jwt-authentication/issues\n"
 "POT-Creation-Date: 2025-08-29 23:26:44+00:00\n"
