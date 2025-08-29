@@ -63,11 +63,22 @@ class CLI_Command_View extends Tokens {
 				);
 			}
 
+			// Get PAT data for additional info.
+			$pat_id    = null;
+			$user_id   = null;
+			$last_used = null;
+
 			// Add payload data.
 			foreach ( $decoded_token->payload as $key => $value ) {
 				if ( 'data' === $key && isset( $value->user ) ) {
 					// Handle user data separately.
 					foreach ( get_object_vars( $value->user ) as $user_key => $user_value ) {
+						if ( 'pat' === $user_key ) {
+							$pat_id = $user_value;
+						} elseif ( 'id' === $user_key ) {
+							$user_id = $user_value;
+						}
+
 						$table[] = array(
 							__( 'Key', 'cocart-jwt-authentication' )   => "user.$user_key",
 							__( 'Value', 'cocart-jwt-authentication' ) => $user_value,
@@ -78,6 +89,24 @@ class CLI_Command_View extends Tokens {
 						'Key'   => $key,
 						'Value' => is_scalar( $value ) ? $value : wp_json_encode( $value ),
 					);
+				}
+			}
+
+			// Add PAT last-used timestamp if available.
+			if ( $pat_id && $user_id ) {
+				$pat_data = get_user_meta( $user_id, '_cocart_jwt_token_pat' );
+
+				foreach ( $pat_data as $pat_entry ) {
+					if ( array_key_exists( $pat_id, $pat_entry ) && isset( $pat_entry[ $pat_id ]['last-used'] ) ) {
+						$last_used = $pat_entry[ $pat_id ]['last-used'];
+
+						$table[] = array(
+							__( 'Key', 'cocart-jwt-authentication' )   => 'user.last-used',
+							__( 'Value', 'cocart-jwt-authentication' ) => date_i18n( 'Y-m-d H:i:s', $last_used ),
+						);
+
+						break;
+					}
 				}
 			}
 
