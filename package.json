@@ -48,7 +48,8 @@
 		"headless-woocommerce"
 	],
 	"scripts": {
-		"packages:update": "npm install -g npm-check-updates & ncu -u & npm update & npm install"
+		"packages:update": "npm install -g npm-check-updates & ncu -u & npm update & npm install",
+		"fix:textdomain": "node ./bin/package-update-textdomain.js"
 	},
 	"dependencies": {
 		"grunt-cli": "^1.5.0"
