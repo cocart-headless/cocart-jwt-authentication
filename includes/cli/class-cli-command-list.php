@@ -66,14 +66,28 @@ class CLI_Command_List extends Tokens {
 				continue;
 			}
 
+			// Get PAT data for last-used timestamps.
+			$pat_data = get_user_meta( $user->ID, '_cocart_jwt_token_pat' );
+
 			foreach ( $user_tokens as $id => $token ) {
 				// Check the token is a string and not expired.
 				if ( is_string( $token ) && ! $this->is_token_expired( $token ) ) {
+					// Find last-used timestamp from PAT data.
+					$last_used = '';
+
+					foreach ( $pat_data as $pat_entry ) {
+						if ( array_key_exists( $id, $pat_entry ) && ! empty( $pat_entry[ $id ]['last-used'] ) ) {
+							$last_used = date_i18n( 'Y-m-d H:i:s', $pat_entry[ $id ]['last-used'] );
+							break;
+						}
+					}
+
 					$tokens[] = array(
-						'user_id' => $user->ID,
-						'pat'     => $id,
-						'token'   => $token,
-						'created' => $this->get_token_creation_time( $token ),
+						'user_id'   => $user->ID,
+						'pat'       => $id,
+						'token'     => $token,
+						'created'   => $this->get_token_creation_time( $token ),
+						'last-used' => $last_used ?: __( 'Never', 'cocart-jwt-authentication' ),
 					);
 				}
 			}
@@ -86,7 +100,7 @@ class CLI_Command_List extends Tokens {
 		} else {
 			\WP_CLI::log( '# Tokens' );
 
-			$this->pretty_table_wrapped( $tokens, array( 'user_id', 'pat', 'token', 'created' ), 44 );
+			$this->pretty_table_wrapped( $tokens, array( 'user_id', 'pat', 'token', 'created', 'last-used' ), 44 );
 		}
 	} // END list()
 
