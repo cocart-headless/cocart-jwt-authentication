@@ -67,7 +67,9 @@ class DestroyTokens {
 
 		delete_user_meta( $user_id, '_cocart_jwt_token' );
 		delete_user_meta( $user_id, '_cocart_jwt_tokens' );
+		delete_user_meta( $user_id, '_cocart_jwt_token_pat' );
 		delete_user_meta( $user_id, '_cocart_jwt_refresh_tokens' );
+		delete_user_meta( $user_id, '_cocart_jwt_refresh_token' );
 
 		/**
 		 * Fires when a token is deleted.
