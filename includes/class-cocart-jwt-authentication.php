@@ -182,6 +182,7 @@ final class Plugin {
 	 *
 	 * @since 2.0.0 Introduced.
 	 * @since 2.2.0 Improved to work in batches.
+	 * @since 3.0.0 Updated to clean up PAT and refresh token data.
 	 *
 	 * @param int $batch_size Number of users to process per batch.
 	 */
@@ -190,7 +191,7 @@ final class Plugin {
 
 		do {
 			$users = get_users( array(
-				'meta_key'     => 'cocart_jwt_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_key'     => '_cocart_jwt_tokens', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				'meta_compare' => 'EXISTS',
 				'number'       => $batch_size,
 				'offset'       => $offset,
@@ -199,16 +200,65 @@ final class Plugin {
 			$users_count = count( $users );
 
 			foreach ( $users as $user ) {
-				$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
-
-				if ( ! empty( $token ) && self::is_token_expired( $token ) ) {
-					delete_user_meta( $user->ID, 'cocart_jwt_token' );
-				}
+				self::cleanup_expired_tokens_for_user( $user->ID );
 			}
 
 			$offset += $batch_size;
 		} while ( $users_count === $batch_size );
 	} // END cleanup_expired_tokens()
+
+	/**
+	 * Clean up expired tokens for a specific user.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 3.0.0 Introduced.
+	 *
+	 * @param int $user_id User ID to clean up tokens for.
+	 */
+	public static function cleanup_expired_tokens_for_user( $user_id ) {
+		// Clean up expired JWT tokens and associated PAT data.
+		$user_tokens = get_user_meta( $user_id, '_cocart_jwt_tokens', true );
+		$pat_data    = get_user_meta( $user_id, '_cocart_jwt_token_pat' );
+
+		if ( is_array( $user_tokens ) ) {
+			foreach ( $user_tokens as $pat_id => $token ) {
+				if ( self::is_token_expired( $token ) ) {
+					// Remove from main tokens collection.
+					unset( $user_tokens[ $pat_id ] );
+
+					// Remove associated PAT entry.
+					foreach ( $pat_data as $pat_entry ) {
+						if ( array_key_exists( $pat_id, $pat_entry ) ) {
+							delete_user_meta( $user_id, '_cocart_jwt_token_pat', $pat_entry );
+
+							break;
+						}
+					}
+				}
+			}
+
+			update_user_meta( $user_id, '_cocart_jwt_tokens', $user_tokens );
+		}
+
+		// Clean up expired refresh tokens.
+		$refresh_tokens = get_user_meta( $user_id, '_cocart_jwt_refresh_tokens', true );
+
+		if ( is_array( $refresh_tokens ) ) {
+			$current_time = time();
+
+			foreach ( $refresh_tokens as $refresh_token => $expiration ) {
+				if ( $current_time > $expiration ) {
+					unset( $refresh_tokens[ $refresh_token ] );
+					delete_user_meta( $user_id, '_cocart_jwt_refresh_token', $refresh_token );
+				}
+			}
+
+			update_user_meta( $user_id, '_cocart_jwt_refresh_tokens', $refresh_tokens );
+		}
+	} // END cleanup_expired_tokens_for_user()
 
 	/**
 	 * Schedule cron job for cleaning up expired tokens.

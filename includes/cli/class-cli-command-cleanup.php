@@ -42,6 +42,9 @@ class CLI_Command_Cleanup extends Tokens {
 	 *
 	 * @access public
 	 *
+	 * @since 2.2.0 Introduced.
+	 * @since 3.0.0 Updated to clean up PAT and refresh token data comprehensively.
+	 *
 	 * @param array $args       WP-CLI positional arguments.
 	 * @param array $assoc_args WP-CLI associative arguments.
 	 */
@@ -71,17 +74,15 @@ class CLI_Command_Cleanup extends Tokens {
 
 			foreach ( $users as $user ) {
 				if ( $force ) {
+					// Force cleanup of all token data.
+					delete_user_meta( $user->ID, '_cocart_jwt_token' );
 					delete_user_meta( $user->ID, '_cocart_jwt_tokens' );
+					delete_user_meta( $user->ID, '_cocart_jwt_token_pat' );
+					delete_user_meta( $user->ID, '_cocart_jwt_refresh_tokens' );
+					delete_user_meta( $user->ID, '_cocart_jwt_refresh_token' );
 				} else {
-					$user_tokens = get_user_meta( $user->ID, '_cocart_jwt_tokens', true );
-
-					foreach ( $user_tokens as $id => $token ) {
-						if ( $this->is_token_expired( $token ) ) {
-							unset( $user_tokens[ $id ] );
-						}
-					}
-
-					update_user_meta( $user->ID, '_cocart_jwt_tokens', $user_tokens );
+					// Clean up only expired tokens.
+					\CoCart\JWTAuthentication\Plugin::cleanup_expired_tokens_for_user( $user->ID );
 				}
 
 				$progress->tick();
