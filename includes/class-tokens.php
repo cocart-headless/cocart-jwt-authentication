@@ -358,7 +358,7 @@ abstract class Tokens {
 			$pat => array(
 				'token'     => $token,
 				'created'   => $issued_at,
-				'last-used' => $issued_at,
+				'last-used' => '',
 			),
 		);
 		add_user_meta( $user->ID, '_cocart_jwt_token_pat', $pat_data ); // Store the token PAT individually for reference.
