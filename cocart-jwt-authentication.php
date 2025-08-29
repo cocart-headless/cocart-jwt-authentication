@@ -45,7 +45,7 @@ if ( ! function_exists( 'cocart_jwt_authentication' ) ) {
 	 * Initialize CoCart JWT Authentication.
 	 */
 	function cocart_jwt_authentication() {
-		return \CoCart\JWTAuthentication\Plugin::init();
+		return \CoCart\JWTAuthentication\Plugin::instance();
 	}
 
 	cocart_jwt_authentication();
