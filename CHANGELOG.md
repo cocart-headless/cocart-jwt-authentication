@@ -1,5 +1,43 @@
 # Changelog for CoCart JWT Authentication
 
+## v3.0.0 -?? ??, 2025
+
+📢 This update will invalidate previous tokens as they will no longer be valid.
+
+With this update we have improved tracking of tokens to be dual-secured with a PAT (Personal Access Token) ID. This also makes sure users don't get unnecessary new tokens when already authenticated for proper token lifecycle management and prevent token proliferation when users are already authenticated.
+
+### What's New?
+
+* Plugin: Refactored the plugin for better management and performance.
+* REST-API: Users can now have multiple active token sessions, each tracked separately for different devices/browsers.
+* REST-API: Refresh tokens are now properly linked to their corresponding JWT tokens.
+* REST-API: Existing tokens are returned when authenticating with Bearer tokens (prevents token proliferation).
+* WP-CLI: Creating a token now accepts the user ID, email or login. See documentation for updated command.
+
+### Bug Fix
+
+* WP-CLI: Fixed loading of localization to early.
+
+### Improvements
+
+* Plugin: Tokens will now log the last login timestamp. This is also part of the PAT (Personal Access Token).
+* Plugin: Meta data is hidden from custom fields.
+* REST-API: Authorization will fail if the user has no tokens in session.
+* REST-API: Authorization will fail if the token is not found in session.
+* REST-API: Token refresh now uses proper session rotation for enhanced security.
+* WP-CLI: Listing user tokens will now list each token a user has.
+* WP-CLI: Now localized.
+
+### Developers
+
+* Introduced new filter `cocart_jwt_auth_max_user_tokens` that sets the maximum number of tokens stored for a user.
+* Introduced new action hook `cocart_jwt_auth_authenticated` that fires when a user is authenticated.
+
+### Compatibility
+
+* Tested with CoCart v4.7
+* Tested with WooCommerce 10.1
+
 ## v2.5.1 - 20th June, 2025
 
 ### 🔥 Hot Patch
