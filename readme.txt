@@ -113,6 +113,24 @@ CoCart JWT Authentication uses Semver practices. The summary of Semver versionin
 
 You can read more about the details of Semver at [semver.org](https://semver.org/)
 
+== Frequently Asked Questions ==
+
+= What is CoCart? =
+
+CoCart is developer-first REST API to decouple WooCommerce on the frontend and allow you to build modern storefronts with full control over auth, sessions, cart and product flows.
+
+= Will this work with WooCommerce REST API? =
+
+No! The WooCommerce REST API only use their own API key system to utilize it.
+
+= Can I use this with ordinary REST API endpoints? =
+
+No! This JWT Authentication was specifically designed for the CoCart API ONLY.
+
+= I'm getting fatal error of allowed memory exhausted - a 500 error response. Why? =
+
+It is possible due to a plugin conflict e.g. Login Limit and the token used failed many times and the IP address may have been blacklisted.
+
 == Changelog ==
 
 [View the full changelog here](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/CHANGELOG.md).
