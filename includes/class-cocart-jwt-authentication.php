@@ -127,6 +127,7 @@ final class Plugin {
 			include_once __DIR__ . '/cli/class-cli-command-list.php';
 			include_once __DIR__ . '/cli/class-cli-command-view.php';
 			include_once __DIR__ . '/cli/class-cli-command-cleanup.php';
+			include_once __DIR__ . '/cli/class-cli-command-destroy.php';
 
 			// Register the command group.
 			\WP_CLI::add_command( 'cocart jwt', array( $this, 'cli_jwt_command' ) );
@@ -146,7 +147,7 @@ final class Plugin {
 		$subcommand = $args[0] ?? null;
 
 		if ( ! $subcommand ) {
-			\WP_CLI::error( 'Please provide a subcommand, e.g., create, view, list or cleanup.' );
+			\WP_CLI::error( 'Please provide a subcommand, e.g., create, view, list, cleanup, or destroy.' );
 		}
 
 		switch ( $subcommand ) {
@@ -168,6 +169,11 @@ final class Plugin {
 			case 'cleanup':
 				$class = new CLI_Command_Cleanup();
 				$class->cleanup( array_slice( $args, 1 ), $assoc_args );
+				break;
+
+			case 'destroy':
+				$class = new CLI_Command_Destroy();
+				$class->destroy( array_slice( $args, 1 ), $assoc_args );
 				break;
 
 			default:
