@@ -143,12 +143,14 @@ final class Plugin {
 	 * @param array $assoc_args Associative arguments passed to the command.
 	 */
 	public function cli_jwt_command( $args, $assoc_args ) {
-		// Simple router for subcommands.
-		$subcommand = $args[0] ?? null;
-
-		if ( ! $subcommand ) {
-			\WP_CLI::error( 'Please provide a subcommand, e.g., create, view, list, cleanup, or destroy.' );
+		// Show help if requested or no subcommand provided.
+		if ( empty( $args[0] ) || isset( $assoc_args['help'] ) ) {
+			$this->show_cli_help();
+			return;
 		}
+
+		// Simple router for subcommands.
+		$subcommand = $args[0];
 
 		switch ( $subcommand ) {
 			case 'create':
@@ -180,6 +182,52 @@ final class Plugin {
 				\WP_CLI::error( "Unknown subcommand: $subcommand" );
 		}
 	} // END cli_jwt_command()
+
+	/**
+	 * Display CLI help information.
+	 *
+	 * @access private
+	 *
+	 * @since 3.0.0 Introduced.
+	 *
+	 * @return void
+	 */
+	private function show_cli_help() {
+		\WP_CLI::line( 'NAME' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( '  wp cocart jwt - Manage JWT tokens for CoCart.' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( 'SYNOPSIS' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( '  wp cocart jwt <subcommand>' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( 'SUBCOMMANDS' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( '  create     Generate a new JWT token for a user' );
+		\WP_CLI::line( '    wp cocart jwt create --user=<user> [--user-agent=<user-agent>]' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( '  view       Display details of a JWT token' );
+		\WP_CLI::line( '    wp cocart jwt view <token>' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( '  list       List all active JWT tokens' );
+		\WP_CLI::line( '    wp cocart jwt list [--page=<number>] [--per-page=<number>]' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( '  cleanup    Clean up expired JWT tokens' );
+		\WP_CLI::line( '    wp cocart jwt cleanup [--batch-size=<number>] [--force]' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( '  destroy    Destroy JWT tokens for a specific user' );
+		\WP_CLI::line( '    wp cocart jwt destroy <user> [--pat=<pat_id>] [--force]' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( 'EXAMPLES' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( '  wp cocart jwt create --user=123' );
+		\WP_CLI::line( '  wp cocart jwt list --per-page=5' );
+		\WP_CLI::line( '  wp cocart jwt destroy admin@example.com --force' );
+		\WP_CLI::line( '  wp cocart jwt cleanup --batch-size=50' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( 'For more details on each subcommand, visit:' );
+		\WP_CLI::line( 'https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/wp-cli.md' );
+	} // END show_cli_help()
 
 	/**
 	 * Clean up expired tokens in batches.
@@ -308,7 +356,7 @@ final class Plugin {
 				array_merge( $legacy_meta_keys, array( $batch_size ) )
 			);
 
-			$batch_deleted = $wpdb->query( $query );
+			$batch_deleted  = $wpdb->query( $query );
 			$total_deleted += $batch_deleted;
 
 		} while ( $batch_deleted === $batch_size );
