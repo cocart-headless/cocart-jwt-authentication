@@ -38,11 +38,13 @@ if ( ! class_exists( 'CoCart\JWTAuthentication\Plugin', false ) ) {
 /**
  * Returns the main instance of cocart_jwt_authentication and only runs if it does not already exists.
  *
- * @return cocart_jwt_authentication
+ * @return \CoCart\JWTAuthentication\Plugin
  */
 if ( ! function_exists( 'cocart_jwt_authentication' ) ) {
 	/**
 	 * Initialize CoCart JWT Authentication.
+	 *
+	 * @return \CoCart\JWTAuthentication\Plugin
 	 */
 	function cocart_jwt_authentication() {
 		return \CoCart\JWTAuthentication\Plugin::instance();
