@@ -29,7 +29,7 @@ JSON Web Tokens are an open standard [RFC 7519](https://datatracker.ietf.org/doc
 * **Multiple signing algorithms**: `HS256`, `HS384`, `HS512`, `RS256`, `RS384`, `RS512`, `ES256`, `ES384`, `ES512`, `PS256`, `PS384`, `PS512`
 * **Rate Limiting**: Controlled specifically for refreshing and validating tokens. Requires [CoCart Plus](https://cocartapi.com/?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink)
 * **Helpful Debugging**: Detailed logs of authentication issues to help figure out exactly what happened and fix it faster.
-* **WP-CLI Commands**: Useful [commands to handle tokens](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/wp-cli.md) - whether you need to check them, create new ones, or clean up old ones.
+* **WP-CLI Commands**: Useful [commands to handle tokens](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/wp-cli.md) - whether you need to check, destroy or create new ones, or clean up old ones.
 * **Developer Hooks**: Provides [filters](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/filters.md) and [hooks](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/hooks.md) for more configuration to your requirements.
 
 For support, please join the [community on Discord](https://cocartapi.com/community/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart). For priority support, consider upgrading to [CoCart Plus](https://cocartapi.com/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart).
@@ -52,6 +52,10 @@ We also have other add-ons that extend CoCart to enhance your headless store dev
 * and more add-ons in development.
 
 These add-ons of course come with support too.
+
+We also have a security plugin built for the REST-API to provide a firewall to block unknown outsiders, rate limit requests and protect data exposure – no configuration required.
+
+See more at [API Security](https://apisecurity.pro/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart).
 
 ### ⌨️ Join our growing community
 
