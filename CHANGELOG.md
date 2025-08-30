@@ -9,10 +9,12 @@ With this update we have improved tracking of tokens to be dual-secured with a P
 ### What's New?
 
 * Plugin: Refactored the plugin for better management and performance.
+* Plugin: Added background database cleanup for legacy user meta data on plugin activation.
 * REST-API: Users can now have multiple active token sessions, each tracked separately for different devices/browsers.
 * REST-API: Refresh tokens are now properly linked to their corresponding JWT tokens.
 * REST-API: Existing tokens are returned when authenticating with Bearer tokens (prevents token proliferation).
 * WP-CLI: Creating a token now accepts the user ID, email or login. See documentation for updated command.
+* WP-CLI: Added new `destroy` command to remove tokens for specific users with confirmation prompts.
 
 ### Bug Fix
 
