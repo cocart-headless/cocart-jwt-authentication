@@ -110,7 +110,9 @@ final class Plugin {
 
 		// Schedule cron job for cleaning up expired tokens.
 		add_action( 'cocart_jwt_cleanup_cron', array( __CLASS__, 'cleanup_expired_tokens' ) );
+		add_action( 'cocart_jwt_cleanup_legacy_cron', array( __CLASS__, 'cleanup_legacy_user_meta' ) );
 		register_activation_hook( COCART_JWT_AUTHENTICATION_FILE, array( $this, 'schedule_cron_job' ) );
+		register_activation_hook( COCART_JWT_AUTHENTICATION_FILE, array( $this, 'schedule_legacy_cleanup' ) );
 		register_deactivation_hook( COCART_JWT_AUTHENTICATION_FILE, array( $this, 'clear_scheduled_cron_job' ) );
 	} // END init()
 
@@ -261,6 +263,61 @@ final class Plugin {
 	} // END cleanup_expired_tokens_for_user()
 
 	/**
+	 * Clean up legacy user meta data from previous versions.
+	 *
+	 * Removes outdated meta keys that are no longer used in version 3.0.0+.
+	 * Uses batching to prevent performance issues on large sites.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 3.0.0 Introduced.
+	 *
+	 * @param int $batch_size Number of rows to process per batch. Default 500.
+	 *
+	 * @return void
+	 */
+	public static function cleanup_legacy_user_meta( $batch_size = 500 ) {
+		global $wpdb;
+
+		// Legacy meta keys to be removed (from v2.5.1 and earlier).
+		$legacy_meta_keys = array(
+			'cocart_jwt_token',                    // Old single token storage (without underscore prefix).
+			'cocart_jwt_refresh_token',            // Old refresh token storage (without underscore prefix).
+			'cocart_jwt_refresh_token_expiration', // Old refresh token expiration storage.
+		);
+
+		$total_deleted = 0;
+		$batch_deleted = 0;
+
+		// Process in batches to prevent memory issues.
+		do {
+			// Create placeholders for the IN clause.
+			$placeholders = implode( ', ', array_fill( 0, count( $legacy_meta_keys ), '%s' ) );
+
+			// Prepare and execute batched query.
+			$query = $wpdb->prepare(
+				"DELETE FROM {$wpdb->usermeta} WHERE meta_key IN ($placeholders) LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				array_merge( $legacy_meta_keys, array( $batch_size ) )
+			);
+
+			$batch_deleted = $wpdb->query( $query );
+			$total_deleted += $batch_deleted;
+
+		} while ( $batch_deleted === $batch_size );
+
+		// Log the cleanup results if CoCart logger is available.
+		if ( class_exists( 'CoCart_Logger' ) && $total_deleted > 0 ) {
+			\CoCart_Logger::log(
+				sprintf( 'Background cleanup completed: removed %d legacy JWT token meta entries (processed in batches of %d).', $total_deleted, $batch_size ),
+				'info',
+				'cocart-jwt-authentication'
+			);
+		}
+	} // END cleanup_legacy_user_meta()
+
+	/**
 	 * Schedule cron job for cleaning up expired tokens.
 	 *
 	 * @access public
@@ -276,6 +333,25 @@ final class Plugin {
 	} // END schedule_cron_job()
 
 	/**
+	 * Schedule one-time legacy cleanup job.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 3.0.0 Introduced.
+	 *
+	 * @return void
+	 */
+	public static function schedule_legacy_cleanup() {
+		// Only schedule if not already scheduled and there might be legacy data.
+		if ( ! wp_next_scheduled( 'cocart_jwt_cleanup_legacy_cron' ) ) {
+			// Schedule to run in 30 seconds to allow plugin activation to complete.
+			wp_schedule_single_event( time() + 30, 'cocart_jwt_cleanup_legacy_cron' );
+		}
+	} // END schedule_legacy_cleanup()
+
+	/**
 	 * Clear scheduled cron job on plugin deactivation.
 	 *
 	 * @access public
@@ -283,10 +359,21 @@ final class Plugin {
 	 * @static
 	 *
 	 * @since 2.0.0 Introduced.
+	 *
+	 * @return void
 	 */
 	public static function clear_scheduled_cron_job() {
+		// Clear regular cleanup cron.
 		$timestamp = wp_next_scheduled( 'cocart_jwt_cleanup_cron' );
-		wp_unschedule_event( $timestamp, 'cocart_jwt_cleanup_cron' );
+		if ( $timestamp ) {
+			wp_unschedule_event( $timestamp, 'cocart_jwt_cleanup_cron' );
+		}
+
+		// Clear legacy cleanup cron if still scheduled.
+		$legacy_timestamp = wp_next_scheduled( 'cocart_jwt_cleanup_legacy_cron' );
+		if ( $legacy_timestamp ) {
+			wp_unschedule_event( $legacy_timestamp, 'cocart_jwt_cleanup_legacy_cron' );
+		}
 	} // END clear_scheduled_cron_job()
 
 	/**
