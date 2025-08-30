@@ -193,39 +193,39 @@ final class Plugin {
 	 * @return void
 	 */
 	private function show_cli_help() {
-		\WP_CLI::line( 'NAME' );
+		\WP_CLI::line( __( 'NAME', 'cocart-jwt-authentication' ) );
 		\WP_CLI::line( '' );
-		\WP_CLI::line( '  wp cocart jwt - Manage JWT tokens for CoCart.' );
+		\WP_CLI::line( '  wp cocart jwt - ' . __( 'Manage JWT tokens for CoCart.', 'cocart-jwt-authentication' ) );
 		\WP_CLI::line( '' );
-		\WP_CLI::line( 'SYNOPSIS' );
+		\WP_CLI::line( __( 'SYNOPSIS', 'cocart-jwt-authentication' ) );
 		\WP_CLI::line( '' );
 		\WP_CLI::line( '  wp cocart jwt <subcommand>' );
 		\WP_CLI::line( '' );
-		\WP_CLI::line( 'SUBCOMMANDS' );
+		\WP_CLI::line( __( 'SUBCOMMANDS', 'cocart-jwt-authentication' ) );
 		\WP_CLI::line( '' );
-		\WP_CLI::line( '  create     Generate a new JWT token for a user' );
+		\WP_CLI::line( '  create     ' . __( 'Generate a new JWT token for a user', 'cocart-jwt-authentication' ) );
 		\WP_CLI::line( '    wp cocart jwt create --user=<user> [--user-agent=<user-agent>]' );
 		\WP_CLI::line( '' );
-		\WP_CLI::line( '  view       Display details of a JWT token' );
+		\WP_CLI::line( '  view       ' . __( 'Display details of a JWT token', 'cocart-jwt-authentication' ) );
 		\WP_CLI::line( '    wp cocart jwt view <token>' );
 		\WP_CLI::line( '' );
-		\WP_CLI::line( '  list       List all active JWT tokens' );
+		\WP_CLI::line( '  list       ' . __( 'List all active JWT tokens', 'cocart-jwt-authentication' ) );
 		\WP_CLI::line( '    wp cocart jwt list [--page=<number>] [--per-page=<number>]' );
 		\WP_CLI::line( '' );
-		\WP_CLI::line( '  cleanup    Clean up expired JWT tokens' );
+		\WP_CLI::line( '  cleanup    ' . __( 'Clean up expired JWT tokens', 'cocart-jwt-authentication' ) );
 		\WP_CLI::line( '    wp cocart jwt cleanup [--batch-size=<number>] [--force]' );
 		\WP_CLI::line( '' );
-		\WP_CLI::line( '  destroy    Destroy JWT tokens for a specific user' );
+		\WP_CLI::line( '  destroy    ' . __( 'Destroy JWT tokens for a specific user', 'cocart-jwt-authentication' ) );
 		\WP_CLI::line( '    wp cocart jwt destroy <user> [--pat=<pat_id>] [--force]' );
 		\WP_CLI::line( '' );
-		\WP_CLI::line( 'EXAMPLES' );
+		\WP_CLI::line( __( 'EXAMPLES', 'cocart-jwt-authentication' ) );
 		\WP_CLI::line( '' );
 		\WP_CLI::line( '  wp cocart jwt create --user=123' );
 		\WP_CLI::line( '  wp cocart jwt list --per-page=5' );
 		\WP_CLI::line( '  wp cocart jwt destroy admin@example.com --force' );
 		\WP_CLI::line( '  wp cocart jwt cleanup --batch-size=50' );
 		\WP_CLI::line( '' );
-		\WP_CLI::line( 'For more details on each subcommand, visit:' );
+		\WP_CLI::line( __( 'For more details on each subcommand, visit:', 'cocart-jwt-authentication' ) );
 		\WP_CLI::line( 'https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/wp-cli.md' );
 	} // END show_cli_help()
 
