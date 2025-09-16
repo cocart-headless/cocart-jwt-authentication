@@ -4,7 +4,7 @@ Tags: woocommerce, rest-api, decoupled, headless, jwt
 Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 6.8
-Stable tag: 2.5.1
+Stable tag: 2.5.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -137,6 +137,6 @@ It is possible due to a plugin conflict e.g. Login Limit and the token used fail
 
 == Upgrade Notice ==
 
-= 2.2.0 =
+= 2.5.2 =
 
-Update CoCart to version 4.3 before updating this plugin.
+Fixed compatibility with PHP v7.4 when generating token.
