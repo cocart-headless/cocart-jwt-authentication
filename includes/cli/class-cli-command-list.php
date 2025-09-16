@@ -4,6 +4,7 @@
  *
  * @author  Sébastien Dumont
  * @package CoCart JWT Authentication
+ * @since   2.2.0
  * @license GPL-3.0
  */
 
@@ -51,6 +52,9 @@ class CLI_Command_List extends Tokens {
 	 * wp cocart jwt list --field=pat
 	 *
 	 * @access public
+	 *
+	 * @since 2.2.0 Introduced.
+	 * @since 3.0.0 Refactored to use Tokens class methods, new table formatter and added field options.
 	 *
 	 * @param array $args       WP-CLI positional arguments.
 	 * @param array $assoc_args WP-CLI associative arguments.

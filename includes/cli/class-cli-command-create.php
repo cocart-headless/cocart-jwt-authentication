@@ -4,6 +4,7 @@
  *
  * @author  Sébastien Dumont
  * @package CoCart JWT Authentication
+ * @since   2.2.0
  * @license GPL-3.0
  */
 

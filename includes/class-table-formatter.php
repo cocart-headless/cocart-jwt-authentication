@@ -4,6 +4,7 @@
  *
  * @author  Sébastien Dumont
  * @package CoCart JWT Authentication
+ * @since   3.0.0
  * @license GPL-3.0
  */
 
@@ -23,7 +24,11 @@ class Table_Formatter {
 	/**
 	 * Pretty print a table with word wrapping and terminal width optimization.
 	 *
+	 * @access public
+	 *
 	 * @static
+	 *
+	 * @since 3.0.0 Introduced.
 	 *
 	 * @param array $items           Array of associative arrays representing rows.
 	 * @param array $fields          Fields to display in the table.
@@ -83,7 +88,11 @@ class Table_Formatter {
 	/**
 	 * Get terminal width using multiple detection methods.
 	 *
+	 * @access private
+	 *
 	 * @static
+	 *
+	 * @since 3.0.0 Introduced.
 	 *
 	 * @return int Terminal width in characters.
 	 */
@@ -129,7 +138,11 @@ class Table_Formatter {
 	/**
 	 * Calculate column widths considering terminal width.
 	 *
+	 * @access private
+	 *
 	 * @static
+	 *
+	 * @since 3.0.0 Introduced.
 	 *
 	 * @param array $items           Array of items.
 	 * @param array $fields          Array of field names.
@@ -266,7 +279,11 @@ class Table_Formatter {
 	/**
 	 * Print a table row with word-aware wrapping.
 	 *
+	 * @access private
+	 *
 	 * @static
+	 *
+	 * @since 3.0.0 Introduced.
 	 *
 	 * @param array $item       Item data.
 	 * @param array $fields     Field names.
