@@ -128,6 +128,7 @@ final class Plugin {
 	public function load_admin() {
 		if ( is_admin() ) {
 			include_once __DIR__ . '/admin/class-cocart-jwt-wc-admin-system-status.php';
+			include_once __DIR__ . '/admin/class-admin-notices.php';
 			include_once __DIR__ . '/admin/class-jwt-setup.php';
 		}
 	} // END load_admin()
