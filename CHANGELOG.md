@@ -15,10 +15,11 @@ With this update we have improved tracking of tokens to be dual-secured with a P
 * REST-API: Existing tokens are returned when authenticating with Bearer tokens (prevents token proliferation).
 * WP-CLI: Creating a token now accepts the user ID, email or login. See documentation for updated command.
 * WP-CLI: Added new `destroy` command to remove tokens for specific users with confirmation prompts.
+* Dashboard: Added setup guide with secret key generator.
 
 ### Bug Fix
 
-* WP-CLI: Fixed loading of localization to early.
+* WP-CLI: Fixed loading of localization too early.
 
 ### Improvements
 
@@ -27,7 +28,7 @@ With this update we have improved tracking of tokens to be dual-secured with a P
 * REST-API: Authorization will fail if the user has no tokens in session.
 * REST-API: Authorization will fail if the token is not found in session.
 * REST-API: Token refresh now uses proper session rotation for enhanced security.
-* WP-CLI: Listing user tokens will now list each token a user has.
+* WP-CLI: Listing user tokens will now list each token a user has. See documentation for updated command.
 * WP-CLI: Now localized.
 
 ### Developers
@@ -37,7 +38,7 @@ With this update we have improved tracking of tokens to be dual-secured with a P
 
 ### Compatibility
 
-* Tested with CoCart v4.7
+* Tested with CoCart v4.8
 * Tested with WooCommerce 10.1
 
 ## v2.5.1 - 20th June, 2025
