@@ -355,7 +355,7 @@ class REST extends Tokens {
 		$pat_id   = $this->get_pat_from_token( $token );
 		$pat_data = get_user_meta( $user->ID, '_cocart_jwt_token_pat' );
 
-		if ( ! is_null( $pat_id ) || ! array_key_exists( $pat_id, $pat_data ) ) {
+		if ( is_null( $pat_id ) || ! array_key_exists( $pat_id, $pat_data ) ) {
 			return;
 		}
 
