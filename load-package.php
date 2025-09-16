@@ -2,7 +2,7 @@
 /**
  * This file is designed to be used to load as package NOT a WP plugin!
  *
- * @version 3.0.0-beta.4
+ * @version 3.0.0-beta.5
  * @package CoCart JWT Authentication
  */
 
