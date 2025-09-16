@@ -91,6 +91,9 @@ final class Plugin {
 		include_once __DIR__ . '/class-destroy-tokens.php';
 		include_once __DIR__ . '/class-rest.php';
 
+		// Extras.
+		include_once __DIR__ . '/class-google-auth-rest.php';
+
 		$this->init_hooks();
 	}
 
