@@ -73,7 +73,7 @@ class CLI_Command_Create extends Tokens {
 			$_SERVER['HTTP_USER_AGENT'] = $user_agent;
 		}
 
-		$token = $this->generate_token( $user );
+		$token = $this->generate_token( $user_object->ID );
 
 		if ( is_wp_error( $token ) ) {
 			\WP_CLI::error( $token->get_error_message() );
