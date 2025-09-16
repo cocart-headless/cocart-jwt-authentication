@@ -21,6 +21,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class REST extends Tokens {
 
 	/**
+	 * REST API namespaces and endpoints.
+	 *
+	 * @var array
+	 */
+	protected $routes = array();
+
+	/**
 	 * Request made flag to prevent multiple authentication attempts.
 	 *
 	 * @access private
@@ -39,27 +46,53 @@ class REST extends Tokens {
 	 * @static
 	 */
 	public function __construct() {
-		// Register REST API endpoint to refresh tokens.
-		add_action( 'rest_api_init', function () {
-			register_rest_route( 'cocart/jwt', '/refresh-token', array(
-				'methods'             => 'POST',
-				'callback'            => array( $this, 'refresh_token' ),
-				'permission_callback' => '__return_true',
-			) );
-		} );
+		// Check which version of CoCart is running.
+		if ( version_compare( COCART_VERSION, '5.0.0', '>=' ) ) {
+			// Define routes for JWT auth.
+			$this->routes = array(
+				CoCart::get_api_namespace() . 'jwt' => cocart_rest_should_load_namespace( 'cocart/jwt' ) ? array(
+					'refresh_token'  => array(
+						'methods'             => 'POST',
+						'callback'            => array( $this, 'refresh_token' ),
+						'permission_callback' => '__return_true',
+					),
+					'validate_token' => array(
+						'methods'             => 'POST',
+						'callback'            => function () {
+							return rest_ensure_response( array( 'message' => __( 'Token is valid.', 'cocart-jwt-authentication' ) ) );
+						},
+						'permission_callback' => function () {
+							return get_current_user_id() > 0;
+						},
+					),
+				) : array(),
+			);
 
-		// Register REST API endpoint to validate tokens.
-		add_action( 'rest_api_init', function () {
-			register_rest_route( 'cocart/jwt', '/validate-token', array(
-				'methods'             => 'POST',
-				'callback'            => function () {
-					return rest_ensure_response( array( 'message' => __( 'Token is valid.', 'cocart-jwt-authentication' ) ) );
-				},
-				'permission_callback' => function () {
-					return get_current_user_id() > 0;
-				},
-			) );
-		} );
+			// Register defined routes.
+			$this->register_routes( 'jwt' );
+		} else {
+			// Register REST API endpoint to refresh tokens.
+			add_action( 'rest_api_init', function () {
+				register_rest_route( 'cocart/jwt', '/refresh-token', array(
+					'methods'             => 'POST',
+					'callback'            => array( $this, 'refresh_token' ),
+					'permission_callback' => '__return_true',
+				) );
+			} );
+
+			// Register REST API endpoint to validate tokens.
+			add_action( 'rest_api_init', function () {
+				register_rest_route( 'cocart/jwt', '/validate-token', array(
+					'methods'             => 'POST',
+					'callback'            => function () {
+						return rest_ensure_response( array( 'message' => __( 'Token is valid.', 'cocart-jwt-authentication' ) ) );
+					},
+					'permission_callback' => function () {
+						return get_current_user_id() > 0;
+					},
+				) );
+			} );
+		}
 
 		// Filter in first before anyone else.
 		add_filter( 'cocart_authenticate', array( $this, 'perform_jwt_authentication' ), 0, 3 );
@@ -73,6 +106,39 @@ class REST extends Tokens {
 		// Add rate limits for JWT refresh token.
 		add_filter( 'cocart_api_rate_limit_options', array( $this, 'jwt_rate_limits' ), 0 );
 	} // END init()
+
+	/**
+	 * Register defined list of routes with WordPress.
+	 *
+	 * @access protected
+	 *
+	 * @since x.x.x Introduced.
+	 *
+	 * @param string $version API Version being registered. Default is JWT.
+	 */
+	protected function register_routes( $version = 'jwt' ) {
+		$routes = $this->routes[ \CoCart::get_api_namespace() . $version ];
+
+		// If no routes for the version exist return nothing.
+		if ( ! isset( $routes ) ) {
+			return;
+		}
+
+		// Set the route namespace outside the controller.
+		$route_namespace = \CoCart::get_api_namespace() . '/' . $version;
+
+		foreach ( $routes as $path => $args ) {
+			$route = $routes[ $path ] ?? false;
+
+			if ( array_search( $path, $this->registered_routes ) === false ) {
+				register_rest_route(
+					$route_namespace,
+					$path,
+					$args
+				);
+			}
+		}
+	} // END register_routes()
 
 	/**
 	 * Check if the token is valid.
