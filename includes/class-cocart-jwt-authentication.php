@@ -105,6 +105,9 @@ final class Plugin {
 		// Load translation files.
 		add_action( 'init', array( $this, 'load_plugin_textdomain' ), 0 );
 
+		// Load admin classes.
+		add_action( 'init', array( $this, 'load_admin' ) );
+
 		// Register the CLI commands.
 		add_action( 'plugins_loaded', array( $this, 'register_cli' ) );
 
@@ -115,6 +118,20 @@ final class Plugin {
 		register_activation_hook( COCART_JWT_AUTHENTICATION_FILE, array( $this, 'schedule_legacy_cleanup' ) );
 		register_deactivation_hook( COCART_JWT_AUTHENTICATION_FILE, array( $this, 'clear_scheduled_cron_job' ) );
 	} // END init()
+
+	/**
+	 * Load admin classes.
+	 *
+	 * @access public
+	 *
+	 * @return void
+	 */
+	public function load_admin() {
+		if ( is_admin() ) {
+			include_once __DIR__ . '/admin/class-cocart-jwt-wc-admin-system-status.php';
+			include_once __DIR__ . '/admin/class-jwt-setup.php';
+		}
+	} // END load_admin()
 
 	/**
 	 * Register the CLI commands.
