@@ -86,7 +86,6 @@ final class Plugin {
 	 * @since 3.0.0 Introduced.
 	 */
 	private function __construct() {
-		include_once __DIR__ . '/admin/class-cocart-jwt-wc-admin-system-status.php';
 		include_once __DIR__ . '/class-tokens.php';
 		include_once __DIR__ . '/class-destroy-tokens.php';
 		include_once __DIR__ . '/class-rest.php';
