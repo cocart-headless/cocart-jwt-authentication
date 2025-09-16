@@ -509,24 +509,24 @@ final class Plugin {
 	 *
 	 * @static
 	 *
-	 * @param int|string $user The user to generate token for.
+	 * @param int $user_id The user ID to generate a token for.
 	 *
 	 * @return string Generated JWT token.
 	 */
-	public static function generate_token( int|string $user = '' ) {
+	public static function generate_token( int $user_id ) {
 		$secret_key = self::get_secret_private_key();
 
 		if ( ! $secret_key ) {
-			return new \WP_Error( 'cocart_jwt_auth_bad_config', __( 'JWT configuration error.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
+			return new \WP_Error( 'cocart_jwt_auth_bad_config', __( 'JWT configuration error.', 'cocart-jwt-authentication' ), array( 'status' => 403 ) );
 		}
 
 		// See if we can lookup the username if no user provided.
-		if ( empty( $user ) ) {
-			$user = self::lookup_username();
+		if ( empty( $user_id ) ) {
+			$user_id = self::lookup_username();
 		}
 
 		// Check if user is valid.
-		$user = self::is_user_valid( $user );
+		$user = self::is_user_valid( $user_id );
 
 		if ( ! $user ) {
 			return new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
