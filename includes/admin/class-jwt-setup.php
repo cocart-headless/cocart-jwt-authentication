@@ -10,7 +10,9 @@
  * @license GPL-3.0
  */
 
-namespace CoCart\JWTAuthentication;
+namespace CoCart\JWTAuthentication\Admin;
+
+use CoCart\JWTAuthentication\Plugin;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -45,6 +47,7 @@ class JWTSetup extends \CoCart_Submenu_Page {
 			}
 		);
 
+		// Enqueue scripts and styles for the JWT setup page.
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 	}
 
@@ -65,7 +68,7 @@ class JWTSetup extends \CoCart_Submenu_Page {
 		}
 
 		$submenu_pages['jwt-setup'] = array(
-			'class_name' => 'CoCart\JWTAuthentication\JWTSetup',
+			'class_name' => 'CoCart\JWTAuthentication\Admin\JWTSetup',
 			'data'       => array(
 				'page_title' => __( 'JWT Setup', 'cocart-jwt-authentication' ),
 				'menu_title' => __( 'JWT Setup', 'cocart-jwt-authentication' ),
@@ -334,8 +337,7 @@ class JWTSetup extends \CoCart_Submenu_Page {
 								<div class="terminal-window">
 									<div class="terminal-content">
 										<pre class="code-content active" data-lang="curl"><code><span class="comment"># cURL</span>
-curl -X POST \
-					<?php echo esc_html( home_url( '/wp-json/cocart/jwt/refresh-token' ) ); ?> \
+curl -X POST <?php echo esc_html( home_url( '/wp-json/cocart/jwt/refresh-token' ) ); ?> \
 	-H <span class="string">"Content-Type: application/json"</span> \
 	-d <span class="string">'{"refresh_token": "YOUR-REFRESH-TOKEN"}'</span></code></pre>
 										
@@ -390,8 +392,7 @@ curl -X POST \
 								<div class="terminal-window">
 									<div class="terminal-content">
 										<pre class="code-content active" data-lang="curl"><code><span class="comment"># cURL</span>
-curl -X POST \
-					<?php echo esc_html( home_url( '/wp-json/cocart/jwt/validate-token' ) ); ?> \
+curl -X POST <?php echo esc_html( home_url( '/wp-json/cocart/jwt/validate-token' ) ); ?> \
 	-H <span class="string">"Authorization: Bearer YOUR-JWT-TOKEN"</span></code></pre>
 										
 										<pre class="code-content" data-lang="php"><code><span class="comment">// PHP</span>
