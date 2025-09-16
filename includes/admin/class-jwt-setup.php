@@ -428,7 +428,7 @@ curl -X POST \
 					<div class="jwt-status-section">
 						<div class="jwt-status-indicator jwt-status-not-ready">
 							<span class="status-icon">⚠️</span>
-							<strong><?php esc_html_e( 'JWT Authentication Not Configured', 'cocart-jwt-authentication' ); ?></strong>
+							<strong><?php esc_html_e( 'Not Configured', 'cocart-jwt-authentication' ); ?></strong>
 							<p><?php esc_html_e( 'You need to add the secret key to your wp-config.php file to enable JWT authentication.', 'cocart-jwt-authentication' ); ?></p>
 						</div>
 					</div>
