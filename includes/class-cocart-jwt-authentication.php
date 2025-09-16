@@ -123,6 +123,7 @@ final class Plugin {
 	 */
 	public function register_cli() {
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			include_once __DIR__ . '/class-table-formatter.php';
 			include_once __DIR__ . '/cli/class-cli-command-create.php';
 			include_once __DIR__ . '/cli/class-cli-command-list.php';
 			include_once __DIR__ . '/cli/class-cli-command-view.php';

@@ -37,9 +37,18 @@ class CLI_Command_List extends Tokens {
 	 * ---
 	 * default: 20
 	 *
+	 * [--field=<field>]
+	 * : Display only a specific field in copy-friendly format.
+	 * ---
+	 * options:
+	 *   - pat
+	 *   - token
+	 *
 	 * ## EXAMPLES
 	 *
 	 * wp cocart jwt list --page=2 --per-page=10
+	 * wp cocart jwt list --field=token
+	 * wp cocart jwt list --field=pat
 	 *
 	 * @access public
 	 *
@@ -49,12 +58,24 @@ class CLI_Command_List extends Tokens {
 	public function list( $args, $assoc_args ) {
 		$page     = isset( $assoc_args['page'] ) ? intval( $assoc_args['page'] ) : 1;
 		$per_page = isset( $assoc_args['per-page'] ) ? intval( $assoc_args['per-page'] ) : 20;
+		$field    = isset( $assoc_args['field'] ) ? $assoc_args['field'] : null;
 
+		// Validate field parameter.
+		if ( $field && ! in_array( $field, array( 'pat', 'token' ) ) ) {
+			\WP_CLI::error(
+				sprintf(
+					/* translators: 1: Invalid field. 2: Allowed fields. */
+					__( 'Invalid field %1$s. Allowed fields: %2$s', 'cocart-jwt-authentication' ),
+					$field,
+					'pat, token'
+				)
+			);
+		}
+
+		// Get all users with tokens.
 		$users = get_users( array(
 			'meta_key'     => '_cocart_jwt_tokens', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'meta_compare' => 'EXISTS',
-			'number'       => $per_page,
-			'offset'       => ( $page - 1 ) * $per_page,
 		) );
 
 		$tokens = array();
@@ -87,100 +108,67 @@ class CLI_Command_List extends Tokens {
 						'pat'       => $id,
 						'token'     => $token,
 						'created'   => $this->get_token_creation_time( $token ),
-						'last-used' => $last_used ?: __( 'Never', 'cocart-jwt-authentication' ),
+						'last-used' => $last_used ? $last_used : __( 'Never', 'cocart-jwt-authentication' ),
 					);
 				}
 			}
 		}
 
-		\WP_CLI::log( '####################################################' );
-
 		if ( empty( $tokens ) ) {
 			\WP_CLI::log( __( 'No tokens found.', 'cocart-jwt-authentication' ) );
-		} else {
-			\WP_CLI::log( '# Tokens' );
-
-			$this->pretty_table_wrapped( $tokens, array( 'user_id', 'pat', 'token', 'created', 'last-used' ), 44 );
-		}
-	} // END list()
-
-	/**
-	 * Pretty print a table with word wrapping for long text fields.
-	 *
-	 * @access private
-	 *
-	 * @param array $items      Array of associative arrays representing rows.
-	 * @param array $fields     Fields to display in the table.
-	 * @param int   $wrap_width Maximum width before wrapping text.
-	 *
-	 * @return void
-	 */
-	private function pretty_table_wrapped( $items, $fields, $wrap_width = 20 ) {
-		if ( empty( $items ) ) {
-			\WP_CLI::line( 'No items.' );
 			return;
 		}
 
-		// Prepare rows: wrap each cell.
-		$rows       = array();
-		$col_widths = array();
+		// Apply pagination to tokens (not users).
+		$total_tokens = count( $tokens );
+		$offset       = ( $page - 1 ) * $per_page;
+		$tokens       = array_slice( $tokens, $offset, $per_page );
 
-		foreach ( $fields as $field ) {
-			$col_widths[ $field ] = strlen( $field );
-		}
+		// Show pagination info.
+		$showing_count = count( $tokens );
+		$start_num     = $offset + 1;
+		$end_num       = $offset + $showing_count;
 
-		foreach ( $items as $item ) {
-			$wrapped_row = array();
+		\WP_CLI::log( ' ' );
+		\WP_CLI::log( '####################################################' );
 
-			foreach ( $fields as $field ) {
-				$value = (string) ( $item[ $field ] ?? '' );
+		// Handle field-specific output.
+		if ( $field ) {
+			\WP_CLI::log(
+				sprintf(
+					/* translators: 1: Showing count. 2: Total tokens. 3: Field name. 4: Start number. 5: End number. */
+					__( 'Showing %1$s of %2$s field: %3$s (items %4$s-%5$s) - (copy-friendly format)', 'cocart-jwt-authentication' ),
+					$showing_count,
+					$total_tokens,
+					$field,
+					$start_num,
+					$end_num
+				)
+			);
+			\WP_CLI::log( '####################################################' );
 
-				// Wrap value.
-				$lines                 = str_split( $value, $wrap_width );
-				$wrapped_row[ $field ] = $lines;
-
-				// Update column width.
-				foreach ( $lines as $line ) {
-					$col_widths[ $field ] = max( $col_widths[ $field ], strlen( $line ) );
+			foreach ( $tokens as $token ) {
+				if ( isset( $token[ $field ] ) ) {
+					\WP_CLI::line( $token[ $field ] );
+					\WP_CLI::line( '' );
 				}
 			}
+		} else {
+			// Default table output.
+			\WP_CLI::log(
+				sprintf(
+					/* translators: 1: Showing count. 2: Total tokens. 3: Start number. 4: End number. */
+					__( 'Showing %1$s of %2$s tokens (items %3$s-%4$s)', 'cocart-jwt-authentication' ),
+					$showing_count,
+					$total_tokens,
+					$start_num,
+					$end_num
+				)
+			);
+			\WP_CLI::log( '####################################################' );
 
-			$rows[] = $wrapped_row;
+			// Enhanced table with word wrapping and auto terminal width detection.
+			Table_Formatter::prettier_table( $tokens, array( 'user_id', 'pat', 'token', 'created', 'last-used' ), 44 );
 		}
-
-		// Build separator line.
-		$sep = '+';
-		foreach ( $fields as $field ) {
-			$sep .= str_repeat( '-', $col_widths[ $field ] + 2 ) . '+';
-		}
-
-		// Print header.
-		\WP_CLI::line( $sep );
-
-		$header = '|';
-		foreach ( $fields as $field ) {
-			$header .= ' ' . str_pad( $field, $col_widths[ $field ] ) . ' |';
-		}
-
-		\WP_CLI::line( $header );
-		\WP_CLI::line( $sep );
-
-		// Print rows.
-		foreach ( $rows as $row ) {
-			$max_lines = max( array_map( 'count', $row ) );
-
-			for ( $i = 0; $i < $max_lines; $i++ ) {
-				$line = '|';
-
-				foreach ( $fields as $field ) {
-					$cell_line = $row[ $field ][ $i ] ?? '';
-					$line     .= ' ' . str_pad( $cell_line, $col_widths[ $field ] ) . ' |';
-				}
-
-				\WP_CLI::line( $line );
-			}
-
-			\WP_CLI::line( $sep );
-		}
-	} // END pretty_table_wrapped()
+	} // END list()
 } // END class
