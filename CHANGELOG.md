@@ -1,6 +1,6 @@
 # Changelog for CoCart JWT Authentication
 
-## v3.0.0 -?? ??, 2025
+## v3.0.0 - ?? ??, 2025
 
 📢 This update will invalidate previous tokens as they will no longer be valid.
 
@@ -39,7 +39,17 @@ With this update we have improved tracking of tokens to be dual-secured with a P
 ### Compatibility
 
 * Tested with CoCart v4.8
-* Tested with WooCommerce 10.1
+
+## v2.5.2 - 16th September, 2025
+
+### Bug Fix
+
+* Fixed compatibility with PHP v7.4 when generating token.
+
+### Compatibility
+
+* Tested with CoCart v4.7
+* Tested with WooCommerce v10.1
 
 ## v2.5.1 - 20th June, 2025
 
@@ -67,7 +77,7 @@ Last release broke support for guest users. [Reported](https://github.com/cocart
 ### Compatibility
 
 * Tested with CoCart v4.6
-* Tested with WooCommerce 9.9
+* Tested with WooCommerce v9.9
 
 ## v2.4.0 - 9th May, 2025
 
