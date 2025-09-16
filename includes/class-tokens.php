@@ -214,11 +214,11 @@ abstract class Tokens {
 	 *
 	 * @access public
 	 *
-	 * @param int|string $user The user to generate token for.
+	 * @param int $user_id The user ID to generate a token for.
 	 *
 	 * @return string Generated JWT token.
 	 */
-	public function generate_token( int|string $user = '' ) {
+	public function generate_token( int $user_id ) {
 		$secret_key = $this->get_secret_private_key();
 
 		if ( ! $secret_key ) {
@@ -226,12 +226,12 @@ abstract class Tokens {
 		}
 
 		// See if we can lookup the username if no user provided.
-		if ( empty( $user ) ) {
-			$user = $this->lookup_username();
+		if ( empty( $user_id ) ) {
+			$user_id = $this->lookup_username();
 		}
 
 		// Check if user is valid.
-		$user = $this->is_user_valid( $user );
+		$user = $this->is_user_valid( $user_id );
 
 		if ( ! $user ) {
 			return new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 403 ) );
