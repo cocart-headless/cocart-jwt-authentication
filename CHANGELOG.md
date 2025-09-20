@@ -1,10 +1,10 @@
 # Changelog for CoCart JWT Authentication
 
-## v3.0.0 - ?? ??, 2025
+## v3.0.0 - 20th September, 2025
 
 📢 This update will invalidate previous tokens as they will no longer be valid.
 
-With this update we have improved tracking of tokens to be dual-secured with a PAT (Personal Access Token) ID. This also makes sure users don't get unnecessary new tokens when already authenticated for proper token lifecycle management and prevent token proliferation when users are already authenticated.
+With this update we have improved tracking of tokens to be dual-secured with a PAT (Personal Access Token) ID. This also makes sure users don't get unnecessary new tokens when already authenticated for proper token life cycle management and prevent token proliferation when users are already authenticated.
 
 ### What's New?
 

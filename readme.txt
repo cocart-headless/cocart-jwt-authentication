@@ -53,9 +53,7 @@ We also have other add-ons that extend CoCart to enhance your headless store dev
 
 These add-ons of course come with support too.
 
-We also have a security plugin built for the REST-API to provide a firewall to block unknown outsiders, rate limit requests and protect data exposure – no configuration required.
-
-See more at [API Security](https://apisecurity.pro/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart).
+For additional security, consider our [API Security](https://apisecurity.pro/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart) plugin that provides a firewall to block unknown outsiders, rate limit requests and protect data exposure – no configuration required.
 
 ### ⌨️ Join our growing community
 
@@ -137,11 +135,11 @@ It is possible due to a plugin conflict e.g. Login Limit and the token used fail
 
 == Changelog ==
 
-= v3.0.0 - ?? ??, 2025 =
+= v3.0.0 - 20th September, 2025 =
 
 📢 This update will invalidate previous tokens as they will no longer be valid.
 
-With this update we have improved tracking of tokens to be dual-secured with a PAT (Personal Access Token) ID. This also makes sure users don't get unnecessary new tokens when already authenticated for proper token lifecycle management and prevent token proliferation when users are already authenticated.
+With this update we have improved tracking of tokens to be dual-secured with a PAT (Personal Access Token) ID. This also makes sure users don't get unnecessary new tokens when already authenticated for proper token life cycle management and prevent token proliferation when users are already authenticated.
 
 ### What's New?
 
@@ -176,7 +174,6 @@ With this update we have improved tracking of tokens to be dual-secured with a P
 ### Compatibility
 
 * Tested with CoCart v4.8
-* Tested with WooCommerce 10.1
 
 [View the full changelog here](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/CHANGELOG.md).
 

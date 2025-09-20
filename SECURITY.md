@@ -27,7 +27,6 @@ Our most critical targets are:
 
 * CoCart JWT Authentication (this repository)
 * cocartapi.com -- the primary marketplace and marketing site.
-* cocart.dev -- Developers resources, release updates, guides.
 
 ## Guidelines
 
