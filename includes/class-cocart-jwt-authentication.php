@@ -9,8 +9,6 @@
 
 namespace CoCart\JWTAuthentication;
 
-use WC_Validation;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -31,66 +29,69 @@ final class Plugin {
 	 *
 	 * @var string
 	 */
-	public static $version = '2.1.0';
+	public static $version = '3.0.0';
 
 	/**
-	 * JWT algorithm to generate signature.
+	 * Single instance of the CoCart class
 	 *
-	 * Default is HS256
+	 * @since 3.0.0 Introduced.
 	 *
-	 * @var string
+	 * @var CoCart
 	 */
-	private static $algorithm = 'HS256';
+	private static $instance = null;
 
 	/**
-	 * All possible HTTP headers that represent the
-	 * User-Agent string.
+	 * Cloning is forbidden.
 	 *
-	 * @access protected
+	 * @access public
 	 *
-	 * @since 2.0.0 Introduced.
-	 *
-	 * @var array
+	 * @since 3.0.0 Introduced.
 	 */
-	protected static array $user_agent_headers = array(
-		// The default User-Agent string.
-		'HTTP_USER_AGENT',
-		// Header can occur on devices using Opera Mini.
-		'HTTP_X_OPERAMINI_PHONE_UA',
-		// Vodafone specific header: http://www.seoprinciple.com/mobile-web-community-still-angry-at-vodafone/24/
-		'HTTP_X_DEVICE_USER_AGENT',
-		'HTTP_X_ORIGINAL_USER_AGENT',
-		'HTTP_X_SKYFIRE_PHONE',
-		'HTTP_X_BOLT_PHONE_UA',
-		'HTTP_DEVICE_STOCK_UA',
-		'HTTP_X_UCBROWSER_DEVICE_UA',
-	);
+	public function __clone() {
+		_doing_it_wrong( __FUNCTION__, esc_html__( 'Cloning this object is forbidden.', 'cocart-jwt-authentication' ), '3.0.0' );
+	} // END __clone()
 
 	/**
-	 * Supported algorithms to sign the token.
+	 * Unserializing instances of this class is forbidden.
+	 *
+	 * @access public
+	 *
+	 * @since 3.0.0 Introduced.
+	 */
+	public function __wakeup() {
+		_doing_it_wrong( __FUNCTION__, esc_html__( 'Unserializing instances of this class is forbidden.', 'cocart-jwt-authentication' ), '3.0.0' );
+	} // END __wakeup()
+
+	/**
+	 * Main Instance.
+	 *
+	 * Ensures only one instance of CoCart JWT Authentication is loaded or can be loaded.
+	 *
+	 * @since 3.0.0 Introduced.
+	 *
+	 * @return CoCart JWT Authentication - Main instance.
+	 */
+	public static function instance() {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
+	 * CoCart JWT Authentication Constructor.
 	 *
 	 * @access private
 	 *
-	 * @since 2.0.0 Introduced.
-	 *
-	 * @see https://datatracker.ietf.org/doc/html/rfc7518#section-3
-	 *
-	 * @var array|string[]
+	 * @since 3.0.0 Introduced.
 	 */
-	private static array $supported_algorithms = array(
-		'HS256',
-		'HS384',
-		'HS512',
-		'RS256',
-		'RS384',
-		'RS512',
-		'ES256',
-		'ES384',
-		'ES512',
-		'PS256',
-		'PS384',
-		'PS512',
-	);
+	private function __construct() {
+		include_once __DIR__ . '/class-tokens.php';
+		include_once __DIR__ . '/class-destroy-tokens.php';
+		include_once __DIR__ . '/class-rest.php';
+
+		$this->init_hooks();
+	}
 
 	/**
 	 * Initiate CoCart JWT Authentication.
@@ -99,57 +100,406 @@ final class Plugin {
 	 *
 	 * @static
 	 */
-	public static function init() {
+	public function init_hooks() {
 		// Load translation files.
-		add_action( 'init', array( __CLASS__, 'load_plugin_textdomain' ), 0 );
+		add_action( 'init', array( $this, 'load_plugin_textdomain' ), 0 );
 
-		// Register REST API endpoint to refresh tokens.
-		add_action( 'rest_api_init', function () {
-			register_rest_route( 'cocart/jwt', '/refresh-token', array(
-				'methods'             => 'POST',
-				'callback'            => array( __CLASS__, 'refresh_token' ),
-				'permission_callback' => '__return_true',
-			) );
-		} );
+		// Load admin classes.
+		add_action( 'init', array( $this, 'load_admin' ) );
 
-		// Register REST API endpoint to validate tokens.
-		add_action( 'rest_api_init', function () {
-			register_rest_route( 'cocart/jwt', '/validate-token', array(
-				'methods'             => 'POST',
-				'callback'            => function () {
-					return rest_ensure_response( array( 'message' => __( 'Token is valid.', 'cocart-jwt-authentication' ) ) );
-				},
-				'permission_callback' => function () {
-					return get_current_user_id() > 0;
-				},
-			) );
-		} );
-
-		// Filter in first before anyone else.
-		add_filter( 'cocart_authenticate', array( __CLASS__, 'perform_jwt_authentication' ), 0, 3 );
-
-		// Send tokens to login response.
-		add_filter( 'cocart_login_extras', array( __CLASS__, 'send_tokens' ), 0, 2 );
-
-		// Delete tokens when user logs out.
-		add_action( 'wp_logout', array( __CLASS__, 'destroy_tokens' ) );
-
-		// Delete tokens when user changes password/email or user is deleted.
-		add_action( 'after_password_reset', array( __CLASS__, 'destroy_tokens' ) );
-		add_action( 'profile_update', array( __CLASS__, 'maybe_destroy_tokens' ), 10, 2 );
-		add_action( 'delete_user', array( __CLASS__, 'destroy_tokens' ), 10, 1 );
-
-		// Add rate limits for JWT refresh token.
-		add_filter( 'cocart_api_rate_limit_options', array( __CLASS__, 'jwt_rate_limits' ), 0 );
+		// Register the CLI commands.
+		add_action( 'plugins_loaded', array( $this, 'register_cli' ) );
 
 		// Schedule cron job for cleaning up expired tokens.
 		add_action( 'cocart_jwt_cleanup_cron', array( __CLASS__, 'cleanup_expired_tokens' ) );
-		register_activation_hook( COCART_JWT_AUTHENTICATION_FILE, array( __CLASS__, 'schedule_cron_job' ) );
-		register_deactivation_hook( COCART_JWT_AUTHENTICATION_FILE, array( __CLASS__, 'clear_scheduled_cron_job' ) );
-
-		// WP-CLI Commands.
-		self::register_cli_commands();
+		add_action( 'cocart_jwt_cleanup_legacy_cron', array( __CLASS__, 'cleanup_legacy_user_meta' ) );
+		register_activation_hook( COCART_JWT_AUTHENTICATION_FILE, array( $this, 'schedule_cron_job' ) );
+		register_activation_hook( COCART_JWT_AUTHENTICATION_FILE, array( $this, 'schedule_legacy_cleanup' ) );
+		register_activation_hook( COCART_JWT_AUTHENTICATION_FILE, array( $this, 'activation_redirect' ) );
+		register_deactivation_hook( COCART_JWT_AUTHENTICATION_FILE, array( $this, 'clear_scheduled_cron_job' ) );
 	} // END init()
+
+	/**
+	 * Load admin classes.
+	 *
+	 * @access public
+	 *
+	 * @return void
+	 */
+	public function load_admin() {
+		if ( is_admin() ) {
+			include_once __DIR__ . '/admin/class-cocart-jwt-wc-admin-system-status.php';
+			include_once __DIR__ . '/admin/class-admin-notices.php';
+			include_once __DIR__ . '/admin/class-jwt-setup.php';
+
+			// Handle activation redirect.
+			add_action( 'admin_init', array( $this, 'handle_activation_redirect' ) );
+		}
+	} // END load_admin()
+
+	/**
+	 * Handle the activation redirect to the setup page.
+	 *
+	 * @access public
+	 *
+	 * @since 3.0.0 Introduced.
+	 *
+	 * @return void
+	 */
+	public function handle_activation_redirect() {
+		// Check if we should redirect after activation.
+		if ( get_transient( 'cocart_jwt_activation_redirect' ) ) {
+			// Delete the transient to prevent future redirects.
+			delete_transient( 'cocart_jwt_activation_redirect' );
+
+			// Only redirect if user has proper capabilities.
+			if ( current_user_can( 'manage_options' ) ) {
+				wp_redirect( admin_url( 'admin.php?page=cocart-jwt-setup' ) );
+				exit;
+			}
+		}
+	} // END handle_activation_redirect()
+
+	/**
+	 * Register the CLI commands.
+	 *
+	 * @access public
+	 */
+	public function register_cli() {
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			include_once __DIR__ . '/class-table-formatter.php';
+			include_once __DIR__ . '/cli/class-cli-command-create.php';
+			include_once __DIR__ . '/cli/class-cli-command-list.php';
+			include_once __DIR__ . '/cli/class-cli-command-view.php';
+			include_once __DIR__ . '/cli/class-cli-command-cleanup.php';
+			include_once __DIR__ . '/cli/class-cli-command-destroy.php';
+
+			// Register the command group.
+			\WP_CLI::add_command( 'cocart jwt', array( $this, 'cli_jwt_command' ) );
+		}
+	} // END register_cli()
+
+	/**
+	 * Handles subcommands under 'cocart jwt'
+	 *
+	 * @access public
+	 *
+	 * @param array $args       Positional arguments passed to the command.
+	 * @param array $assoc_args Associative arguments passed to the command.
+	 */
+	public function cli_jwt_command( $args, $assoc_args ) {
+		// Show help if requested or no subcommand provided.
+		if ( empty( $args[0] ) || isset( $assoc_args['help'] ) ) {
+			$this->show_cli_help();
+			return;
+		}
+
+		// Simple router for subcommands.
+		$subcommand = $args[0];
+
+		switch ( $subcommand ) {
+			case 'create':
+				$class = new CLI_Command_Create();
+				$class->create( array_slice( $args, 1 ), $assoc_args );
+				break;
+
+			case 'list':
+				$class = new CLI_Command_List();
+				$class->list( array_slice( $args, 1 ), $assoc_args );
+				break;
+
+			case 'view':
+				$class = new CLI_Command_View();
+				$class->view( array_slice( $args, 1 ), $assoc_args );
+				break;
+
+			case 'cleanup':
+				$class = new CLI_Command_Cleanup();
+				$class->cleanup( array_slice( $args, 1 ), $assoc_args );
+				break;
+
+			case 'destroy':
+				$class = new CLI_Command_Destroy();
+				$class->destroy( array_slice( $args, 1 ), $assoc_args );
+				break;
+
+			default:
+				\WP_CLI::error( "Unknown subcommand: $subcommand" );
+		}
+	} // END cli_jwt_command()
+
+	/**
+	 * Display CLI help information.
+	 *
+	 * @access private
+	 *
+	 * @since 3.0.0 Introduced.
+	 *
+	 * @return void
+	 */
+	private function show_cli_help() {
+		\WP_CLI::line( __( 'NAME', 'cocart-jwt-authentication' ) );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( '  wp cocart jwt - ' . __( 'Manage JWT tokens for CoCart.', 'cocart-jwt-authentication' ) );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( __( 'SYNOPSIS', 'cocart-jwt-authentication' ) );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( '  wp cocart jwt <subcommand>' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( __( 'SUBCOMMANDS', 'cocart-jwt-authentication' ) );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( '  create     ' . __( 'Generate a new JWT token for a user', 'cocart-jwt-authentication' ) );
+		\WP_CLI::line( '    wp cocart jwt create --user=<user> [--user-agent=<user-agent>]' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( '  view       ' . __( 'Display details of a JWT token', 'cocart-jwt-authentication' ) );
+		\WP_CLI::line( '    wp cocart jwt view <token>' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( '  list       ' . __( 'List all active JWT tokens', 'cocart-jwt-authentication' ) );
+		\WP_CLI::line( '    wp cocart jwt list [--page=<number>] [--per-page=<number>]' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( '  cleanup    ' . __( 'Clean up expired JWT tokens', 'cocart-jwt-authentication' ) );
+		\WP_CLI::line( '    wp cocart jwt cleanup [--batch-size=<number>] [--force]' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( '  destroy    ' . __( 'Destroy JWT tokens for a specific user', 'cocart-jwt-authentication' ) );
+		\WP_CLI::line( '    wp cocart jwt destroy <user> [--pat=<pat_id>] [--force]' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( __( 'EXAMPLES', 'cocart-jwt-authentication' ) );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( '  wp cocart jwt create --user=123' );
+		\WP_CLI::line( '  wp cocart jwt list --per-page=5' );
+		\WP_CLI::line( '  wp cocart jwt destroy admin@example.com --force' );
+		\WP_CLI::line( '  wp cocart jwt cleanup --batch-size=50' );
+		\WP_CLI::line( '' );
+		\WP_CLI::line( __( 'For more details on each subcommand, visit:', 'cocart-jwt-authentication' ) );
+		\WP_CLI::line( 'https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/wp-cli.md' );
+	} // END show_cli_help()
+
+	/**
+	 * Clean up expired tokens in batches.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 2.0.0 Introduced.
+	 * @since 2.2.0 Improved to work in batches.
+	 * @since 3.0.0 Updated to clean up PAT and refresh token data.
+	 *
+	 * @param int $batch_size Number of users to process per batch.
+	 */
+	public static function cleanup_expired_tokens( $batch_size = 100 ) {
+		$offset = 0;
+
+		do {
+			$users = get_users( array(
+				'meta_key'     => '_cocart_jwt_tokens', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_compare' => 'EXISTS',
+				'number'       => $batch_size,
+				'offset'       => $offset,
+			) );
+
+			$users_count = count( $users );
+
+			foreach ( $users as $user ) {
+				self::cleanup_expired_tokens_for_user( $user->ID );
+			}
+
+			$offset += $batch_size;
+		} while ( $users_count === $batch_size );
+	} // END cleanup_expired_tokens()
+
+	/**
+	 * Clean up expired tokens for a specific user.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 3.0.0 Introduced.
+	 *
+	 * @param int $user_id User ID to clean up tokens for.
+	 */
+	public static function cleanup_expired_tokens_for_user( $user_id ) {
+		// Clean up expired JWT tokens and associated PAT data.
+		$user_tokens = get_user_meta( $user_id, '_cocart_jwt_tokens', true );
+		$pat_data    = get_user_meta( $user_id, '_cocart_jwt_token_pat' );
+
+		if ( is_array( $user_tokens ) ) {
+			foreach ( $user_tokens as $pat_id => $token ) {
+				if ( self::is_token_expired( $token ) ) {
+					// Remove from main tokens collection.
+					unset( $user_tokens[ $pat_id ] );
+
+					// Remove associated PAT entry.
+					foreach ( $pat_data as $pat_entry ) {
+						if ( array_key_exists( $pat_id, $pat_entry ) ) {
+							delete_user_meta( $user_id, '_cocart_jwt_token_pat', $pat_entry );
+
+							break;
+						}
+					}
+				}
+			}
+
+			update_user_meta( $user_id, '_cocart_jwt_tokens', $user_tokens );
+		}
+
+		// Clean up expired refresh tokens.
+		$refresh_tokens = get_user_meta( $user_id, '_cocart_jwt_refresh_tokens', true );
+
+		if ( is_array( $refresh_tokens ) ) {
+			$current_time = time();
+
+			foreach ( $refresh_tokens as $refresh_token => $expiration ) {
+				if ( $current_time > $expiration ) {
+					unset( $refresh_tokens[ $refresh_token ] );
+					delete_user_meta( $user_id, '_cocart_jwt_refresh_token', $refresh_token );
+				}
+			}
+
+			update_user_meta( $user_id, '_cocart_jwt_refresh_tokens', $refresh_tokens );
+		}
+	} // END cleanup_expired_tokens_for_user()
+
+	/**
+	 * Clean up legacy user meta data from previous versions.
+	 *
+	 * Removes outdated meta keys that are no longer used in version 3.0.0+.
+	 * Uses batching to prevent performance issues on large sites.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 3.0.0 Introduced.
+	 *
+	 * @param int $batch_size Number of rows to process per batch. Default 500.
+	 *
+	 * @return void
+	 */
+	public static function cleanup_legacy_user_meta( $batch_size = 500 ) {
+		global $wpdb;
+
+		// Legacy meta keys to be removed (from v2.5.1 and earlier).
+		$legacy_meta_keys = array(
+			'cocart_jwt_token',                    // Old single token storage (without underscore prefix).
+			'cocart_jwt_refresh_token',            // Old refresh token storage (without underscore prefix).
+			'cocart_jwt_refresh_token_expiration', // Old refresh token expiration storage.
+		);
+
+		$total_deleted = 0;
+		$batch_deleted = 0;
+
+		// Process in batches to prevent memory issues.
+		do {
+			// Create placeholders for the IN clause.
+			$placeholders = implode( ', ', array_fill( 0, count( $legacy_meta_keys ), '%s' ) );
+
+			// Prepare and execute batched query.
+			$query = $wpdb->prepare(
+				"DELETE FROM {$wpdb->usermeta} WHERE meta_key IN ($placeholders) LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				array_merge( $legacy_meta_keys, array( $batch_size ) )
+			);
+
+			$batch_deleted  = $wpdb->query( $query );
+			$total_deleted += $batch_deleted;
+
+		} while ( $batch_deleted === $batch_size );
+
+		// Log the cleanup results if CoCart logger is available.
+		if ( class_exists( 'CoCart_Logger' ) && $total_deleted > 0 ) {
+			\CoCart_Logger::log(
+				sprintf( 'Background cleanup completed: removed %d legacy JWT token meta entries (processed in batches of %d).', $total_deleted, $batch_size ),
+				'info',
+				'cocart-jwt-authentication'
+			);
+		}
+	} // END cleanup_legacy_user_meta()
+
+	/**
+	 * Schedule cron job for cleaning up expired tokens.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 2.0.0 Introduced.
+	 */
+	public static function schedule_cron_job() {
+		if ( ! wp_next_scheduled( 'cocart_jwt_cleanup_cron' ) ) {
+			wp_schedule_event( time(), 'daily', 'cocart_jwt_cleanup_cron' );
+		}
+	} // END schedule_cron_job()
+
+	/**
+	 * Schedule one-time legacy cleanup job.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 3.0.0 Introduced.
+	 *
+	 * @return void
+	 */
+	public static function schedule_legacy_cleanup() {
+		// Only schedule if not already scheduled and there might be legacy data.
+		if ( ! wp_next_scheduled( 'cocart_jwt_cleanup_legacy_cron' ) ) {
+			// Schedule to run in 30 seconds to allow plugin activation to complete.
+			wp_schedule_single_event( time() + 30, 'cocart_jwt_cleanup_legacy_cron' );
+		}
+	} // END schedule_legacy_cleanup()
+
+	/**
+	 * Handle plugin activation redirect to setup page.
+	 *
+	 * Redirects to the JWT setup page if CoCart is installed and active.
+	 *
+	 * @access public
+	 *
+	 * @since 3.0.0 Introduced.
+	 *
+	 * @return void
+	 */
+	public function activation_redirect() {
+		// Check if CoCart is installed and active.
+		if ( ! defined( 'COCART_FILE' ) ) {
+			return;
+		}
+
+		// Don't redirect if we're doing bulk activation or in network admin.
+		if ( isset( $_GET['activate-multi'] ) || is_network_admin() ) {
+			return;
+		}
+
+		// Set a transient to trigger redirect after activation.
+		set_transient( 'cocart_jwt_activation_redirect', true, 30 );
+	} // END activation_redirect()
+
+	/**
+	 * Clear scheduled cron job on plugin deactivation.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @since 2.0.0 Introduced.
+	 *
+	 * @return void
+	 */
+	public static function clear_scheduled_cron_job() {
+		// Clear regular cleanup cron.
+		$timestamp = wp_next_scheduled( 'cocart_jwt_cleanup_cron' );
+		if ( $timestamp ) {
+			wp_unschedule_event( $timestamp, 'cocart_jwt_cleanup_cron' );
+		}
+
+		// Clear legacy cleanup cron if still scheduled.
+		$legacy_timestamp = wp_next_scheduled( 'cocart_jwt_cleanup_legacy_cron' );
+		if ( $legacy_timestamp ) {
+			wp_unschedule_event( $legacy_timestamp, 'cocart_jwt_cleanup_legacy_cron' );
+		}
+	} // END clear_scheduled_cron_job()
 
 	/**
 	 * Return the name of the package.
@@ -191,1271 +541,6 @@ final class Plugin {
 	} // END get_path()
 
 	/**
-	 * JWT Authentication.
-	 *
-	 * Validates a token passed via the authentication header and authenticates the user.
-	 *
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @since 1.0.0 Introduced.
-	 *
-	 * @param int    $user_id The user ID if authentication was successful.
-	 * @param bool   $ssl     Determines if the site is secure.
-	 * @param object $auth    The Authentication class.
-	 *
-	 * @return int $user_id The user ID returned if authentication was successful.
-	 */
-	public static function perform_jwt_authentication( int $user_id, bool $ssl, $auth ) {
-		$auth->set_method( 'jwt_auth' );
-
-		$auth_header = \CoCart_Authentication::get_auth_header();
-
-		// Validating authorization header and token.
-		if ( ! empty( $auth_header ) && 0 === stripos( $auth_header, 'bearer ' ) ) {
-			/**
-			 * The HTTP_AUTHORIZATION is present, verify the format.
-			 * If the format is wrong return the user.
-			 */
-			list($token) = sscanf( $auth_header, 'Bearer %s' );
-
-			// If the token is malformed then return error.
-			if ( ! $token ) {
-				// Error: Authorization header malformed. Please check the authentication token and try again.
-				$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
-				return false;
-			}
-
-			$secret_key = defined( 'COCART_JWT_AUTH_SECRET_KEY' ) ? COCART_JWT_AUTH_SECRET_KEY : false;
-
-			// First thing, check the secret key, if not exist return error.
-			if ( ! $secret_key ) {
-				// Error: JWT is not configured properly.
-				$auth->set_error( new \WP_Error( 'cocart_jwt_auth_bad_config', __( 'JWT configuration error.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
-				return false;
-			}
-
-			// Check if the token is valid using the secret key.
-			if ( ! self::validate_token( $token, $secret_key ) ) {
-				// Error: JWT Token is not valid or has expired.
-				$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
-				return false;
-			}
-
-			// Decode token provided using the secret key.
-			$payload = self::decode_token( $token, $secret_key );
-			$payload = $payload->payload;
-
-			// The token is decoded now validate the iss.
-			if ( self::get_iss() !== $payload->iss ) {
-				// Error: The token issuer does not match with this server.
-				$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
-				return false;
-			}
-
-			// Check the user id existence in the token.
-			if ( ! isset( $payload->data->user->id ) ) {
-				// Error: The token does not identify any user.
-				$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
-				return false;
-			}
-
-			// So far so good, check if the given user id exists in database.
-			$user = get_user_by( 'id', $payload->data->user->id );
-
-			if ( ! $user ) {
-				// Error: The user doesn't exist.
-				$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
-				return false;
-			}
-
-			// Validate IP or Device.
-			if ( \CoCart_Authentication::get_ip_address() !== $payload->data->user->ip || sanitize_text_field( wp_unslash( $_SERVER[ self::get_user_agent_header() ] ) ) !== $payload->data->user->device ) {
-				// Error: IP or Device mismatch.
-				$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) ) );
-				return false;
-			}
-
-			/**
-			 * Fires when a token is successfully validated.
-			 *
-			 * @since 2.1.0 Introduced.
-			 *
-			 * @param object $payload Payload decoded object.
-			 */
-			do_action( 'cocart_jwt_auth_token_validated', $payload );
-
-			// User is authenticated.
-			return $user->ID;
-		}
-
-		return $user_id;
-	} // END perform_jwt_authentication()
-
-	/**
-	 * Get the token issuer (iss claim).
-	 *
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @return string The token issuer (iss).
-	 */
-	public static function get_iss() {
-		/**
-		 * Allows you to change the token issuer (iss claim) for multi-site setups or custom API endpoints.
-		 *
-		 * @since 2.0.0 Introduced.
-		 */
-		return apply_filters( 'cocart_jwt_auth_issuer', get_bloginfo( 'url' ) );
-	} // END get_iss()
-
-	/**
-	 * Lookup the username from the authorization header.
-	 *
-	 * @access protected
-	 *
-	 * @static
-	 *
-	 * @return string The username if found.
-	 */
-	protected static function lookup_username() {
-		$auth_header = \CoCart_Authentication::get_auth_header();
-		$username    = ''; // Initialize the variable
-
-		// Validating authorization header and get username and password.
-		if ( ! empty( $auth_header ) && 0 === stripos( $auth_header, 'basic ' ) ) {
-			$exploded = explode( ':', base64_decode( substr( $auth_header, 6 ) ), 2 ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
-
-			// If valid return username and password.
-			if ( 2 === \count( $exploded ) ) {
-				list( $username, $password ) = $exploded;
-			}
-		} elseif ( ! empty( $_SERVER['PHP_AUTH_USER'] ) && ! empty( $_SERVER['PHP_AUTH_PW'] ) ) {
-			// Check that we're trying to authenticate via simple headers.
-			$username = trim( sanitize_user( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		} elseif ( ! empty( $_REQUEST['username'] ) && ! empty( $_REQUEST['password'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			// Fallback to check if the username and password was passed via URL.
-			$username = trim( sanitize_user( wp_unslash( $_REQUEST['username'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		}
-
-		// Get username from basic authentication.
-		$username = \CoCart_Authentication::get_username( $username );
-
-		return $username;
-	} // END lookup_username()
-
-	/**
-	 * Validate if the user exists.
-	 *
-	 * @access protected
-	 *
-	 * @static
-	 *
-	 * @param int|string $user The user ID or username.
-	 *
-	 * @return \WP_User|false The user object if valid, false otherwise.
-	 */
-	protected static function is_user_valid( $user ) {
-		if ( empty( $user ) ) {
-			return new \WP_Error(
-				'cocart_authentication_error',
-				__( 'User unknown!', 'cocart-jwt-authentication' ),
-				array( 'status' => 404 )
-			);
-		}
-
-		$get_user_by = 'login';
-		if ( is_numeric( $user ) ) {
-			$get_user_by = 'id';
-		}
-
-		$user = get_user_by( $get_user_by, $user );
-
-		// Error: The user doesn't exist.
-		if ( empty( $user ) ) {
-			return false;
-		}
-
-		return $user;
-	} // END is_user_valid()
-
-	/**
-	 * Generates a JWT token for the user.
-	 *
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @param int|string $user The user to generate token for.
-	 *
-	 * @return string Generated JWT token.
-	 */
-	public static function generate_token( int|string $user = '' ) {
-		$secret_key = defined( 'COCART_JWT_AUTH_SECRET_KEY' ) ? COCART_JWT_AUTH_SECRET_KEY : false;
-
-		if ( ! $secret_key ) {
-			return new \WP_Error( 'cocart_jwt_auth_bad_config', __( 'JWT configuration error.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
-		}
-
-		// See if we can lookup the username if no user provided.
-		if ( empty( $user ) ) {
-			$user = self::lookup_username();
-		}
-
-		// Check if user is valid.
-		$user = self::is_user_valid( $user );
-
-		if ( ! $user ) {
-			return new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
-		}
-
-		/**
-		 * Allows you to change the token issuance timestamp (iat claim) for token timing synchronization.
-		 *
-		 * @since 2.0.0 Introduced.
-		 */
-		$issued_at = apply_filters( 'cocart_jwt_auth_issued_at', time() );
-
-		/**
-		 * Authorization expires not before the time the token was created.
-		 *
-		 * Filter allows you to set when the token becomes valid (nbf claim) for token activation control.
-		 *
-		 * @since 2.0.0 Introduced.
-		 */
-		$not_before = apply_filters( 'cocart_jwt_auth_not_before', time(), $issued_at );
-
-		/**
-		 * Authorization expiration expires after 10 days by default.
-		 *
-		 * Filter allows you to customize when the token will expire (exp claim) based on roles or conditions.
-		 *
-		 * @since 1.0.0 Introduced.
-		 * @since 2.0.0 Added `$issued_at` parameter.
-		 */
-		$auth_expires = apply_filters( 'cocart_jwt_auth_expire', DAY_IN_SECONDS * 10, $issued_at );
-
-		$expire = $issued_at + intval( $auth_expires );
-		$header = self::to_base_64_url( self::generate_header() );
-
-		// Prepare the payload.
-		$payload = array(
-			'iss'  => self::get_iss(),
-			'iat'  => $issued_at,
-			'nbf'  => $not_before,
-			'exp'  => $expire,
-			'data' => array(
-				'user' => array(
-					'id'       => $user->ID,
-					'username' => $user->user_login,
-					'ip'       => \CoCart_Authentication::get_ip_address(),
-					'device'   => ! empty( $_SERVER[ self::get_user_agent_header() ] ) ? sanitize_text_field( wp_unslash( $_SERVER[ self::get_user_agent_header() ] ) ) : '',
-				),
-			),
-		);
-
-		/**
-		 * Filter allows additional user data to be applied to the payload before the token is generated.
-		 *
-		 * @since 2.2.0 Introduced.
-		 *
-		 * @param \WP_User $user User object.
-		 */
-		$payload['data']['user'] = array_merge( $payload['data']['user'], apply_filters( 'cocart_jwt_auth_token_user_data', array(), $user ) );
-
-		// Generate a token from provided data.
-		$payload = self::to_base_64_url( wp_json_encode( $payload ) );
-
-		/** Let the user modify the token data before the sign. */
-		$algorithm = self::get_algorithm();
-
-		if ( false === $algorithm ) {
-			// See https://datatracker.ietf.org/doc/html/rfc7518#section-3
-			return new \WP_Error(
-				'cocart_authentication_error',
-				__( 'Algorithm not supported', 'cocart-jwt-authentication' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		/** The token is signed, now generate the signature to the response */
-		$signature = self::to_base_64_url( self::generate_signature( $header . '.' . $payload, $secret_key ) );
-
-		$token = $header . '.' . $payload . '.' . $signature;
-
-		// Save user token.
-		update_user_meta( $user->ID, 'cocart_jwt_token', $token );
-
-		/**
-		 * Fires when a new JWT token is generated after successful authentication.
-		 *
-		 * @since 2.1.0 Introduced.
-		 *
-		 * @param string   $token Refreshed token.
-		 * @param \WC_User $user  User object.
-		 */
-		do_action( 'cocart_jwt_token_generated', $token, $user );
-
-		return $token;
-	} // END generate_token()
-
-	/**
-	 * Get the algorithm used to sign the token and validate that
-	 * the algorithm is in the supported list.
-	 *
-	 * @access private
-	 *
-	 * @static
-	 *
-	 * @return false|mixed|null
-	 */
-	private static function get_algorithm() {
-		/**
-		 * Filter the algorithm to one of the supported.
-		 *
-		 * @since 2.0.0 Introduced.
-		 */
-		$algorithm = apply_filters( 'cocart_jwt_auth_algorithm', self::$algorithm );
-
-		if ( ! in_array( $algorithm, self::$supported_algorithms ) ) {
-			return false;
-		}
-
-		return $algorithm;
-	} // END get_algorithm()
-
-	/**
-	 * Generate refresh token.
-	 *
-	 * By default a random 64-byte string is generated.
-	 *
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @since 2.0.0 Introduced.
-	 *
-	 * @param int $user_id User ID.
-	 *
-	 * @return int User ID
-	 */
-	public static function generate_refresh_token( $user_id ) {
-		/**
-		 * Filter allows you to change how refresh tokens are generated.
-		 *
-		 * @since 2.0.0 Introduced.
-		 */
-		$refresh_token = apply_filters( 'cocart_jwt_auth_refresh_token_generation', bin2hex( random_bytes( 64 ) ) );
-		update_user_meta( $user_id, 'cocart_jwt_refresh_token', $refresh_token );
-
-		/**
-		 * Filter allows you to customize refresh token lifetime based on roles or conditions.
-		 *
-		 * Default is 30 days.
-		 *
-		 * @since 2.0.0 Introduced.
-		 */
-		$expiration = time() + apply_filters( 'cocart_jwt_auth_refresh_token_expiration', DAY_IN_SECONDS * 30 );
-		update_user_meta( $user_id, 'cocart_jwt_refresh_token_expiration', $expiration );
-
-		return $refresh_token;
-	} // END generate_refresh_token()
-
-	/**
-	 * Refresh the JWT token.
-	 *
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @since 2.0.0 Introduced.
-	 *
-	 * @param \WP_REST_Request $request The request object.
-	 *
-	 * @return \WP_REST_Response|WP_Error
-	 */
-	public static function refresh_token( \WP_REST_Request $request ) {
-		$refresh_token = $request->get_param( 'refresh_token' );
-		$user_id       = self::validate_refresh_token( $refresh_token );
-
-		if ( is_wp_error( $user_id ) ) {
-			return $user_id;
-		}
-
-		$secret_key = defined( 'COCART_JWT_AUTH_SECRET_KEY' ) ? COCART_JWT_AUTH_SECRET_KEY : false;
-
-		if ( ! $secret_key ) {
-			return new \WP_Error( 'cocart_jwt_auth_bad_config', __( 'JWT configuration error.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
-		}
-
-		$user = get_user_by( 'id', $user_id );
-
-		if ( empty( $user ) ) {
-			// Error: The user doesn't exist.
-			return new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
-		}
-
-		$token         = self::generate_token( $user->ID );
-		$refresh_token = self::generate_refresh_token( $user->ID );
-
-		/**
-		 * Fires when a token is refreshed using a refresh token.
-		 *
-		 * @since 2.1.0 Introduced.
-		 *
-		 * @param string   $token Refreshed token.
-		 * @param \WC_User $user  User object.
-		 */
-		do_action( 'cocart_jwt_auth_token_refreshed', $token, $user );
-
-		return rest_ensure_response(
-			array(
-				'token'         => $token,
-				'refresh_token' => $refresh_token,
-			)
-		);
-	} // END refresh_token()
-
-	/**
-	 * Validate the refresh token.
-	 *
-	 * @access private
-	 *
-	 * @static
-	 *
-	 * @since 2.0.0 Introduced.
-	 *
-	 * @param string $refresh_token The refresh token.
-	 *
-	 * @return int|WP_Error User ID if valid, WP_Error otherwise.
-	 */
-	private static function validate_refresh_token( string $refresh_token ) {
-		$user_query = new \WP_User_Query( array(
-			'meta_key'   => 'cocart_jwt_refresh_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			'meta_value' => $refresh_token, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-			'number'     => 1,
-		) );
-
-		$users = $user_query->get_results();
-
-		if ( empty( $users ) ) {
-			return new \WP_Error( 'cocart_authentication_error', __( 'Invalid refresh token.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
-		}
-
-		$user_id    = $users[0]->ID;
-		$expiration = get_user_meta( $user_id, 'cocart_jwt_refresh_token_expiration', true );
-
-		if ( time() > $expiration ) {
-			return new \WP_Error( 'cocart_authentication_error', __( 'Refresh token expired.', 'cocart-jwt-authentication' ), array( 'status' => 401 ) );
-		}
-
-		return $user_id;
-	} // END validate_refresh_token()
-
-	/**
-	 * Finds a user based on a matching billing phone number.
-	 *
-	 * @access protected
-	 *
-	 * @deprecated 2.0.0 Moved function to the core of CoCart.
-	 *
-	 * @static
-	 *
-	 * @param numeric $phone The billing phone number to check.
-	 *
-	 * @return string The username returned if found.
-	 */
-	protected static function get_user_by_phone( $phone ) {
-		cocart_deprecated_function( 'CoCart\JWTAuthentication\Plugin::get_user_by_phone', '2.0.0', 'CoCart_Authentication::get_user_by_phone' );
-
-		$matching_users = get_users( array(
-			'meta_key'     => 'billing_phone', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			'meta_value'   => $phone,          // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-			'meta_compare' => '=',
-		) );
-
-		$username = ! empty( $matching_users ) && is_array( $matching_users ) ? $matching_users[0]->user_login : $phone;
-
-		return $username;
-	} // END get_user_by_phone()
-
-	/**
-	 * Get the authorization header.
-	 *
-	 * Returns the value from the authorization header.
-	 *
-	 * On certain systems and configurations, the Authorization header will be
-	 * stripped out by the server or PHP. Typically this is then used to
-	 * generate `PHP_AUTH_USER`/`PHP_AUTH_PASS` but not passed on. We use
-	 * `getallheaders` here to try and grab it out instead.
-	 *
-	 * @access protected
-	 *
-	 * @deprecated 2.0.0 Moved function to the core of CoCart.
-	 *
-	 * @static
-	 *
-	 * @return string $auth_header
-	 */
-	protected static function get_auth_header() {
-		cocart_deprecated_function( 'CoCart\JWTAuthentication\Plugin::get_auth_header', '2.0.0', 'CoCart_Authentication::get_auth_header' );
-
-		$auth_header = ! empty( $_SERVER['HTTP_AUTHORIZATION'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ) ) : '';
-
-		if ( function_exists( 'getallheaders' ) ) {
-			$headers = getallheaders();
-			// Check for the authorization header case-insensitively.
-			foreach ( $headers as $key => $value ) {
-				if ( 'authorization' === strtolower( $key ) ) {
-					$auth_header = $value;
-				}
-			}
-		}
-
-		// Double check for different auth header string if empty (server dependent).
-		if ( empty( $auth_header ) ) {
-			$auth_header = isset( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) ) : '';
-		}
-
-		/**
-		 * Filter allows you to change the authorization header.
-		 *
-		 * @since 4.1.0 Introduced into the core of CoCart.
-		 *
-		 * @param string Authorization header.
-		 */
-		return apply_filters( 'cocart_auth_header', $auth_header );
-	} // END get_auth_header()
-
-	/**
-	 * Sends the generated token to the login response.
-	 *
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @param array  $extras Other extras filtered with `cocart_login_extras`.
-	 * @param object $user   The current user.
-	 *
-	 * @return array $extras
-	 */
-	public static function send_tokens( $extras, $user ) {
-		$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
-
-		if ( empty( $token ) || self::is_token_expired( $token ) ) {
-			$token = self::generate_token( $user->ID );
-		}
-
-		$extras['jwt_token']   = $token;
-		$extras['jwt_refresh'] = self::generate_refresh_token( $user->ID );
-
-		return $extras;
-	} // END send_tokens()
-
-	/**
-	 * Check if the token is expired.
-	 *
-	 * @access private
-	 *
-	 * @static
-	 *
-	 * @param string $token The JWT token.
-	 *
-	 * @return bool True if expired, false otherwise.
-	 */
-	private static function is_token_expired( $token ) {
-		try {
-			$parts = self::decode_token( $token );
-
-			if ( ! property_exists( $parts->payload, 'exp' ) || (int) $parts->payload->exp < time() ) {
-				return true;
-			}
-
-			return false;
-		} catch ( Exception $e ) {
-			return true;
-		}
-	} // END is_token_expired()
-
-	/**
-	 * Destroys both the token and refresh token when the user changes.
-	 *
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @since 2.0.0 Introduced.
-	 *
-	 * @hooked: wp_logout
-	 *
-	 * @param int $user_id User ID.
-	 */
-	public static function destroy_tokens( $user_id ) {
-		delete_user_meta( $user_id, 'cocart_jwt_token' );
-		delete_user_meta( $user_id, 'cocart_jwt_refresh_token' );
-
-		/**
-		 * Fires when a token is deleted.
-		 *
-		 * @since 2.1.0 Introduced.
-		 *
-		 * @param int $user_id User ID.
-		 */
-		do_action( 'cocart_jwt_auth_token_deleted', $user_id );
-	} // END destroy_tokens()
-
-	/**
-	 * Maybe destroys tokens when user changes password/email.
-	 *
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @since 2.0.0 Introduced.
-	 *
-	 * @hooked: profile_update
-	 *
-	 * @param int    $user_id       User ID.
-	 * @param object $old_user_data User data.
-	 */
-	public static function maybe_destroy_tokens( $user_id, $old_user_data ) {
-		$new_user_data = get_userdata( $user_id );
-
-		// Check if the password was changed.
-		if ( $new_user_data->user_pass !== $old_user_data->user_pass || $new_user_data->user_email !== $old_user_data->user_email ) {
-			self::destroy_tokens( $user_id );
-		}
-	} // END maybe_destroy_tokens()
-
-	/**
-	 * Add rate limits for JWT refresh token.
-	 *
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @since 2.0.0 Introduced.
-	 *
-	 * @return array
-	 */
-	public static function jwt_rate_limits( $options ) {
-		if ( preg_match( '/cocart\/jwt\/refresh-token/', $GLOBALS['wp']->query_vars['rest_route'] ) ) {
-			$options = array(
-				'enabled' => true,
-				'limit'   => 10,
-				'seconds' => MINUTE_IN_SECONDS,
-			);
-		}
-
-		return $options;
-	} // END jwt_rate_limits()
-
-	/**
-	 * Validates a provided token against the provided secret key.
-	 *
-	 * Checks for format, valid header for our class, expiration claim validity and signature.
-	 * https://datatracker.ietf.org/doc/html/rfc7519#section-7.2
-	 *
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @param string $token      Full token string.
-	 * @param string $secret_key The secret key used to generate the signature.
-	 *
-	 * @return bool
-	 */
-	public static function validate_token( string $token, string $secret_key ) {
-		/**
-		 * Confirm the structure of a JSON Web Token, it has three parts separated
-		 * by dots and complies with Base64URL standards.
-		 */
-		if ( preg_match( '/^[a-zA-Z\d\-_=]+\.[a-zA-Z\d\-_=]+\.[a-zA-Z\d\-_=]+$/', $token ) !== 1 ) {
-			return false;
-		}
-
-		$parts = self::decode_token( $token );
-
-		// Check if header declares a supported JWT by this class.
-		if (
-			! is_object( $parts->header ) ||
-			! property_exists( $parts->header, 'typ' ) ||
-			! property_exists( $parts->header, 'alg' ) ||
-			'JWT' !== $parts->header->typ ||
-			self::get_algorithm() !== $parts->header->alg
-		) {
-			return false;
-		}
-
-		// Check if token is expired.
-		if ( ! property_exists( $parts->payload, 'exp' ) || time() > (int) $parts->payload->exp ) {
-			return false;
-		}
-
-		// Check if the token is based on our secret key.
-		$encoded_regenerated_signature = self::to_base_64_url(
-			self::generate_signature( $parts->header_encoded . '.' . $parts->payload_encoded, $secret_key )
-		);
-
-		return hash_equals( $encoded_regenerated_signature, $parts->signature_encoded );
-	} // END validate_token()
-
-	/**
-	 * Returns the decoded/encoded header, payload and signature from a token string.
-	 *
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @param string $token Full token string.
-	 *
-	 * @return object
-	 */
-	public static function decode_token( string $token ) {
-		$parts = explode( '.', $token );
-
-		return (object) array(
-			'header'            => json_decode( self::from_base_64_url( $parts[0] ) ),
-			'header_encoded'    => $parts[0],
-			'payload'           => json_decode( self::from_base_64_url( $parts[1] ) ),
-			'payload_encoded'   => $parts[1],
-			'signature'         => self::from_base_64_url( $parts[2] ),
-			'signature_encoded' => $parts[2],
-		);
-	} // END decode_token()
-
-	/**
-	 * Generates the json formatted header for our HS256 JWT token.
-	 *
-	 * @access private
-	 *
-	 * @static
-	 *
-	 * @return string|bool
-	 */
-	private static function generate_header() {
-		return wp_json_encode(
-			array(
-				'alg' => self::get_algorithm(),
-				'typ' => 'JWT',
-			)
-		);
-	} // END generate_header()
-
-	/**
-	 * Generates a sha256 signature for the provided string using the provided secret.
-	 *
-	 * @access private
-	 *
-	 * @static
-	 *
-	 * @param string $header_encoded Header + Payload token substring.
-	 * @param string $secret         The secret used to generate the signature.
-	 *
-	 * @return false|string
-	 */
-	private static function generate_signature( string $header_encoded, string $secret ) {
-		return hash_hmac(
-			'sha256',
-			$header_encoded,
-			$secret,
-			true
-		);
-	} // END generate_signature()
-
-	/**
-	 * Encodes a string to url safe base64.
-	 *
-	 * @access private
-	 *
-	 * @static
-	 *
-	 * @param string $encode_string The string to be encoded.
-	 *
-	 * @return string
-	 */
-	private static function to_base_64_url( string $encode_string ) {
-		return str_replace(
-			array( '+', '/', '=' ),
-			array( '-', '_', '' ),
-			base64_encode( $encode_string ) // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-		);
-	} // END to_base_64_url()
-
-	/**
-	 * Decodes a string encoded using url safe base64, supporting auto padding.
-	 *
-	 * @access private
-	 *
-	 * @static
-	 *
-	 * @param string $encoded_string the string to be decoded.
-	 *
-	 * @return string
-	 */
-	private static function from_base_64_url( string $encoded_string ) {
-		/**
-		 * Add padding to base64 strings which require it. Some base64 URL strings
-		 * which are decoded will have missing padding which is represented by the
-		 * equals sign.
-		 */
-		if ( strlen( $encoded_string ) % 4 !== 0 ) {
-			return self::from_base_64_url( $encoded_string . '=' );
-		}
-
-		return base64_decode( // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
-			str_replace(
-				array( '-', '_' ),
-				array( '+', '/' ),
-				$encoded_string
-			)
-		);
-	} // END from_base_64_url()
-
-	/**
-	 * Get all possible HTTP headers that can contain the User-Agent string.
-	 *
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @since 2.0.0 Introduced.
-	 *
-	 * @return array List of HTTP headers.
-	 */
-	public static function get_user_agent_headers() {
-		return self::$user_agent_headers;
-	} // END get_user_agent_headers()
-
-	/**
-	 * Get the found User-Agent header.
-	 *
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @since 2.0.0 Introduced.
-	 *
-	 * @return string
-	 */
-	public static function get_user_agent_header() {
-		$user_agent_header = '';
-
-		foreach ( self::get_user_agent_headers() as $ua_header ) {
-			if ( ! empty( $_SERVER[ $ua_header ] ) ) {
-				$user_agent_header = $ua_header;
-			}
-		}
-
-		return $user_agent_header;
-	} // END get_user_agent_header()
-
-	/**
-	 * Clean up expired tokens in batches.
-	 *
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @since 2.0.0 Introduced.
-	 * @since 2.2.0 Improved to work in batches.
-	 *
-	 * @param int $batch_size Number of users to process per batch.
-	 */
-	public static function cleanup_expired_tokens( $batch_size = 100 ) {
-		$offset = 0;
-
-		do {
-			$users = get_users( array(
-				'meta_key'     => 'cocart_jwt_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_compare' => 'EXISTS',
-				'number'       => $batch_size,
-				'offset'       => $offset,
-			) );
-
-			foreach ( $users as $user ) {
-				$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
-
-				if ( ! empty( $token ) && self::is_token_expired( $token ) ) {
-					delete_user_meta( $user->ID, 'cocart_jwt_token' );
-				}
-			}
-
-			$offset += $batch_size;
-		} while ( count( $users ) === $batch_size );
-	} // END cleanup_expired_tokens()
-
-	/**
-	 * Schedule cron job for cleaning up expired tokens.
-	 *
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @since 2.0.0 Introduced.
-	 */
-	public static function schedule_cron_job() {
-		if ( ! wp_next_scheduled( 'cocart_jwt_cleanup_cron' ) ) {
-			wp_schedule_event( time(), 'daily', 'cocart_jwt_cleanup_cron' );
-		}
-	} // END schedule_cron_job()
-
-	/**
-	 * Clear scheduled cron job on plugin deactivation.
-	 *
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @since 2.0.0 Introduced.
-	 */
-	public static function clear_scheduled_cron_job() {
-		$timestamp = wp_next_scheduled( 'cocart_jwt_cleanup_cron' );
-		wp_unschedule_event( $timestamp, 'cocart_jwt_cleanup_cron' );
-	} // END clear_scheduled_cron_job()
-
-	/**
-	 * Clean up expired tokens.
-	 *
-	 * ## OPTIONS
-	 *
-	 * [--batch-size=<number>]
-	 * : Number of users to process per batch.
-	 * ---
-	 * default: 100
-	 *
-	 * [--force]
-	 * : Force cleanup of all tokens.
-	 *
-	 * ## EXAMPLES
-	 *
-	 * wp cocart jwt cleanup --batch-size=50
-	 * wp cocart jwt cleanup --force
-	 *
-	 * @when after_wp_load
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @param array $args       WP-CLI positional arguments.
-	 * @param array $assoc_args WP-CLI associative arguments.
-	 */
-	public function cli_clean_up_tokens( $args, $assoc_args ) {
-		$batch_size  = isset( $assoc_args['batch-size'] ) ? intval( $assoc_args['batch-size'] ) : 100;
-		$force       = isset( $assoc_args['force'] ) ? (bool) $assoc_args['force'] : false;
-		$total_users = count( get_users( array(
-			'meta_key'     => 'cocart_jwt_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			'meta_compare' => 'EXISTS',
-			'fields'       => 'ID',
-		) ) );
-
-		$progress = \WP_CLI\Utils\make_progress_bar( 'Cleaning up tokens', $total_users );
-
-		$offset = 0;
-
-		do {
-			$users = get_users( array(
-				'meta_key'     => 'cocart_jwt_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_compare' => 'EXISTS',
-				'number'       => $batch_size,
-				'offset'       => $offset,
-			) );
-
-			foreach ( $users as $user ) {
-				$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
-
-				if ( $force || ( ! empty( $token ) && self::is_token_expired( $token ) ) ) {
-					delete_user_meta( $user->ID, 'cocart_jwt_token' );
-				}
-
-				$progress->tick();
-			}
-
-			$offset += $batch_size;
-		} while ( count( $users ) === $batch_size );
-
-		$progress->finish();
-	} // END cli_clean_up_tokens()
-
-	/**
-	 * View details of a JWT token.
-	 *
-	 * ## OPTIONS
-	 *
-	 * <token>
-	 * : The JWT token to view.
-	 *
-	 * ## EXAMPLES
-	 *
-	 * wp cocart jwt view <token>
-	 *
-	 * @when after_wp_load
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @param array $args       WP-CLI positional arguments.
-	 * @param array $assoc_args WP-CLI associative arguments.
-	 */
-	public function cli_view_token( $args, $assoc_args ) {
-		list( $token ) = $args;
-
-		if ( empty( $token ) ) {
-			\WP_CLI::error( __( 'Token is required.', 'cocart-jwt-authentication' ) );
-		}
-
-		try {
-			$decoded_token = self::decode_token( $token );
-			\WP_CLI::log( '# Token details' );
-			\WP_CLI::log( 'Header Encoded: ' . $decoded_token->header_encoded );
-
-			$header_table = array();
-			foreach ( $decoded_token->header as $key => $value ) {
-				$header_table[] = array(
-					'Key'   => $key,
-					'Value' => $value,
-				);
-			}
-
-			$payload_table = array();
-			foreach ( $decoded_token->payload as $key => $value ) {
-				if ( is_object( $value ) || is_array( $value ) ) {
-					$value = wp_json_encode( $value, JSON_PRETTY_PRINT );
-				}
-				$payload_table[] = array(
-					'Key'   => $key,
-					'Value' => $value,
-				);
-			}
-
-			\WP_CLI::log( 'Header:' );
-			\WP_CLI\Utils\format_items( 'table', $header_table, array( 'Key', 'Value' ) );
-
-			\WP_CLI::log( '------------------------' );
-
-			\WP_CLI::log( 'Payload:' );
-			\WP_CLI\Utils\format_items( 'table', $payload_table, array( 'Key', 'Value' ) );
-		} catch ( Exception $e ) {
-			\WP_CLI::error( __( 'Invalid token.', 'cocart-jwt-authentication' ) );
-		}
-	} // END cli_view_token()
-
-	/**
-	 * List all active JWT tokens.
-	 *
-	 * ## OPTIONS
-	 *
-	 * [--page=<number>]
-	 * : Page number to display.
-	 * ---
-	 * default: 1
-	 *
-	 * [--per-page=<number>]
-	 * : Number of tokens to display per page.
-	 * ---
-	 * default: 20
-	 *
-	 * ## EXAMPLES
-	 *
-	 * wp cocart jwt list --page=2 --per-page=10
-	 *
-	 * @when after_wp_load
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @param array $args       WP-CLI positional arguments.
-	 * @param array $assoc_args WP-CLI associative arguments.
-	 */
-	public function cli_list_tokens( $args, $assoc_args ) {
-		$page     = isset( $assoc_args['page'] ) ? intval( $assoc_args['page'] ) : 1;
-		$per_page = isset( $assoc_args['per-page'] ) ? intval( $assoc_args['per-page'] ) : 20;
-
-		$users = get_users( array(
-			'meta_key'     => 'cocart_jwt_token', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			'meta_compare' => 'EXISTS',
-			'number'       => $per_page,
-			'offset'       => ( $page - 1 ) * $per_page,
-		) );
-
-		$tokens = array();
-
-		foreach ( $users as $user ) {
-			$token = get_user_meta( $user->ID, 'cocart_jwt_token', true );
-
-			if ( ! empty( $token ) && ! self::is_token_expired( $token ) ) {
-				$tokens[] = array(
-					'user_id' => $user->ID,
-					'token'   => $token,
-				);
-			}
-		}
-
-		if ( empty( $tokens ) ) {
-			\WP_CLI::success( __( 'No tokens found.', 'cocart-jwt-authentication' ) );
-		} else {
-			\WP_CLI::log( '# Tokens' );
-			\WP_CLI\Utils\format_items( 'table', $tokens, array( 'user_id', 'token' ) );
-		}
-	} // END cli_list_tokens()
-
-	/**
-	 * Generate a new JWT token for a user.
-	 *
-	 * ## OPTIONS
-	 *
-	 * --user=<id>
-	 * : The user ID to generate the token for.
-	 *
-	 * [--ip=<ip>]
-	 * : The IP address to override the server IP.
-	 *
-	 * [--user-agent=<user-agent>]
-	 * : The User Agent to override the server User Agent.
-	 *
-	 * ## EXAMPLES
-	 *
-	 * wp cocart jwt create --user=123 --ip=<ip> --user-agent=<user-agent>
-	 *
-	 * @when after_wp_load
-	 * @access public
-	 *
-	 * @static
-	 *
-	 * @param array $args       WP-CLI positional arguments.
-	 * @param array $assoc_args WP-CLI associative arguments.
-	 */
-	public function cli_create_token( $args, $assoc_args ) {
-		$user_ID    = isset( $assoc_args['user_id'] ) ? intval( $assoc_args['user_id'] ) : null;
-
-		if ( empty( $user_ID ) ) {
-			\WP_CLI::error( __( 'User ID is required.', 'cocart-jwt-authentication' ) );
-		}
-
-		$user = get_user_by( 'id', $user_ID );
-
-		if ( ! $user ) {
-			\WP_CLI::error( __( 'User not found.', 'cocart-jwt-authentication' ) );
-		}
-
-		$existing_token = get_user_meta( $user_ID, 'cocart_jwt_token', true );
-
-		if ( ! empty( $existing_token ) ) {
-			\WP_CLI::confirm( __( 'The user already has a token. Do you want to generate a new one?', 'cocart-jwt-authentication' ) );
-		}
-
-		$token = self::generate_token( $user_ID );
-
-		\WP_CLI::success( __( 'Token generated successfully.', 'cocart-jwt-authentication' ) );
-		\WP_CLI::log( $token );
-	} // END cli_create_token()
-
-	/**
-	 * Register WP-CLI command for cleaning up expired tokens with progress bar.
-	 *
-	 * @access public
-	 *
-	 * @static
-	 */
-	public static function register_cli_commands() {
-		if ( defined( 'WP_CLI' ) && WP_CLI ) {
-			\WP_CLI::add_command(
-				'cocart jwt cleanup',
-				array( __CLASS__, 'cli_clean_up_tokens' ),
-				array(
-					'shortdesc' => __( 'Cleans up expired JWT tokens.', 'cocart-jwt-authentication' ),
-					'synopsis'  => array(
-						array(
-							'type'        => 'assoc',
-							'name'        => 'batch-size',
-							'description' => __( 'Number of users to process per batch.', 'cocart-jwt-authentication' ),
-							'optional'    => true,
-							'default'     => 100,
-						),
-						array(
-							'type'        => 'flag',
-							'name'        => 'force',
-							'description' => __( 'Force cleanup of all tokens.', 'cocart-jwt-authentication' ),
-							'optional'    => true,
-						),
-					),
-					'examples'  => array(
-						'wp cocart jwt cleanup --batch-size=50',
-						'wp cocart jwt cleanup --force',
-					),
-				)
-			);
-
-			\WP_CLI::add_command(
-				'cocart jwt view',
-				array( __CLASS__, 'cli_view_token' ),
-				array(
-					'shortdesc' => __( 'Displays details of a JWT token.', 'cocart-jwt-authentication' ),
-					'synopsis'  => array(
-						array(
-							'type'        => 'positional',
-							'name'        => 'token',
-							'description' => __( 'The JWT token to view.', 'cocart-jwt-authentication' ),
-							'optional'    => false,
-						),
-					),
-					'examples'  => array(
-						'wp cocart jwt view <token>',
-					),
-				)
-			);
-
-			\WP_CLI::add_command(
-				'cocart jwt list',
-				array( __CLASS__, 'cli_list_tokens' ),
-				array(
-					'shortdesc' => __( 'Lists all active JWT tokens.', 'cocart-jwt-authentication' ),
-					'synopsis'  => array(
-						array(
-							'type'        => 'assoc',
-							'name'        => 'page',
-							'description' => __( 'Page number to display.', 'cocart-jwt-authentication' ),
-							'optional'    => true,
-							'default'     => 1,
-						),
-						array(
-							'type'        => 'assoc',
-							'name'        => 'per-page',
-							'description' => __( 'Number of tokens to display per page.', 'cocart-jwt-authentication' ),
-							'optional'    => true,
-							'default'     => 20,
-						),
-					),
-					'examples'  => array(
-						'wp cocart jwt list --page=2 --per-page=10',
-					),
-				)
-			);
-
-			\WP_CLI::add_command(
-				'cocart jwt create',
-				array( __CLASS__, 'cli_create_token' ),
-				array(
-					'shortdesc' => __( 'Generates a new JWT token for a user.', 'cocart-jwt-authentication' ),
-					'synopsis'  => array(
-						array(
-							'type'        => 'assoc',
-							'name'        => 'user_id',
-							'description' => __( 'The user ID to generate the token for.', 'cocart-jwt-authentication' ),
-							'optional'    => false,
-						),
-					),
-					'examples'  => array(
-						'wp cocart jwt create --user_id=123',
-					),
-				)
-			);
-		}
-	} // END register_cli_commands()
-
-	/**
 	 * Load the plugin translations if any ready.
 	 *
 	 * Note: the first-loaded translation file overrides any following ones if the same translation is present.
@@ -1465,20 +550,26 @@ final class Plugin {
 	 *      - WP_LANG_DIR/plugins/cocart-jwt-authentication-LOCALE.mo
 	 *
 	 * @access public
-	 *
-	 * @static
 	 */
-	public static function load_plugin_textdomain() {
-		if ( function_exists( 'determine_locale' ) ) {
-			$locale = determine_locale();
-		} else {
-			$locale = is_admin() ? get_user_locale() : get_locale();
-		}
+	public function load_plugin_textdomain() {
+		/**
+		 * Filter to adjust the cocart-jwt-authentication locale to use for translations.
+		 *
+		 * @since 3.0.0 Introduced in WP core.
+		 */
+		$locale                  = apply_filters( 'plugin_locale', determine_locale(), 'cocart-jwt-authentication' );
+		$custom_translation_path = WP_LANG_DIR . '/cocart-jwt-authentication/cocart-jwt-authentication-' . $locale . '.mo';
+		$plugin_translation_path = WP_LANG_DIR . '/plugins/cocart-jwt-authentication-' . $locale . '.mo';
 
-		$locale = apply_filters( 'plugin_locale', $locale, 'cocart-jwt-authentication' );
-
+		// If a custom translation exists (by default it will not, as it is not a standard WordPress convention)
+		// we unload the existing translation, then essentially layer the custom translation on top of the canonical
+		// translation. Otherwise, we simply step back and let WP manage things.
 		unload_textdomain( 'cocart-jwt-authentication' );
-		load_textdomain( 'cocart-jwt-authentication', WP_LANG_DIR . '/cocart-jwt-authentication/cocart-jwt-authentication-' . $locale . '.mo' );
-		load_plugin_textdomain( 'cocart-jwt-authentication', false, plugin_basename( dirname( COCART_JWT_AUTHENTICATION_FILE ) ) . '/languages' );
+		if ( is_readable( $custom_translation_path ) ) {
+			load_textdomain( 'cocart-jwt-authentication', $custom_translation_path );
+			load_textdomain( 'cocart-jwt-authentication', $plugin_translation_path );
+		} else {
+			load_textdomain( 'cocart-jwt-authentication', plugin_basename( dirname( COCART_JWT_AUTHENTICATION_FILE ) ) . '/languages/cocart-jwt-authentication-' . $locale . '.mo' );
+		}
 	} // END load_plugin_textdomain()
 } // END class

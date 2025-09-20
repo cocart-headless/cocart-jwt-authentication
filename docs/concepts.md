@@ -66,7 +66,7 @@ Tokens can be invalidated for security events or user actions.
 
 Rate limiting is a security feature that helps protect your API from abuse by limiting the number of requests.
 
-For JWT, we force enable this feature when refreshing a client's token within a specific time window.
+For JWT, we force enable this feature when refreshing a client's token and validating within a specific time window.
 
 > Rate limiting is only supported if you have [CoCart Plus](https://cocartapi.com) installed.​
 
@@ -82,7 +82,10 @@ Requests are counted within a configurable time window (default: 1 minute)
 
 3. Limit Enforcement
 
-When limits are exceeded (default: 10 requests per minute per IP), requests are blocked with a 429 (Too Many Requests) response.
+For refresh token, limits are exceeded (default: 10 requests per minute per IP)
+For validating token, limits are exceeded (default: 2 requests per minute per IP)
+
+Then requests are blocked with a 429 (Too Many Requests) response.
 
 4. Reset Period
 

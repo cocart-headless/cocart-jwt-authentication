@@ -1,0 +1,200 @@
+# Translation of CoCart JWT Authentication in French (France)
+# This file is distributed under the same license as the CoCart JWT Authentication package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2025-03-17 02:27:02+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: GlotPress/4.0.1\n"
+"Language: fr\n"
+"Project-Id-Version: CoCart JWT Authentication\n"
+
+#: includes/class-cocart-jwt-authentication.php:1217
+msgid "Token was incomplete."
+msgstr ""
+
+#: includes/class-cocart-jwt-authentication.php:1205
+msgid "Token does not have a matching prefix."
+msgstr ""
+
+#: includes/class-cocart-jwt-authentication.php:353
+msgid "User associated with token no longer exists."
+msgstr ""
+
+#: includes/class-cocart-jwt-authentication.php:343
+msgid "Token is malformed: Missing user to identify."
+msgstr ""
+
+#: includes/class-cocart-jwt-authentication.php:335
+msgid "Token is invalid: Does not match with this server."
+msgstr ""
+
+#: includes/class-cocart-jwt-authentication.php:327
+msgid "Token has expired."
+msgstr ""
+
+#: includes/class-cocart-jwt-authentication.php:320
+msgid "Token signature verification failed."
+msgstr ""
+
+#: includes/class-cocart-jwt-authentication.php:309
+msgid "Token is malformed."
+msgstr ""
+
+#: includes/class-cocart-jwt-authentication.php:266
+msgid "Authorization header present but no Bearer token."
+msgstr ""
+
+#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:71
+msgctxt "label that indicates the version of the plugin"
+msgid "JWT Authentication Version"
+msgstr ""
+
+#: includes/class-cocart-jwt-authentication.php:361
+msgid "Unable to validate IP or User-Agent."
+msgstr ""
+
+#: includes/class-cocart-jwt-authentication.php:293
+msgid "JWT is not configured properly."
+msgstr ""
+
+#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:123
+msgid "All expired tokens have now been cleared."
+msgstr ""
+
+#. translators: %s = Plugin name
+#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:101
+msgid "This tool will clear all expired JWT tokens generated with %s."
+msgstr ""
+
+#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:98
+msgid "Note:"
+msgstr ""
+
+#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:95
+msgid "Clear"
+msgstr ""
+
+#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:94
+msgid "Clear expired JWT tokens"
+msgstr ""
+
+#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:72
+msgid "JWT Authentication Version"
+msgstr ""
+
+#: includes/class-cocart-jwt-authentication.php:1775
+msgid "The User Agent to override the server User Agent."
+msgstr "L'agent utilisateur pour remplacer l'agent utilisateur du serveur."
+
+#: includes/class-cocart-jwt-authentication.php:1769
+msgid "The user ID to generate the token for."
+msgstr "L'ID utilisateur pour lequel générer le jeton."
+
+#: includes/class-cocart-jwt-authentication.php:1764
+msgid "Generates a new JWT token for a user."
+msgstr "Génère un nouveau jeton JWT pour un utilisateur."
+
+#: includes/class-cocart-jwt-authentication.php:1749
+msgid "Number of tokens to display per page."
+msgstr "Nombre de jetons à afficher par page."
+
+#: includes/class-cocart-jwt-authentication.php:1742
+msgid "Page number to display."
+msgstr "Numéro de page à afficher."
+
+#: includes/class-cocart-jwt-authentication.php:1737
+msgid "Lists all active JWT tokens."
+msgstr "Répertorie tous les jetons JWT actifs."
+
+#: includes/class-cocart-jwt-authentication.php:1723
+msgid "The JWT token to view."
+msgstr "Le jeton JWT à afficher."
+
+#: includes/class-cocart-jwt-authentication.php:1718
+msgid "Displays details of a JWT token."
+msgstr "Affiche les détails d'un jeton JWT."
+
+#: includes/class-cocart-jwt-authentication.php:1703
+msgid "Force cleanup of all tokens."
+msgstr "Forcer le nettoyage de tous les jetons."
+
+#: includes/class-cocart-jwt-authentication.php:1696
+msgid "Number of users to process per batch."
+msgstr "Nombre d'utilisateurs à traiter par lot."
+
+#: includes/class-cocart-jwt-authentication.php:1691
+msgid "Cleans up expired JWT tokens."
+msgstr "Nettoie les jetons JWT expirés."
+
+#: includes/class-cocart-jwt-authentication.php:1674
+msgid "Token generated."
+msgstr "Jeton généré."
+
+#: includes/class-cocart-jwt-authentication.php:1664
+msgid "Are you sure you want to generate a new one?"
+msgstr "Êtes-vous sûr de vouloir en générer un nouveau?"
+
+#: includes/class-cocart-jwt-authentication.php:1663
+msgid "Generating another token will kick the user out of session"
+msgstr "La génération d'un autre jeton expulsera l'utilisateur de la session"
+
+#: includes/class-cocart-jwt-authentication.php:1657
+msgid "User not found."
+msgstr "Utilisateur non trouvé."
+
+#: includes/class-cocart-jwt-authentication.php:1651
+msgid "User ID is required."
+msgstr "L'identifiant utilisateur est requis."
+
+#: includes/class-cocart-jwt-authentication.php:1616
+msgid "No tokens found."
+msgstr "Aucun jeton trouvé."
+
+#: includes/class-cocart-jwt-authentication.php:1560
+msgid "Invalid token."
+msgstr "Jeton non valide."
+
+#: includes/class-cocart-jwt-authentication.php:1522
+msgid "Token is required."
+msgstr "Un jeton est requis."
+
+#: includes/class-cocart-jwt-authentication.php:485
+msgid "User unknown!"
+msgstr "Utilisateur inconnu !"
+
+#: includes/class-cocart-jwt-authentication.php:133
+msgid "Token is valid."
+msgstr "Le jeton est valide."
+
+#: includes/class-cocart-jwt-authentication.php:864
+msgid "Refresh token expired."
+msgstr "Le jeton d'actualisation a expiré."
+
+#: includes/class-cocart-jwt-authentication.php:857
+msgid "Invalid refresh token."
+msgstr "Jeton d'actualisation non valide."
+
+#: includes/class-cocart-jwt-authentication.php:608
+msgid "Algorithm not supported"
+msgstr "Algorithme non pris en charge"
+
+#: includes/class-cocart-jwt-authentication.php:294
+#: includes/class-cocart-jwt-authentication.php:520
+#: includes/class-cocart-jwt-authentication.php:803
+msgid "JWT configuration error."
+msgstr "Erreur de configuration JWT."
+
+#: includes/class-cocart-jwt-authentication.php:310
+#: includes/class-cocart-jwt-authentication.php:321
+#: includes/class-cocart-jwt-authentication.php:328
+#: includes/class-cocart-jwt-authentication.php:336
+#: includes/class-cocart-jwt-authentication.php:344
+#: includes/class-cocart-jwt-authentication.php:354
+#: includes/class-cocart-jwt-authentication.php:362
+#: includes/class-cocart-jwt-authentication.php:532
+#: includes/class-cocart-jwt-authentication.php:810
+msgid "Authentication failed."
+msgstr "L'authentification a échoué."
