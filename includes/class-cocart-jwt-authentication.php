@@ -554,6 +554,8 @@ final class Plugin {
 	public function load_plugin_textdomain() {
 		/**
 		 * Filter to adjust the cocart-jwt-authentication locale to use for translations.
+		 *
+		 * @since 3.0.0 Introduced in WP core.
 		 */
 		$locale                  = apply_filters( 'plugin_locale', determine_locale(), 'cocart-jwt-authentication' );
 		$custom_translation_path = WP_LANG_DIR . '/cocart-jwt-authentication/cocart-jwt-authentication-' . $locale . '.mo';
