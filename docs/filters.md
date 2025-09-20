@@ -151,6 +151,24 @@ add_filter( 'cocart_jwt_auth_refresh_token_expiration', function( $expiration ) 
 
 ## Token Management
 
+`cocart_jwt_auth_max_user_tokens`
+
+> Made available since v3.0.0
+
+Allows you to change the maximum number of tokens a user can have. Default is 5 tokens.
+
+```php
+add_filter( 'cocart_jwt_auth_max_user_tokens', function( $max_tokens, $user ) {
+    // Allow administrators unlimited tokens.
+    if ( user_can( $user, 'manage_options' ) ) {
+        return -1; // -1 = unlimited
+    }
+
+    // Limit regular users to 3 tokens.
+    return 3;
+}, 10, 2);
+```
+
 `cocart_jwt_auth_revoke_tokens_on_email_change`
 
 > Made available since v2.3.0

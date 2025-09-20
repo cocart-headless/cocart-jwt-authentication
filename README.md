@@ -38,24 +38,20 @@ Once ready to use, see the [quick start guide](docs/quick-start.md). There is al
 
 If you find an issue, please [report the issue](https://github.com/cocart-headless/cocart-jwt-authentication/issues/new). If you believe you have found a security issue then [read the security policy](SECURITY.md).
 
----
-
 ## CoCart Channels
 
 We have different channels at your disposal where you can find information about the CoCart project, discuss it and get involved:
 
-[![Twitter: cocartapi](https://img.shields.io/twitter/follow/cocartapi?style=social)](https://twitter.com/cocartapi) [![CoCart GitHub Stars](https://img.shields.io/github/stars/co-cart/co-cart?style=social)](https://github.com/co-cart/co-cart)
+[![Twitter: cocartapi](https://img.shields.io/twitter/follow/cocartapi?style=social)](https://twitter.com/cocartapi) [![CoCart GitHub Stars](https://img.shields.io/github/stars/cocart-headless/cocart-jwt-authentication?style=social)](https://github.com/cocart-headless/cocart-jwt-authentication)
 
 <ul>
-  <li>📖 <strong>Docs</strong>: this is the place to learn how to use CoCart API. <a href="https://cocartapi.com/docs/?utm_medium=gh&utm_source=github&utm_campaign=readme&utm_content=cocart">Get started!</a></li>
-  <li>🧰 <strong>Resources</strong>: this is the hub of all CoCart resources to help you build a headless store. <a href="https://cocart.dev/?utm_medium=gh&utm_source=github&utm_campaign=readme&utm_content=cocart">Get resources!</a></li>
+  <li>📖 <strong>Documentation</strong>: this is the place to learn how to use CoCart API. <a href="https://cocartapi.com/docs/?utm_medium=gh&utm_source=github&utm_campaign=readme&utm_content=cocart">Get started!</a></li>
   <li>👪 <strong>Community</strong>: use our Discord chat room to share any doubts, feedback and meet great people. This is your place too to share <a href="https://cocartapi.com/community/?utm_medium=gh&utm_source=github&utm_campaign=readme&utm_content=cocart">how are you planning to use CoCart!</a></li>
   <li>🐞 <strong>GitHub</strong>: we use GitHub for bugs and pull requests, doubts are solved with the community.</li>
-  <li>🐦 <strong>Social media</strong>: a more informal place to interact with CoCart users, reach out to us on <a href="https://twitter.com/cocartapi">Twitter.</a></li>
-  <li>💌 <strong>Newsletter</strong>: do you want to receive the latest plugin updates and news? Subscribe <a href="https://twitter.com/cocartapi">here.</a></li>
+  <li>🐦 <strong>Social media</strong>: a more informal place to interact with CoCart users, reach out to us on <a href="https://twitter.com/cocartapi">X/Twitter.</a></li>
 </ul>
 
----
+For additional security, consider our [API Security](https://apisecurity.pro/?utm_medium=gh&utm_source=github&utm_campaign=readme&utm_content=cocart) plugin that provides a firewall to block unknown outsiders, rate limit requests and protect data exposure – no configuration required.
 
 ## License
 
@@ -66,8 +62,10 @@ Released under [GNU General Public License v3.0](http://www.gnu.org/licenses/gpl
 ## Credits
 
 Website [cocartapi.com](https://cocartapi.com/?ref=github) &nbsp;&middot;&nbsp;
-GitHub [@co-cart](https://github.com/co-cart) &nbsp;&middot;&nbsp;
-Twitter [@cocartapi](https://twitter.com/cocartapi)
+GitHub [@cocart-headless](https://github.com/cocart-headless) &nbsp;&middot;&nbsp;
+X/Twitter [@cocartapi](https://twitter.com/cocartapi) &nbsp;&middot;&nbsp;
+[Facebook](https://www.facebook.com/cocartforwc/) &nbsp;&middot;&nbsp;
+[Instagram](https://www.instagram.com/cocartheadless/)
 
 ---
 

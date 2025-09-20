@@ -4,7 +4,7 @@ Tags: woocommerce, rest-api, decoupled, headless, jwt
 Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 6.8
-Stable tag: 2.5.2
+Stable tag: 3.0.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -29,7 +29,7 @@ JSON Web Tokens are an open standard [RFC 7519](https://datatracker.ietf.org/doc
 * **Multiple signing algorithms**: `HS256`, `HS384`, `HS512`, `RS256`, `RS384`, `RS512`, `ES256`, `ES384`, `ES512`, `PS256`, `PS384`, `PS512`
 * **Rate Limiting**: Controlled specifically for refreshing and validating tokens. Requires [CoCart Plus](https://cocartapi.com/?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink)
 * **Helpful Debugging**: Detailed logs of authentication issues to help figure out exactly what happened and fix it faster.
-* **WP-CLI Commands**: Useful [commands to handle tokens](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/wp-cli.md) - whether you need to check them, create new ones, or clean up old ones.
+* **WP-CLI Commands**: Useful [commands to handle tokens](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/wp-cli.md) - whether you need to check, destroy or create new ones, or clean up old ones.
 * **Developer Hooks**: Provides [filters](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/filters.md) and [hooks](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/hooks.md) for more configuration to your requirements.
 
 For support, please join the [community on Discord](https://cocartapi.com/community/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart). For priority support, consider upgrading to [CoCart Plus](https://cocartapi.com/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart).
@@ -52,6 +52,8 @@ We also have other add-ons that extend CoCart to enhance your headless store dev
 * and more add-ons in development.
 
 These add-ons of course come with support too.
+
+For additional security, consider our [API Security](https://apisecurity.pro/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart) plugin that provides a firewall to block unknown outsiders, rate limit requests and protect data exposure – no configuration required.
 
 ### ⌨️ Join our growing community
 
@@ -133,10 +135,50 @@ It is possible due to a plugin conflict e.g. Login Limit and the token used fail
 
 == Changelog ==
 
+= v3.0.0 - 20th September, 2025 =
+
+📢 This update will invalidate previous tokens as they will no longer be valid.
+
+With this update we have improved tracking of tokens to be dual-secured with a PAT (Personal Access Token) ID. This also makes sure users don't get unnecessary new tokens when already authenticated for proper token life cycle management and prevent token proliferation when users are already authenticated.
+
+### What's New?
+
+* Plugin: Refactored the plugin for better management and performance.
+* Plugin: Added background database cleanup for legacy user meta data on plugin activation.
+* REST-API: Users can now have multiple active token sessions, each tracked separately for different devices/browsers.
+* REST-API: Refresh tokens are now properly linked to their corresponding JWT tokens.
+* REST-API: Existing tokens are returned when authenticating with Bearer tokens (prevents token proliferation).
+* WP-CLI: Creating a token now accepts the user ID, email or login. See documentation for updated command.
+* WP-CLI: Added new `destroy` command to remove tokens for specific users with confirmation prompts.
+* Dashboard: Added setup guide with secret key generator.
+
+### Bug Fix
+
+* WP-CLI: Fixed loading of localization too early.
+
+### Improvements
+
+* Plugin: Tokens will now log the last login timestamp. This is also part of the PAT (Personal Access Token).
+* Plugin: Meta data is hidden from custom fields.
+* REST-API: Authorization will fail if the user has no tokens in session.
+* REST-API: Authorization will fail if the token is not found in session.
+* REST-API: Token refresh now uses proper session rotation for enhanced security.
+* WP-CLI: Listing user tokens will now list each token a user has. See documentation for updated command.
+* WP-CLI: Now localized.
+
+### Developers
+
+* Introduced new filter `cocart_jwt_auth_max_user_tokens` that sets the maximum number of tokens stored for a user.
+* Introduced new action hook `cocart_jwt_auth_authenticated` that fires when a user is authenticated.
+
+### Compatibility
+
+* Tested with CoCart v4.8
+
 [View the full changelog here](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/CHANGELOG.md).
 
 == Upgrade Notice ==
 
-= 2.5.2 =
+= 3.0.0 =
 
-Fixed compatibility with PHP v7.4 when generating token.
+This update will invalidate previous tokens as they will no longer be valid.

@@ -4,6 +4,25 @@ CoCart JWT Authentication provides a set of actions that allow you to hook into 
 
 ## Token Events
 
+`cocart_jwt_auth_authenticated`
+
+> Made available since v3.0.0
+
+Fires when a user is authenticated via JWT token.
+
+```php
+add_action( 'cocart_jwt_auth_authenticated', function( $token, $user ) {
+    // Send notification to admin for VIP users.
+    if ( in_array( 'vip_customer', $user->roles ) ) {
+        wp_mail( 'admin@site.com', 'VIP Customer API Access', "VIP customer {$user->display_name} accessed the API" );
+    }
+
+    // Track API usage for analytics.
+    $usage_count = get_user_meta( $user->ID, 'api_usage_count', true ) ?: 0;
+    update_user_meta( $user->ID, 'api_usage_count', $usage_count + 1 );
+}, 10, 2 );
+```
+
 `cocart_jwt_auth_token_generated`
 
 > Made available since v2.1.0
