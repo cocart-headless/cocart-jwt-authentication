@@ -12,6 +12,8 @@
 
 namespace CoCart\JWTAuthentication\Admin;
 
+use CoCart\JWTAuthentication\Plugin;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
