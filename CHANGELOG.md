@@ -1,5 +1,19 @@
 # Changelog for CoCart JWT Authentication
 
+## v3.0.1 - 27th November, 2025
+
+### What's New?
+
+* Dashboard: Added plugin action links.
+
+### Bug Fix
+
+* Dashboard: WooCommerce System Status was not accessible.
+
+### Compatible
+
+* Tested with WooCommerce v10.3
+
 ## v3.0.0 - 20th September, 2025
 
 📢 This update will invalidate previous tokens as they will no longer be valid.

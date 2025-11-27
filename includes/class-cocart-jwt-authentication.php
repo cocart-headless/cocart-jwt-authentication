@@ -29,7 +29,7 @@ final class Plugin {
 	 *
 	 * @var string
 	 */
-	public static $version = '3.0.0';
+	public static $version = '3.0.1';
 
 	/**
 	 * Single instance of the CoCart class

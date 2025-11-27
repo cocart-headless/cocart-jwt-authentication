@@ -4,7 +4,7 @@ Tags: woocommerce, rest-api, decoupled, headless, jwt
 Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 6.8
-Stable tag: 3.0.0
+Stable tag: 3.0.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -134,6 +134,20 @@ No! This JWT Authentication was specifically designed for the CoCart API ONLY.
 It is possible due to a plugin conflict e.g. Login Limit and the token used failed many times and the IP address may have been blacklisted.
 
 == Changelog ==
+
+= v3.0.1 - 27th November, 2025 =
+
+### What's New?
+
+* Dashboard: Added plugin action links.
+
+### Bug Fix
+
+* Dashboard: WooCommerce System Status was not accessible.
+
+### Compatible
+
+* Tested with WooCommerce v10.3
 
 = v3.0.0 - 20th September, 2025 =
 
