@@ -155,7 +155,7 @@ final class Plugin {
 
 			// Only redirect if user has proper capabilities.
 			if ( current_user_can( 'manage_options' ) ) {
-				wp_redirect( admin_url( 'admin.php?page=cocart-jwt-setup' ) );
+				wp_safe_redirect( admin_url( 'admin.php?page=cocart-jwt-setup' ) );
 				exit;
 			}
 		}
