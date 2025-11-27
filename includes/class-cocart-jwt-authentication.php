@@ -130,6 +130,7 @@ final class Plugin {
 		if ( is_admin() ) {
 			include_once __DIR__ . '/admin/class-cocart-jwt-wc-admin-system-status.php';
 			include_once __DIR__ . '/admin/class-admin-notices.php';
+			include_once __DIR__ . '/admin/class-admin-plugin-action-links.php';
 			include_once __DIR__ . '/admin/class-jwt-setup.php';
 
 			// Handle activation redirect.
