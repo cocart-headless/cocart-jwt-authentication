@@ -3,7 +3,7 @@ Contributors: cocartforwc, sebd86
 Tags: woocommerce, rest-api, decoupled, headless, jwt
 Requires at least: 6.0
 Requires PHP: 7.4
-Tested up to: 6.8
+Tested up to: 6.9
 Stable tag: 3.0.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -135,7 +135,7 @@ It is possible due to a plugin conflict e.g. Login Limit and the token used fail
 
 == Changelog ==
 
-= v3.0.1 - 27th November, 2025 =
+= v3.0.1 - 3rd December, 2025 =
 
 ### What's New?
 
@@ -147,6 +147,7 @@ It is possible due to a plugin conflict e.g. Login Limit and the token used fail
 
 ### Compatible
 
+* Tested with WordPress v6.9
 * Tested with WooCommerce v10.3
 
 = v3.0.0 - 20th September, 2025 =

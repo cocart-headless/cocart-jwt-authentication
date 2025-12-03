@@ -2,10 +2,10 @@
 # This file is distributed under the same license as the CoCart package.
 msgid ""
 msgstr ""
-"Project-Id-Version: CoCart JWT Authentication 3.0.0\n"
+"Project-Id-Version: CoCart JWT Authentication 3.0.1\n"
 "Report-Msgid-Bugs-To: "
 "https://github.com/cocart-headless/cocart-jwt-authentication/issues\n"
-"POT-Creation-Date: 2025-09-20 16:43:55+00:00\n"
+"POT-Creation-Date: 2025-11-27 16:57:41+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -33,28 +33,59 @@ msgstr ""
 msgid "Install CoCart now"
 msgstr ""
 
-#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:73
+#: includes/admin/class-admin-plugin-action-links.php:65
+msgid "Setup JWT"
+msgstr ""
+
+#: includes/admin/class-admin-plugin-action-links.php:90
+#. translators: %s: CoCart
+msgid "View %s Documentation"
+msgstr ""
+
+#: includes/admin/class-admin-plugin-action-links.php:92
+msgid "Documentation"
+msgstr ""
+
+#: includes/admin/class-admin-plugin-action-links.php:95
+#. translators: %s: CoCart
+msgid "Translate %s"
+msgstr ""
+
+#: includes/admin/class-admin-plugin-action-links.php:97
+msgid "Translate"
+msgstr ""
+
+#: includes/admin/class-admin-plugin-action-links.php:100
+#. translators: %s: CoCart
+msgid "Submit a review for %s"
+msgstr ""
+
+#: includes/admin/class-admin-plugin-action-links.php:102
+msgid "Leave a Review"
+msgstr ""
+
+#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:75
 msgid "JWT Authentication Version"
 msgstr ""
 
-#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:95
+#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:97
 msgid "Clear expired JWT tokens"
 msgstr ""
 
-#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:96
+#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:98
 msgid "Clear"
 msgstr ""
 
-#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:99
+#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:101
 msgid "Note:"
 msgstr ""
 
-#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:102
+#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:104
 #. translators: %s = Plugin name
 msgid "This tool will clear all expired JWT tokens generated with %s."
 msgstr ""
 
-#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:124
+#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:126
 msgid "All expired tokens have now been cleared."
 msgstr ""
 
@@ -174,47 +205,47 @@ msgstr ""
 msgid "Unserializing instances of this class is forbidden."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:241
+#: includes/class-cocart-jwt-authentication.php:242
 msgid "NAME"
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:243
+#: includes/class-cocart-jwt-authentication.php:244
 msgid "Manage JWT tokens for CoCart."
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:245
+#: includes/class-cocart-jwt-authentication.php:246
 msgid "SYNOPSIS"
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:249
+#: includes/class-cocart-jwt-authentication.php:250
 msgid "SUBCOMMANDS"
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:251
+#: includes/class-cocart-jwt-authentication.php:252
 msgid "Generate a new JWT token for a user"
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:254
+#: includes/class-cocart-jwt-authentication.php:255
 msgid "Display details of a JWT token"
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:257
+#: includes/class-cocart-jwt-authentication.php:258
 msgid "List all active JWT tokens"
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:260
+#: includes/class-cocart-jwt-authentication.php:261
 msgid "Clean up expired JWT tokens"
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:263
+#: includes/class-cocart-jwt-authentication.php:264
 msgid "Destroy JWT tokens for a specific user"
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:266
+#: includes/class-cocart-jwt-authentication.php:267
 msgid "EXAMPLES"
 msgstr ""
 
-#: includes/class-cocart-jwt-authentication.php:273
+#: includes/class-cocart-jwt-authentication.php:274
 msgid "For more details on each subcommand, visit:"
 msgstr ""
 
@@ -378,7 +409,7 @@ msgstr ""
 msgid "Invalid token."
 msgstr ""
 
-#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:72
+#: includes/admin/class-cocart-jwt-wc-admin-system-status.php:74
 msgctxt "label that indicates the version of the plugin"
 msgid "JWT Authentication Version"
 msgstr ""

@@ -1,6 +1,6 @@
 # Changelog for CoCart JWT Authentication
 
-## v3.0.1 - 27th November, 2025
+## v3.0.1 - 3rd December, 2025
 
 ### What's New?
 
@@ -12,6 +12,7 @@
 
 ### Compatible
 
+* Tested with WordPress v6.9
 * Tested with WooCommerce v10.3
 
 ## v3.0.0 - 20th September, 2025
