@@ -75,9 +75,7 @@ jobs:
           tools: composer:v2
 
       - name: Install Composer dependencies
-        uses: ramsey/composer-install@v3
-        with:
-          composer-options: '--prefer-dist --no-progress'
+        run: composer update --prefer-dist --no-progress
 
       - name: Install CoCart core Composer dependencies
         run: composer install --prefer-dist --no-progress
