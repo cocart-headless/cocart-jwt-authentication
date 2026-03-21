@@ -4,7 +4,7 @@
  *
  * Tests for the JWT authentication flow: perform_jwt_authentication() is tested
  * directly (unit-style) since WP REST unit tests do not re-run determine_current_user
- * on dispatch. Endpoint permission is verified via wp_set_current_user simulation.
+ * on dispatch, making it impossible to drive auth via HTTP headers in endpoint tests.
  *
  * @package CoCart JWT Authentication\Tests\Unit
  */
@@ -37,17 +37,8 @@ class Test_CoCart_JWT_Authentication extends CoCart_JWT_Test_Case {
 	 * @return void
 	 */
 	public function test_valid_token_authenticates_user() {
-		$token = $this->get_jwt_token_for_user( $this->user->ID );
-		$rest  = new \CoCart\JWTAuthentication\REST();
-
-		$_SERVER['HTTP_AUTHORIZATION'] = 'Bearer ' . $token;
-		$_SERVER['REQUEST_URI']        = '/wp-json/cocart/jwt/validate-token';
-
-		$auth   = new CoCart_Authentication();
-		$result = $rest->perform_jwt_authentication( 0, false, $auth );
-
-		unset( $_SERVER['HTTP_AUTHORIZATION'], $_SERVER['REQUEST_URI'] );
-
+		$token  = $this->get_jwt_token_for_user( $this->user->ID );
+		$result = $this->perform_jwt_auth( $token );
 		$this->assertEquals( $this->user->ID, $result, 'Valid token must return the user ID.' );
 	}
 
@@ -57,16 +48,7 @@ class Test_CoCart_JWT_Authentication extends CoCart_JWT_Test_Case {
 	 * @return void
 	 */
 	public function test_invalid_token_does_not_authenticate() {
-		$rest = new \CoCart\JWTAuthentication\REST();
-
-		$_SERVER['HTTP_AUTHORIZATION'] = 'Bearer not.a.valid.jwt';
-		$_SERVER['REQUEST_URI']        = '/wp-json/cocart/jwt/validate-token';
-
-		$auth   = new CoCart_Authentication();
-		$result = $rest->perform_jwt_authentication( 0, false, $auth );
-
-		unset( $_SERVER['HTTP_AUTHORIZATION'], $_SERVER['REQUEST_URI'] );
-
+		$result = $this->perform_jwt_auth( 'not.a.valid.jwt' );
 		$this->assertEquals( 0, $result, 'Invalid token must not authenticate.' );
 	}
 
@@ -99,16 +81,7 @@ class Test_CoCart_JWT_Authentication extends CoCart_JWT_Test_Case {
 		remove_all_filters( 'cocart_jwt_auth_secret_private_key', 99 );
 		remove_all_filters( 'cocart_jwt_auth_secret_public_key', 99 );
 
-		$rest = new \CoCart\JWTAuthentication\REST();
-
-		$_SERVER['HTTP_AUTHORIZATION'] = 'Bearer ' . $token;
-		$_SERVER['REQUEST_URI']        = '/wp-json/cocart/jwt/validate-token';
-
-		$auth   = new CoCart_Authentication();
-		$result = $rest->perform_jwt_authentication( 0, false, $auth );
-
-		unset( $_SERVER['HTTP_AUTHORIZATION'], $_SERVER['REQUEST_URI'] );
-
+		$result = $this->perform_jwt_auth( $token );
 		$this->assertEquals( 0, $result, 'Token signed with wrong key must not authenticate.' );
 	}
 
@@ -121,16 +94,7 @@ class Test_CoCart_JWT_Authentication extends CoCart_JWT_Test_Case {
 		$token = $this->get_jwt_token_for_user( $this->user->ID );
 		wp_delete_user( $this->user->ID );
 
-		$rest = new \CoCart\JWTAuthentication\REST();
-
-		$_SERVER['HTTP_AUTHORIZATION'] = 'Bearer ' . $token;
-		$_SERVER['REQUEST_URI']        = '/wp-json/cocart/jwt/validate-token';
-
-		$auth   = new CoCart_Authentication();
-		$result = $rest->perform_jwt_authentication( 0, false, $auth );
-
-		unset( $_SERVER['HTTP_AUTHORIZATION'], $_SERVER['REQUEST_URI'] );
-
+		$result = $this->perform_jwt_auth( $token );
 		$this->assertEquals( 0, $result, 'Token for deleted user must not authenticate.' );
 	}
 
@@ -143,16 +107,7 @@ class Test_CoCart_JWT_Authentication extends CoCart_JWT_Test_Case {
 		$token = $this->get_jwt_token_for_user( $this->user->ID );
 		delete_user_meta( $this->user->ID, '_cocart_jwt_tokens' );
 
-		$rest = new \CoCart\JWTAuthentication\REST();
-
-		$_SERVER['HTTP_AUTHORIZATION'] = 'Bearer ' . $token;
-		$_SERVER['REQUEST_URI']        = '/wp-json/cocart/jwt/validate-token';
-
-		$auth   = new CoCart_Authentication();
-		$result = $rest->perform_jwt_authentication( 0, false, $auth );
-
-		unset( $_SERVER['HTTP_AUTHORIZATION'], $_SERVER['REQUEST_URI'] );
-
+		$result = $this->perform_jwt_auth( $token );
 		$this->assertEquals( 0, $result, 'Revoked token must not authenticate.' );
 	}
 
@@ -165,16 +120,7 @@ class Test_CoCart_JWT_Authentication extends CoCart_JWT_Test_Case {
 		$token = $this->get_jwt_token_for_user( $this->user->ID );
 		delete_user_meta( $this->user->ID, '_cocart_jwt_token_pat' );
 
-		$rest = new \CoCart\JWTAuthentication\REST();
-
-		$_SERVER['HTTP_AUTHORIZATION'] = 'Bearer ' . $token;
-		$_SERVER['REQUEST_URI']        = '/wp-json/cocart/jwt/validate-token';
-
-		$auth   = new CoCart_Authentication();
-		$result = $rest->perform_jwt_authentication( 0, false, $auth );
-
-		unset( $_SERVER['HTTP_AUTHORIZATION'], $_SERVER['REQUEST_URI'] );
-
+		$result = $this->perform_jwt_auth( $token );
 		$this->assertEquals( 0, $result, 'Token with revoked PAT must not authenticate.' );
 	}
 }

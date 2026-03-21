@@ -129,6 +129,10 @@ abstract class CoCart_JWT_Test_Case extends CoCart_API_V2_Test_Case {
 	protected function jwt_request( string $method, string $route, array $params = array(), string $token = '' ): WP_REST_Response {
 		$headers = $token ? array( 'Authorization' => 'Bearer ' . $token ) : array();
 
+		// Preserve originals so we can restore them after dispatch.
+		$prev_request_uri    = $_SERVER['REQUEST_URI'] ?? '';
+		$prev_authorization  = $_SERVER['HTTP_AUTHORIZATION'] ?? null;
+
 		// CoCart::is_rest_api_request() checks $_SERVER['REQUEST_URI'] for the
 		// CoCart namespace. Without it, authenticate() returns early and JWT auth
 		// never fires. Set a fake URI that satisfies the check.
@@ -142,10 +146,47 @@ abstract class CoCart_JWT_Test_Case extends CoCart_API_V2_Test_Case {
 
 		$response = $this->rest_request( $method, $route, $params, $headers );
 
-		unset( $_SERVER['HTTP_AUTHORIZATION'] );
-		unset( $_SERVER['REQUEST_URI'] );
+		// Restore originals rather than unsetting — WP cron reads REQUEST_URI
+		// after dispatch and throws a deprecation notice if it is null.
+		$_SERVER['REQUEST_URI'] = $prev_request_uri;
+		if ( is_null( $prev_authorization ) ) {
+			unset( $_SERVER['HTTP_AUTHORIZATION'] );
+		} else {
+			$_SERVER['HTTP_AUTHORIZATION'] = $prev_authorization;
+		}
 
 		return $response;
+	}
+
+	/**
+	 * Call perform_jwt_authentication() with $_SERVER vars set and safely restored.
+	 *
+	 * Restores REQUEST_URI to its previous value after the call so WP cron code
+	 * reading $_SERVER['REQUEST_URI'] after tearDown does not receive null.
+	 *
+	 * @param string $token JWT bearer token to test with.
+	 *
+	 * @return int The user ID returned by perform_jwt_authentication(), or 0.
+	 */
+	protected function perform_jwt_auth( string $token ): int {
+		$prev_request_uri   = $_SERVER['REQUEST_URI'] ?? '';
+		$prev_authorization = $_SERVER['HTTP_AUTHORIZATION'] ?? null;
+
+		$_SERVER['REQUEST_URI']        = '/wp-json/cocart/jwt/validate-token';
+		$_SERVER['HTTP_AUTHORIZATION'] = 'Bearer ' . $token;
+
+		$rest   = new \CoCart\JWTAuthentication\REST();
+		$auth   = new CoCart_Authentication();
+		$result = $rest->perform_jwt_authentication( 0, false, $auth );
+
+		$_SERVER['REQUEST_URI'] = $prev_request_uri;
+		if ( is_null( $prev_authorization ) ) {
+			unset( $_SERVER['HTTP_AUTHORIZATION'] );
+		} else {
+			$_SERVER['HTTP_AUTHORIZATION'] = $prev_authorization;
+		}
+
+		return $result;
 	}
 
 	/**
