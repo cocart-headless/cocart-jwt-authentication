@@ -113,4 +113,4 @@ jobs:
 
       - name: Run PHPUnit tests
         working-directory: jwt-plugin
-        run: ../cocart-core/vendor/bin/phpunit -c phpunit.xml --testdox
+        run: ${{ github.workspace }}/cocart-core/vendor/bin/phpunit -c phpunit.xml --testdox
