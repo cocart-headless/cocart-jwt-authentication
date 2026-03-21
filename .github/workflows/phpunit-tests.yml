@@ -52,7 +52,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4']
+        php: ['8.1', '8.2', '8.3', '8.4']
         wp: ['${{ github.event.inputs.wp_version || ''latest'' }}']
         wc: ['${{ github.event.inputs.wc_version || ''latest'' }}']
 
@@ -77,10 +77,8 @@ jobs:
           tools: composer:v2
 
       - name: Install CoCart core Composer dependencies
-        uses: ramsey/composer-install@v3
-        with:
-          working-directory: cocart-core
-          composer-options: '--prefer-dist --no-progress'
+        run: composer install --prefer-dist --no-progress
+        working-directory: cocart-core
 
       - name: Install Subversion
         run: sudo apt-get install -y subversion
@@ -113,4 +111,4 @@ jobs:
 
       - name: Run PHPUnit tests
         working-directory: jwt-plugin
-        run: ${{ github.workspace }}/cocart-core/vendor/bin/phpunit -c phpunit.xml --testdox
+        run: ../cocart-core/vendor/bin/phpunit -c phpunit.xml --testdox
