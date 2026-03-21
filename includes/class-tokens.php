@@ -216,7 +216,7 @@ abstract class Tokens {
 	 *
 	 * @param int $user_id The user ID to generate a token for.
 	 *
-	 * @return string Generated JWT token.
+	 * @return string|WP_Error Generated JWT token or WP_Error on failure.
 	 */
 	public function generate_token( int $user_id ) {
 		$secret_key = $this->get_secret_private_key();
