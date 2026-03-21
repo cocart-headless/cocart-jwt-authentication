@@ -791,7 +791,7 @@ abstract class Tokens {
 
 			return date( 'Y-m-d H:i:s', $iat );
 		} catch ( Exception $e ) {
-			return true;
+			return false;
 		}
 	} // END get_token_creation_time()
 
