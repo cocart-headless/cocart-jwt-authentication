@@ -42,6 +42,7 @@ class DestroyTokens {
 	 *
 	 * @since 2.0.0 Introduced.
 	 * @since 2.3.0 Added filter to allow control over token revocation.
+	 * @since 3.0.2 Now also accepts a WP_User object, as passed by the after_password_reset hook.
 	 *
 	 * @hooked: wp_logout
 	 *
