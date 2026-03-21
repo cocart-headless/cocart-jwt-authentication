@@ -59,14 +59,12 @@ jobs:
     steps:
       - name: Checkout JWT plugin
         uses: actions/checkout@v4
-        with:
-          path: jwt-plugin
 
       - name: Checkout CoCart core
         uses: actions/checkout@v4
         with:
           repository: co-cart/co-cart
-          path: cocart-core
+          path: /tmp/wordpress/wp-content/plugins/cart-rest-api-for-woocommerce
 
       - name: Set up PHP ${{ matrix.php }}
         uses: shivammathur/setup-php@v2
@@ -76,15 +74,19 @@ jobs:
           coverage: none
           tools: composer:v2
 
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@v3
+        with:
+          composer-options: '--prefer-dist --no-progress'
+
       - name: Install CoCart core Composer dependencies
         run: composer install --prefer-dist --no-progress
-        working-directory: cocart-core
+        working-directory: /tmp/wordpress/wp-content/plugins/cart-rest-api-for-woocommerce
 
       - name: Install Subversion
         run: sudo apt-get install -y subversion
 
       - name: Install WordPress test suite
-        working-directory: jwt-plugin
         run: |
           WP_VERSION="${{ matrix.wp }}"
           bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1:3306 "$WP_VERSION"
@@ -99,16 +101,10 @@ jobs:
           curl -sL "https://github.com/woocommerce/woocommerce/releases/download/${WC_VERSION}/woocommerce.zip" -o /tmp/woocommerce.zip
           unzip -q /tmp/woocommerce.zip -d /tmp/wordpress/wp-content/plugins/
 
-      - name: Copy CoCart core to test environment
-        run: |
-          mkdir -p /tmp/wordpress/wp-content/plugins/cart-rest-api-for-woocommerce
-          rsync -a --exclude='.git' --exclude='node_modules' cocart-core/ /tmp/wordpress/wp-content/plugins/cart-rest-api-for-woocommerce/
-
       - name: Copy JWT plugin to test environment
         run: |
           mkdir -p /tmp/wordpress/wp-content/plugins/cocart-jwt-authentication
-          rsync -a --exclude='.git' --exclude='node_modules' jwt-plugin/ /tmp/wordpress/wp-content/plugins/cocart-jwt-authentication/
+          rsync -a --exclude='.git' --exclude='node_modules' . /tmp/wordpress/wp-content/plugins/cocart-jwt-authentication/
 
       - name: Run PHPUnit tests
-        working-directory: jwt-plugin
-        run: ../cocart-core/vendor/bin/phpunit -c phpunit.xml --testdox
+        run: vendor/bin/phpunit -c phpunit.xml --testdox
