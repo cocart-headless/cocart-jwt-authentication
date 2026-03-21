@@ -34,6 +34,21 @@ class Test_CoCart_JWT_Token_Revocation extends CoCart_JWT_Test_Case {
 	}
 
 	/**
+	 * Call the protected destroy_pat_session() method via reflection.
+	 *
+	 * @param int    $user_id User ID.
+	 * @param string $pat_id  PAT ID.
+	 *
+	 * @return void
+	 */
+	private function destroy_pat_session( int $user_id, string $pat_id ): void {
+		$rest   = new \CoCart\JWTAuthentication\REST();
+		$method = new ReflectionMethod( \CoCart\JWTAuthentication\REST::class, 'destroy_pat_session' );
+		$method->setAccessible( true );
+		$method->invoke( $rest, $user_id, $pat_id );
+	}
+
+	/**
 	 * Test that destroy_pat_session() removes the token from _cocart_jwt_tokens.
 	 *
 	 * @return void
@@ -46,8 +61,7 @@ class Test_CoCart_JWT_Token_Revocation extends CoCart_JWT_Test_Case {
 		$decoded = $rest->decode_token( $tokens['token'] );
 		$pat_id  = $decoded->payload->data->user->pat;
 
-		// Destroy the PAT session.
-		$rest->destroy_pat_session( $this->user->ID, $pat_id );
+		$this->destroy_pat_session( $this->user->ID, $pat_id );
 
 		$user_tokens = get_user_meta( $this->user->ID, '_cocart_jwt_tokens', true );
 
@@ -75,8 +89,7 @@ class Test_CoCart_JWT_Token_Revocation extends CoCart_JWT_Test_Case {
 		$before = get_user_meta( $this->user->ID, '_cocart_jwt_refresh_tokens', true );
 		$this->assertArrayHasKey( $tokens['refresh_token'], $before, 'Refresh token must exist before destroy.' );
 
-		// Destroy the PAT session.
-		$rest->destroy_pat_session( $this->user->ID, $pat_id );
+		$this->destroy_pat_session( $this->user->ID, $pat_id );
 
 		$after = get_user_meta( $this->user->ID, '_cocart_jwt_refresh_tokens', true );
 
@@ -123,6 +136,7 @@ class Test_CoCart_JWT_Token_Revocation extends CoCart_JWT_Test_Case {
 		$this->assertNotEmpty( get_user_meta( $this->user->ID, '_cocart_jwt_tokens', true ) );
 
 		// Fire the hook that DestroyTokens listens to.
+		// WP core passes a WP_User object as the first argument to after_password_reset.
 		do_action( 'after_password_reset', $this->user, '' );
 
 		$this->assertEmpty( get_user_meta( $this->user->ID, '_cocart_jwt_tokens', true ) );
@@ -142,7 +156,7 @@ class Test_CoCart_JWT_Token_Revocation extends CoCart_JWT_Test_Case {
 		$rest    = new \CoCart\JWTAuthentication\REST();
 		$decoded = $rest->decode_token( $tokens['token'] );
 		$pat_id  = $decoded->payload->data->user->pat;
-		$rest->destroy_pat_session( $this->user->ID, $pat_id );
+		$this->destroy_pat_session( $this->user->ID, $pat_id );
 
 		// Now try to use the revoked token.
 		$response = $this->jwt_request( 'POST', '/cocart/jwt/validate-token', array(), $tokens['token'] );

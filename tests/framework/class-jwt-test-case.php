@@ -129,6 +129,11 @@ abstract class CoCart_JWT_Test_Case extends CoCart_API_V2_Test_Case {
 	protected function jwt_request( string $method, string $route, array $params = array(), string $token = '' ): WP_REST_Response {
 		$headers = $token ? array( 'Authorization' => 'Bearer ' . $token ) : array();
 
+		// CoCart::is_rest_api_request() checks $_SERVER['REQUEST_URI'] for the
+		// CoCart namespace. Without it, authenticate() returns early and JWT auth
+		// never fires. Set a fake URI that satisfies the check.
+		$_SERVER['REQUEST_URI'] = '/wp-json/cocart/jwt/validate-token';
+
 		// CoCart_Authentication::get_auth_header() reads $_SERVER directly,
 		// not from the WP_REST_Request object. Set it so JWT auth fires.
 		if ( $token ) {
@@ -138,6 +143,7 @@ abstract class CoCart_JWT_Test_Case extends CoCart_API_V2_Test_Case {
 		$response = $this->rest_request( $method, $route, $params, $headers );
 
 		unset( $_SERVER['HTTP_AUTHORIZATION'] );
+		unset( $_SERVER['REQUEST_URI'] );
 
 		return $response;
 	}
