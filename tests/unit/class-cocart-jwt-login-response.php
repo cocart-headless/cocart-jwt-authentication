@@ -56,6 +56,7 @@ class Test_CoCart_JWT_Login_Response extends CoCart_JWT_Test_Case {
 	 * @return void
 	 */
 	public function test_login_response_contains_jwt_token() {
+		wp_set_current_user( $this->user->ID );
 		$response = $this->login( array(
 			'username' => $this->user_login,
 			'password' => $this->user_password,
@@ -73,6 +74,7 @@ class Test_CoCart_JWT_Login_Response extends CoCart_JWT_Test_Case {
 	 * @return void
 	 */
 	public function test_login_response_contains_refresh_token() {
+		wp_set_current_user( $this->user->ID );
 		$response = $this->login( array(
 			'username' => $this->user_login,
 			'password' => $this->user_password,
@@ -90,6 +92,7 @@ class Test_CoCart_JWT_Login_Response extends CoCart_JWT_Test_Case {
 	 * @return void
 	 */
 	public function test_jwt_token_is_valid_format() {
+		wp_set_current_user( $this->user->ID );
 		$response = $this->login( array(
 			'username' => $this->user_login,
 			'password' => $this->user_password,
@@ -110,6 +113,7 @@ class Test_CoCart_JWT_Login_Response extends CoCart_JWT_Test_Case {
 	 * @return void
 	 */
 	public function test_refresh_token_is_hex_string() {
+		wp_set_current_user( $this->user->ID );
 		$response = $this->login( array(
 			'username' => $this->user_login,
 			'password' => $this->user_password,
@@ -134,6 +138,7 @@ class Test_CoCart_JWT_Login_Response extends CoCart_JWT_Test_Case {
 	 */
 	public function test_login_with_existing_bearer_reuses_token() {
 		// First login to get a token.
+		wp_set_current_user( $this->user->ID );
 		$first_response = $this->login( array(
 			'username' => $this->user_login,
 			'password' => $this->user_password,
@@ -144,6 +149,7 @@ class Test_CoCart_JWT_Login_Response extends CoCart_JWT_Test_Case {
 		$first_token = $first_data['jwt_token'];
 
 		// Login again with the existing token in the Authorization header.
+		wp_set_current_user( $this->user->ID );
 		$second_response = $this->login(
 			array(
 				'username' => $this->user_login,

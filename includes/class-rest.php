@@ -280,7 +280,12 @@ class REST extends Tokens {
 		}
 
 		$refresh_token = $request->get_param( 'refresh_token' );
-		$user_id       = $this->validate_refresh_token( $refresh_token );
+
+		if ( empty( $refresh_token ) ) {
+			return new \WP_Error( 'cocart_jwt_auth_missing_refresh_token', __( 'Refresh token is required.', 'cocart-jwt-authentication' ), array( 'status' => 403 ) );
+		}
+
+		$user_id = $this->validate_refresh_token( $refresh_token );
 
 		if ( is_wp_error( $user_id ) ) {
 			return $user_id;

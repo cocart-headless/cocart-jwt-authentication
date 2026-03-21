@@ -105,7 +105,10 @@ abstract class CoCart_JWT_Test_Case extends CoCart_API_V2_Test_Case {
 		$rest          = new \CoCart\JWTAuthentication\REST();
 		$token         = $rest->generate_token( $user_id );
 		$refresh_token = $rest->generate_refresh_token( $user_id );
-		$rest->store_refresh_token_in_pat( $user_id, $token, $refresh_token );
+
+		$method = new ReflectionMethod( \CoCart\JWTAuthentication\REST::class, 'store_refresh_token_in_pat' );
+		$method->setAccessible( true );
+		$method->invoke( $rest, $user_id, $token, $refresh_token );
 
 		$this->assertNotWPError( $token, 'Token generation failed.' );
 		$this->assertIsString( $refresh_token, 'Refresh token generation failed.' );
@@ -125,7 +128,18 @@ abstract class CoCart_JWT_Test_Case extends CoCart_API_V2_Test_Case {
 	 */
 	protected function jwt_request( string $method, string $route, array $params = array(), string $token = '' ): WP_REST_Response {
 		$headers = $token ? array( 'Authorization' => 'Bearer ' . $token ) : array();
-		return $this->rest_request( $method, $route, $params, $headers );
+
+		// CoCart_Authentication::get_auth_header() reads $_SERVER directly,
+		// not from the WP_REST_Request object. Set it so JWT auth fires.
+		if ( $token ) {
+			$_SERVER['HTTP_AUTHORIZATION'] = 'Bearer ' . $token;
+		}
+
+		$response = $this->rest_request( $method, $route, $params, $headers );
+
+		unset( $_SERVER['HTTP_AUTHORIZATION'] );
+
+		return $response;
 	}
 
 	/**
