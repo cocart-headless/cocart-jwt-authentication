@@ -1,5 +1,33 @@
 # Changelog for CoCart JWT Authentication
 
+## v3.0.2 - 21st March, 2026
+
+### Bug Fix
+
+* `class-tokens.php`: Fixed `get_token_creation_time()` returning `true` instead of `false` when an exception is caught, causing incorrect return type.
+* `class-tokens.php`: Fixed `generate_token_id()` not passing `$user_tokens` in its recursive call, which would cause a `TypeError` on token ID collision.
+* `class-rest.php`: Fixed `refresh_token()` not guarding against an empty refresh token, which could throw a `TypeError`.
+* `class-destroy-tokens.php`: Fixed `destroy_tokens()` to accept a `WP_User` object, as passed by the `after_password_reset` hook.
+* Tests: Fixed `$_SERVER['REQUEST_URI']` deprecation notice in WP cron by restoring the variable after use instead of unsetting it.
+
+### Improvements
+
+* `class-tokens.php`: Corrected `@return` PHPDoc on `generate_token()` to reflect that a `WP_Error` may also be returned.
+
+### Tests
+
+* Added full PHPUnit test suite with GitHub Actions CI workflow.
+* Rewrote authentication and login tests to call internal methods directly, working around a WP REST unit test limitation where `determine_current_user` is not re-run on dispatch.
+* Fixed test framework to use `ReflectionMethod` for calling protected methods.
+* Added `destroy_pat_session()` test helper for token revocation tests.
+* Fixed `wp_set_current_user()` calls in login response tests.
+
+### Compatibility
+
+* Tested with WordPress v6.9
+* Tested with WooCommerce v10.6
+* Tested with CoCart v4.8
+
 ## v3.0.1 - 3rd December, 2025
 
 ### What's New?

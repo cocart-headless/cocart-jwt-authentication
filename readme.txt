@@ -135,6 +135,19 @@ It is possible due to a plugin conflict e.g. Login Limit and the token used fail
 
 == Changelog ==
 
+= v3.0.2 - 21st March, 2026 =
+
+### Bug Fix
+
+* Fixed an edge case where token creation time could return an incorrect value when a token was invalid.
+* Fixed token ID generation failing if a collision was detected.
+* Fixed refreshing a token failing when no refresh token was provided.
+* Fixed tokens not being properly cleared when a user resets their password.
+
+### Compatible
+
+* Tested with WooCommerce v10.6
+
 = v3.0.1 - 3rd December, 2025 =
 
 ### What's New?
