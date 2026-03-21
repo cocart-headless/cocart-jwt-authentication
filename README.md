@@ -51,8 +51,6 @@ We have different channels at your disposal where you can find information about
   <li>🐦 <strong>Social media</strong>: a more informal place to interact with CoCart users, reach out to us on <a href="https://twitter.com/cocartapi">X/Twitter.</a></li>
 </ul>
 
-For additional security, consider our [API Security](https://apisecurity.pro/?utm_medium=gh&utm_source=github&utm_campaign=readme&utm_content=cocart) plugin that provides a firewall to block unknown outsiders, rate limit requests and protect data exposure – no configuration required.
-
 ## License
 
 [![License](https://img.shields.io/badge/license-GPL--3.0%2B-red.svg)](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/LICENSE.md)
