@@ -11,8 +11,9 @@
 /**
  * Test CoCart JWT Login Response Class
  *
- * Tests the login response extras added by REST::send_tokens() which hooks
- * into cocart_login_extras at priority 0.
+ * Tests send_tokens() directly via the cocart_login_extras filter since
+ * WP REST unit tests do not re-run determine_current_user on dispatch,
+ * making it impossible to drive login auth via HTTP headers in unit tests.
  *
  * @package CoCart JWT Authentication\Tests\Unit
  */
@@ -24,145 +25,84 @@ class Test_CoCart_JWT_Login_Response extends CoCart_JWT_Test_Case {
 	private WP_User $user;
 
 	/**
-	 * @var string Test user login.
-	 */
-	private string $user_login;
-
-	/**
-	 * @var string Test user password.
-	 */
-	private string $user_password;
-
-	/**
 	 * Set up test.
 	 *
 	 * @return void
 	 */
 	public function setUp(): void {
 		parent::setUp();
-
-		$this->user_login    = 'jwt_login_test_' . wp_rand( 1000, 9999 );
-		$this->user_password = 'test_password_123';
-
-		$this->user = $this->create_test_user( array(
-			'user_login' => $this->user_login,
-			'user_pass'  => $this->user_password,
-		) );
+		$this->user = $this->create_test_user();
 	}
 
 	/**
-	 * Test that the login response contains the jwt_token key.
+	 * Apply the cocart_login_extras filter as send_tokens() would during login.
+	 *
+	 * @return array The extras array after JWT keys are added.
+	 */
+	private function get_login_extras(): array {
+		return apply_filters( 'cocart_login_extras', array(), $this->user );
+	}
+
+	/**
+	 * Test that the login extras contain the jwt_token key.
 	 *
 	 * @return void
 	 */
 	public function test_login_response_contains_jwt_token() {
-		wp_set_current_user( $this->user->ID );
-		$response = $this->login( array(
-			'username' => $this->user_login,
-			'password' => $this->user_password,
-		) );
-
-		$this->assert_rest_response_status( 200, $response );
-
-		$data = $response->get_data();
-		$this->assertArrayHasKey( 'jwt_token', $data, 'Login response must contain jwt_token.' );
+		$extras = $this->get_login_extras();
+		$this->assertArrayHasKey( 'jwt_token', $extras, 'Login extras must contain jwt_token.' );
 	}
 
 	/**
-	 * Test that the login response contains the jwt_refresh key.
+	 * Test that the login extras contain the jwt_refresh key.
 	 *
 	 * @return void
 	 */
 	public function test_login_response_contains_refresh_token() {
-		wp_set_current_user( $this->user->ID );
-		$response = $this->login( array(
-			'username' => $this->user_login,
-			'password' => $this->user_password,
-		) );
-
-		$this->assert_rest_response_status( 200, $response );
-
-		$data = $response->get_data();
-		$this->assertArrayHasKey( 'jwt_refresh', $data, 'Login response must contain jwt_refresh.' );
+		$extras = $this->get_login_extras();
+		$this->assertArrayHasKey( 'jwt_refresh', $extras, 'Login extras must contain jwt_refresh.' );
 	}
 
 	/**
-	 * Test that the jwt_token in the login response is a valid JWT format.
+	 * Test that the jwt_token in the login extras is a valid JWT format.
 	 *
 	 * @return void
 	 */
 	public function test_jwt_token_is_valid_format() {
-		wp_set_current_user( $this->user->ID );
-		$response = $this->login( array(
-			'username' => $this->user_login,
-			'password' => $this->user_password,
-		) );
-
-		$this->assert_rest_response_status( 200, $response );
-
-		$data  = $response->get_data();
-		$token = $data['jwt_token'];
-
-		$parts = explode( '.', $token );
+		$extras = $this->get_login_extras();
+		$parts  = explode( '.', $extras['jwt_token'] );
 		$this->assertCount( 3, $parts, 'jwt_token must be in header.payload.signature format.' );
 	}
 
 	/**
-	 * Test that the jwt_refresh token is a hex string (128 chars).
+	 * Test that the jwt_refresh token is a 128-char hex string.
 	 *
 	 * @return void
 	 */
 	public function test_refresh_token_is_hex_string() {
-		wp_set_current_user( $this->user->ID );
-		$response = $this->login( array(
-			'username' => $this->user_login,
-			'password' => $this->user_password,
-		) );
-
-		$this->assert_rest_response_status( 200, $response );
-
-		$data          = $response->get_data();
-		$refresh_token = $data['jwt_refresh'];
-
+		$extras        = $this->get_login_extras();
+		$refresh_token = $extras['jwt_refresh'];
 		$this->assertEquals( 128, strlen( $refresh_token ), 'Refresh token must be 128 hex chars.' );
 		$this->assertMatchesRegularExpression( '/^[0-9a-f]+$/', $refresh_token, 'Refresh token must be a hex string.' );
 	}
 
 	/**
-	 * Test that logging in with an existing valid Bearer token reuses it in the response.
+	 * Test that calling send_tokens() with an existing valid Bearer token reuses it.
 	 *
-	 * When send_tokens() detects a valid Bearer token in the request, it reuses that
+	 * When send_tokens() detects a valid Bearer token in $_SERVER, it reuses that
 	 * token rather than generating a new one.
 	 *
 	 * @return void
 	 */
-	public function test_login_with_existing_bearer_reuses_token() {
-		// First login to get a token.
-		wp_set_current_user( $this->user->ID );
-		$first_response = $this->login( array(
-			'username' => $this->user_login,
-			'password' => $this->user_password,
-		) );
+	public function test_existing_bearer_token_is_reused() {
+		$existing_token = $this->get_jwt_token_for_user( $this->user->ID );
 
-		$this->assert_rest_response_status( 200, $first_response );
-		$first_data  = $first_response->get_data();
-		$first_token = $first_data['jwt_token'];
+		$_SERVER['HTTP_AUTHORIZATION'] = 'Bearer ' . $existing_token;
 
-		// Login again with the existing token in the Authorization header.
-		wp_set_current_user( $this->user->ID );
-		$second_response = $this->login(
-			array(
-				'username' => $this->user_login,
-				'password' => $this->user_password,
-			),
-			array( 'Authorization' => 'Bearer ' . $first_token )
-		);
+		$extras = $this->get_login_extras();
 
-		$this->assert_rest_response_status( 200, $second_response );
-		$second_data  = $second_response->get_data();
-		$second_token = $second_data['jwt_token'];
+		unset( $_SERVER['HTTP_AUTHORIZATION'] );
 
-		// The token should be reused, not regenerated.
-		$this->assertEquals( $first_token, $second_token, 'Login with existing Bearer token must reuse the token.' );
+		$this->assertEquals( $existing_token, $extras['jwt_token'], 'Login with existing Bearer token must reuse the token.' );
 	}
 }
