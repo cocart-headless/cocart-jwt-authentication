@@ -64,7 +64,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: co-cart/co-cart
-          path: /tmp/wordpress/wp-content/plugins/cart-rest-api-for-woocommerce
+          path: cocart-core
 
       - name: Set up PHP ${{ matrix.php }}
         uses: shivammathur/setup-php@v2
@@ -81,7 +81,7 @@ jobs:
 
       - name: Install CoCart core Composer dependencies
         run: composer install --prefer-dist --no-progress
-        working-directory: /tmp/wordpress/wp-content/plugins/cart-rest-api-for-woocommerce
+        working-directory: cocart-core
 
       - name: Install Subversion
         run: sudo apt-get install -y subversion
@@ -101,10 +101,12 @@ jobs:
           curl -sL "https://github.com/woocommerce/woocommerce/releases/download/${WC_VERSION}/woocommerce.zip" -o /tmp/woocommerce.zip
           unzip -q /tmp/woocommerce.zip -d /tmp/wordpress/wp-content/plugins/
 
-      - name: Copy JWT plugin to test environment
+      - name: Copy plugins to test environment
         run: |
+          mkdir -p /tmp/wordpress/wp-content/plugins/cart-rest-api-for-woocommerce
+          rsync -a --exclude='.git' --exclude='node_modules' cocart-core/ /tmp/wordpress/wp-content/plugins/cart-rest-api-for-woocommerce/
           mkdir -p /tmp/wordpress/wp-content/plugins/cocart-jwt-authentication
-          rsync -a --exclude='.git' --exclude='node_modules' . /tmp/wordpress/wp-content/plugins/cocart-jwt-authentication/
+          rsync -a --exclude='.git' --exclude='node_modules' --exclude='cocart-core' . /tmp/wordpress/wp-content/plugins/cocart-jwt-authentication/
 
       - name: Run PHPUnit tests
         run: vendor/bin/phpunit -c phpunit.xml --testdox
