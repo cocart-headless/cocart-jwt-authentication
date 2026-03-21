@@ -7,6 +7,9 @@
 	<a href="https://wordpress.org/plugins/cocart-jwt-authentication/">
 		<img src="https://img.shields.io/wordpress/plugin/dt/cocart-jwt-authentication.svg" alt="WordPress Plugin Downloads">
 	</a>
+	<a href="https://github.com/cocart-headless/cocart-jwt-authentication/actions/workflows/phpunit-tests.yml">
+		<img src="https://github.com/cocart-headless/cocart-jwt-authentication/actions/workflows/phpunit-tests.yml/badge.svg">
+	</a>
 </p>
 
 This free add-on for [CoCart](https://cocartapi.com/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart) allows you to authenticate the Cart API via JSON Web Tokens as an authentication method.
