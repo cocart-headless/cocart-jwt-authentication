@@ -393,7 +393,7 @@ abstract class Tokens {
 
 		// Ensure unique token ID.
 		if ( in_array( $token_id, array_keys( $user_tokens ), true ) ) {
-			$token_id = $this->generate_token_id();
+			$token_id = $this->generate_token_id( $user_tokens );
 		}
 
 		return 'pat_' . $token_id;
