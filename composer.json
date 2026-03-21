@@ -59,7 +59,9 @@
 		"szepeviktor/phpstan-wordpress": "^2.0",
 		"phpstan/extension-installer": "^1.4",
 		"php-stubs/woocommerce-stubs": "^9.1",
-		"php-stubs/wp-cli-stubs": "^2.10"
+		"php-stubs/wp-cli-stubs": "^2.10",
+		"phpunit/phpunit": "^9.6",
+		"yoast/phpunit-polyfills": "^1.0"
 	},
 	"scripts": {
 		"phpcs": [
@@ -73,6 +75,9 @@
 		],
 		"phpstan": [
 			"phpstan analyse --memory-limit=2048M"
+		],
+		"test": [
+			"../cart-rest-api-for-woocommerce/vendor/bin/phpunit"
 		]
 	},
 	"extra": {

@@ -1,0 +1,116 @@
+name: PHPUnit Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      wp_version:
+        description: WordPress version
+        required: false
+        default: latest
+      wc_version:
+        description: WooCommerce version
+        required: false
+        default: latest
+  push:
+    branches:
+      - master
+    paths:
+      - '**.php'
+      - 'phpunit.xml'
+      - 'composer.json'
+      - '.github/workflows/phpunit-tests.yml'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '**.php'
+      - 'phpunit.xml'
+      - 'composer.json'
+
+jobs:
+  phpunit:
+    name: PHP ${{ matrix.php }} / WP ${{ matrix.wp }} / WC ${{ matrix.wc }}
+    runs-on: ubuntu-latest
+    env:
+      WP_TESTS_DIR: /tmp/wordpress-tests-lib
+      WP_CORE_DIR: /tmp/wordpress
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4']
+        wp: ['${{ github.event.inputs.wp_version || ''latest'' }}']
+        wc: ['${{ github.event.inputs.wc_version || ''latest'' }}']
+
+    steps:
+      - name: Checkout JWT plugin
+        uses: actions/checkout@v4
+        with:
+          path: jwt-plugin
+
+      - name: Checkout CoCart core
+        uses: actions/checkout@v4
+        with:
+          repository: co-cart/co-cart
+          path: cocart-core
+
+      - name: Set up PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Install CoCart core Composer dependencies
+        uses: ramsey/composer-install@v3
+        with:
+          working-directory: cocart-core
+          composer-options: '--prefer-dist --no-progress'
+
+      - name: Install Subversion
+        run: sudo apt-get install -y subversion
+
+      - name: Install WordPress test suite
+        working-directory: jwt-plugin
+        run: |
+          WP_VERSION="${{ matrix.wp }}"
+          bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1:3306 "$WP_VERSION"
+
+      - name: Install WooCommerce
+        run: |
+          WC_VERSION="${{ matrix.wc }}"
+          if [ "$WC_VERSION" = "latest" ]; then
+            WC_VERSION=$(curl -s https://api.github.com/repos/woocommerce/woocommerce/releases/latest | jq -r .tag_name | sed 's/^v//')
+          fi
+          echo "Installing WooCommerce $WC_VERSION"
+          curl -sL "https://github.com/woocommerce/woocommerce/releases/download/${WC_VERSION}/woocommerce.zip" -o /tmp/woocommerce.zip
+          unzip -q /tmp/woocommerce.zip -d /tmp/wordpress/wp-content/plugins/
+
+      - name: Copy CoCart core to test environment
+        run: |
+          mkdir -p /tmp/wordpress/wp-content/plugins/cart-rest-api-for-woocommerce
+          rsync -a --exclude='.git' --exclude='node_modules' cocart-core/ /tmp/wordpress/wp-content/plugins/cart-rest-api-for-woocommerce/
+
+      - name: Copy JWT plugin to test environment
+        run: |
+          mkdir -p /tmp/wordpress/wp-content/plugins/cocart-jwt-authentication
+          rsync -a --exclude='.git' --exclude='node_modules' jwt-plugin/ /tmp/wordpress/wp-content/plugins/cocart-jwt-authentication/
+
+      - name: Run PHPUnit tests
+        working-directory: jwt-plugin
+        run: ../cocart-core/vendor/bin/phpunit -c phpunit.xml --testdox

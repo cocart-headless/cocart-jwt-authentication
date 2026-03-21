@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="tests/bootstrap.php" backupGlobals="false" colors="true">
+	<php>
+		<const name="COCART_TESTING" value="1" />
+	</php>
+	<testsuites>
+		<testsuite name="CoCart JWT Authentication Unit Tests">
+			<directory prefix="class-cocart-jwt-" suffix=".php">./tests/unit</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>
