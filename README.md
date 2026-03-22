@@ -1,4 +1,4 @@
-<h1 align="center">CoCart - JWT Authentication</h1>
+<h1 align="center">CoCart JWT Authentication</h1>
 
 <p align="center">
 	<a href="https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/LICENSE.md" target="_blank">
@@ -12,30 +12,32 @@
 	</a>
 </p>
 
-This free add-on for [CoCart](https://cocartapi.com/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart) allows you to authenticate the Cart API via JSON Web Tokens as an authentication method.
-
-JSON Web Tokens are an open standard [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519) for securely transmitting information between parties.
-
-[Read the core concept for more information](docs/concepts.md) on what this plugin does and can do.
+This plugin seamlessly extends [CoCart](https://cocartapi.com/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart) enabling robust and secure authentication using JSON Web Tokens (JWT).
 
 ### Key Features
 
-* **Standard JWT Authentication**: Implements the industry-standard RFC 7519 for secure claims representation.
+* **Standard JWT Authentication**: Implements the industry-standard [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519) for secure claims representation.
 * **Simple Endpoints**: Offers clear endpoints for generating and validating tokens.
 * **Configurable Secret Key**: Define your unique secret key via `wp-config.php` for secure token signing.
 * **Multiple signing algorithms**: `HS256`, `HS384`, `HS512`, `RS256`, `RS384`, `RS512`, `ES256`, `ES384`, `ES512`, `PS256`, `PS384`, `PS512`
-* **Rate Limiting**: Controlled specifically for refreshing and validating tokens. Requires [CoCart Plus](https://cocartapi.com/?utm_medium=gh&utm_source=github&utm_campaign=readme&utm_content=cocart)
+* **Rate Limiting**: Controlled specifically for refreshing and validating tokens. - Requires [CoCart Plus](https://cocartapi.com/?utm_medium=gh&utm_source=github&utm_campaign=readme&utm_content=cocart)
 * **Helpful Debugging**: Detailed logs of authentication issues to help figure out exactly what happened and fix it faster.
 * **WP-CLI Commands**: Useful [commands to handle tokens](/docs/wp-cli.md) - whether you need to check them, create new ones, or clean up old ones.
-* **Developer Hooks**: Provides [filters](docs/filters.md) and [hooks](docs/hooks.md) for more configuration to your requirements.
+* **Developer Hooks**: Provides [filters](docs/filters.md) and [hooks](docs/hooks.md) for customizing token behavior and more configurations to your requirements.
 
-For support, please join the [community on Discord](https://cocartapi.com/community/?utm_medium=gh&utm_source=github&utm_campaign=readme&utm_content=cocart). For priority support, consider upgrading to [CoCart Plus](https://cocartapi.com/?utm_medium=gh&utm_source=github&utm_campaign=readme&utm_content=cocart).
+JSON Web Tokens are an open, industry standard method for representing claims securely between two parties.
+
+For more information, [read the core concept](docs/concepts.md) on what this plugin does and can do.
 
 ### For Developers
 
 See documentation on how to [get setup](docs/guide.md), [filters](docs/filters.md) and [hooks](docs/hooks.md) with examples to help configure JWT Authentication to your needs.
 
 Once ready to use, see the [quick start guide](docs/quick-start.md). There is also an [advanced configuration](docs/advanced-configuration.md) for using RSA Keys.
+
+### 💜 Need Support?
+
+We aim to provide regular support for the CoCart plugin via [our Discord community server](https://cocartapi.com/community/?utm_medium=gh&utm_source=github&utm_campaign=readme&utm_content=cocart). Please understand that we do prioritize support for our [paying customers](https://cocartapi.com/pricing/?utm_medium=gh&utm_source=github&utm_campaign=readme&utm_content=cocart).
 
 ## Bugs and Security
 
