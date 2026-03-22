@@ -256,6 +256,7 @@ module.exports = function (grunt) {
 							'!.*/**',
 							'!.DS_Store',
 							'!.htaccess',
+							'assets/js/**',
 							'!<%= pkg.name %>-git/**',
 							'!<%= pkg.name %>-svn/**',
 							'!bin/**',
