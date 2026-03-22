@@ -3,9 +3,15 @@ name: Zip and Checksum on Release
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name to build (e.g., v3.0.0)'
+        required: true
+        type: string
 
 env:
-  TARGET_REF: ${{ github.event.release.tag_name }}
+  TARGET_REF: ${{ github.event.release.tag_name || inputs.tag_name }}
   OUTPUT_DIR: "build"
 
 jobs:
@@ -13,12 +19,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ env.TARGET_REF }}
 
       - name: Set Up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           cache: 'npm'
@@ -96,7 +102,7 @@ jobs:
         shell: bash
 
       - name: Upload assets
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: release-artifacts
           path: |
@@ -113,7 +119,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ env.TARGET_REF }}
 
@@ -124,7 +130,7 @@ jobs:
           echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
       - name: Download Assets
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: release-artifacts
           path: release-artifacts

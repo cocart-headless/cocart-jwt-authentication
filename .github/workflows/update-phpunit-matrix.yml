@@ -1,0 +1,73 @@
+name: Update PHPUnit Matrix
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'package.json'
+
+jobs:
+  update-matrix:
+    name: Update PHPUnit matrix from package.json
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read versions from package.json
+        id: versions
+        run: |
+          WP_VERSION=$(jq -r '.tested_up_to' package.json)
+          WC_VERSION=$(jq -r '.wc_tested_up_to' package.json)
+          echo "wp=$WP_VERSION" >> "$GITHUB_OUTPUT"
+          echo "wc=$WC_VERSION" >> "$GITHUB_OUTPUT"
+          echo "WP: $WP_VERSION, WC: $WC_VERSION"
+
+      - name: Update stable matrix entries in phpunit-tests.yml
+        run: |
+          WP="${{ steps.versions.outputs.wp }}"
+          WC="${{ steps.versions.outputs.wc }}"
+          FILE=".github/workflows/phpunit-tests.yml"
+
+          # Replace wp/wc values in the stable matrix block only.
+          # The stable block is identified by the comment line above it.
+          # We use awk to update only lines between the stable comment and the latest comment.
+          awk -v wp="$WP" -v wc="$WC" '
+            /# Stable/ { in_stable=1 }
+            /# Latest/ { in_stable=0 }
+            in_stable && /wp:/ { sub(/wp: '"'"'[^'"'"']*'"'"'/, "wp: '"'"'" wp "'"'"'") }
+            in_stable && /wc:/ { sub(/wc: '"'"'[^'"'"']*'"'"'/, "wc: '"'"'" wc "'"'"'") }
+            { print }
+          ' "$FILE" > "$FILE.tmp" && mv "$FILE.tmp" "$FILE"
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet .github/workflows/phpunit-tests.yml; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create pull request
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: update/phpunit-matrix-wp${{ steps.versions.outputs.wp }}-wc${{ steps.versions.outputs.wc }}
+          commit-message: "Update PHPUnit stable matrix to WP ${{ steps.versions.outputs.wp }} / WC ${{ steps.versions.outputs.wc }}"
+          title: "Update PHPUnit stable matrix to WP ${{ steps.versions.outputs.wp }} / WC ${{ steps.versions.outputs.wc }}"
+          body: |
+            Automatically generated from changes to `package.json`.
+
+            Updates the stable matrix in the PHPUnit workflow to match the tested versions declared in `package.json`:
+
+            - WordPress: `${{ steps.versions.outputs.wp }}`
+            - WooCommerce: `${{ steps.versions.outputs.wc }}`
+          labels: |
+            github actions
+          delete-branch: true

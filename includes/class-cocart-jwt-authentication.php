@@ -29,7 +29,7 @@ final class Plugin {
 	 *
 	 * @var string
 	 */
-	public static $version = '3.0.0-beta.4';
+	public static $version = '3.0.2';
 
 	/**
 	 * Single instance of the CoCart class
@@ -115,6 +115,7 @@ final class Plugin {
 		add_action( 'cocart_jwt_cleanup_legacy_cron', array( __CLASS__, 'cleanup_legacy_user_meta' ) );
 		register_activation_hook( COCART_JWT_AUTHENTICATION_FILE, array( $this, 'schedule_cron_job' ) );
 		register_activation_hook( COCART_JWT_AUTHENTICATION_FILE, array( $this, 'schedule_legacy_cleanup' ) );
+		register_activation_hook( COCART_JWT_AUTHENTICATION_FILE, array( $this, 'activation_redirect' ) );
 		register_deactivation_hook( COCART_JWT_AUTHENTICATION_FILE, array( $this, 'clear_scheduled_cron_job' ) );
 	} // END init()
 
@@ -128,9 +129,37 @@ final class Plugin {
 	public function load_admin() {
 		if ( is_admin() ) {
 			include_once __DIR__ . '/admin/class-cocart-jwt-wc-admin-system-status.php';
+			include_once __DIR__ . '/admin/class-admin-notices.php';
+			include_once __DIR__ . '/admin/class-admin-plugin-action-links.php';
 			include_once __DIR__ . '/admin/class-jwt-setup.php';
+
+			// Handle activation redirect.
+			add_action( 'admin_init', array( $this, 'handle_activation_redirect' ) );
 		}
 	} // END load_admin()
+
+	/**
+	 * Handle the activation redirect to the setup page.
+	 *
+	 * @access public
+	 *
+	 * @since 3.0.0 Introduced.
+	 *
+	 * @return void
+	 */
+	public function handle_activation_redirect() {
+		// Check if we should redirect after activation.
+		if ( get_transient( 'cocart_jwt_activation_redirect' ) ) {
+			// Delete the transient to prevent future redirects.
+			delete_transient( 'cocart_jwt_activation_redirect' );
+
+			// Only redirect if user has proper capabilities.
+			if ( current_user_can( 'manage_options' ) ) {
+				wp_safe_redirect( admin_url( 'admin.php?page=cocart-jwt-setup' ) );
+				exit;
+			}
+		}
+	} // END handle_activation_redirect()
 
 	/**
 	 * Register the CLI commands.
@@ -423,6 +452,32 @@ final class Plugin {
 	} // END schedule_legacy_cleanup()
 
 	/**
+	 * Handle plugin activation redirect to setup page.
+	 *
+	 * Redirects to the JWT setup page if CoCart is installed and active.
+	 *
+	 * @access public
+	 *
+	 * @since 3.0.0 Introduced.
+	 *
+	 * @return void
+	 */
+	public function activation_redirect() {
+		// Check if CoCart is installed and active.
+		if ( ! defined( 'COCART_FILE' ) ) {
+			return;
+		}
+
+		// Don't redirect if we're doing bulk activation or in network admin.
+		if ( isset( $_GET['activate-multi'] ) || is_network_admin() ) {
+			return;
+		}
+
+		// Set a transient to trigger redirect after activation.
+		set_transient( 'cocart_jwt_activation_redirect', true, 30 );
+	} // END activation_redirect()
+
+	/**
 	 * Clear scheduled cron job on plugin deactivation.
 	 *
 	 * @access public
@@ -500,6 +555,8 @@ final class Plugin {
 	public function load_plugin_textdomain() {
 		/**
 		 * Filter to adjust the cocart-jwt-authentication locale to use for translations.
+		 *
+		 * @since 3.0.0 Introduced in WP core.
 		 */
 		$locale                  = apply_filters( 'plugin_locale', determine_locale(), 'cocart-jwt-authentication' );
 		$custom_translation_path = WP_LANG_DIR . '/cocart-jwt-authentication/cocart-jwt-authentication-' . $locale . '.mo';

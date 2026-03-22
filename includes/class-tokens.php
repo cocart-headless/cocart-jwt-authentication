@@ -214,11 +214,11 @@ abstract class Tokens {
 	 *
 	 * @access public
 	 *
-	 * @param int|string $user The user to generate token for.
+	 * @param int $user_id The user ID to generate a token for.
 	 *
-	 * @return string Generated JWT token.
+	 * @return string|WP_Error Generated JWT token or WP_Error on failure.
 	 */
-	public function generate_token( int|string $user = '' ) {
+	public function generate_token( int $user_id ) {
 		$secret_key = $this->get_secret_private_key();
 
 		if ( ! $secret_key ) {
@@ -226,12 +226,12 @@ abstract class Tokens {
 		}
 
 		// See if we can lookup the username if no user provided.
-		if ( empty( $user ) ) {
-			$user = $this->lookup_username();
+		if ( empty( $user_id ) ) {
+			$user_id = $this->lookup_username();
 		}
 
 		// Check if user is valid.
-		$user = $this->is_user_valid( $user );
+		$user = $this->is_user_valid( $user_id );
 
 		if ( ! $user ) {
 			return new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 403 ) );
@@ -393,7 +393,7 @@ abstract class Tokens {
 
 		// Ensure unique token ID.
 		if ( in_array( $token_id, array_keys( $user_tokens ), true ) ) {
-			$token_id = $this->generate_token_id();
+			$token_id = $this->generate_token_id( $user_tokens );
 		}
 
 		return 'pat_' . $token_id;
@@ -791,7 +791,7 @@ abstract class Tokens {
 
 			return date( 'Y-m-d H:i:s', $iat );
 		} catch ( Exception $e ) {
-			return true;
+			return false;
 		}
 	} // END get_token_creation_time()
 

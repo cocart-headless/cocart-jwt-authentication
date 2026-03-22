@@ -3,8 +3,8 @@ Contributors: cocartforwc, sebd86
 Tags: woocommerce, rest-api, decoupled, headless, jwt
 Requires at least: 6.0
 Requires PHP: 7.4
-Tested up to: 6.8
-Stable tag: 2.5.1
+Tested up to: 6.9
+Stable tag: 3.0.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -14,25 +14,23 @@ JWT Authentication for CoCart API.
 
 This free add-on for [CoCart](https://cocartapi.com/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart) allows you to authenticate the Cart API via JSON Web Tokens as an authentication method.
 
-JSON Web Tokens are an open standard [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519) for securely transmitting information between parties.
-
-[Read the core concept for more information](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/concepts.md) on what this plugin does and can do.
-
 ★★★★★
 > An excellent plugin, which makes building a headless WooCommerce experience a breeze. Easy to use, nearly zero setup time. [Harald Schneider](https://wordpress.org/support/topic/excellent-plugin-8062/)
 
 ### Key Features
 
-* **Standard JWT Authentication**: Implements the industry-standard RFC 7519 for secure claims representation.
+* **Standard JWT Authentication**: Implements the industry-standard [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519) for secure claims representation.
 * **Simple Endpoints**: Offers clear endpoints for generating and validating tokens.
 * **Configurable Secret Key**: Define your unique secret key via `wp-config.php` for secure token signing.
 * **Multiple signing algorithms**: `HS256`, `HS384`, `HS512`, `RS256`, `RS384`, `RS512`, `ES256`, `ES384`, `ES512`, `PS256`, `PS384`, `PS512`
-* **Rate Limiting**: Controlled specifically for refreshing and validating tokens. Requires [CoCart Plus](https://cocartapi.com/?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink)
+* **Rate Limiting**: Controlled specifically for refreshing and validating tokens.
 * **Helpful Debugging**: Detailed logs of authentication issues to help figure out exactly what happened and fix it faster.
 * **WP-CLI Commands**: Useful [commands to handle tokens](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/wp-cli.md) - whether you need to check, destroy or create new ones, or clean up old ones.
 * **Developer Hooks**: Provides [filters](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/filters.md) and [hooks](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/hooks.md) for more configuration to your requirements.
 
-For support, please join the [community on Discord](https://cocartapi.com/community/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart). For priority support, consider upgrading to [CoCart Plus](https://cocartapi.com/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart).
+JSON Web Tokens are an open, industry standard method for representing claims securely between two parties.
+
+For more information, [read the core concept](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/docs/concepts.md) on what this plugin does and can do.
 
 ## 📄 Documentation
 
@@ -49,31 +47,29 @@ We also have other add-ons that extend CoCart to enhance your headless store dev
 
 * **[CoCart - CORS](https://wordpress.org/plugins/cocart-cors/)** enables support for CORS to allow CoCart to work across multiple domains.
 * **[CoCart - Rate Limiting](https://wordpress.org/plugins/cocart-rate-limiting/)** enables the rate limiting feature.
-* and more add-ons in development.
 
 These add-ons of course come with support too.
 
-We also have a security plugin built for the REST-API to provide a firewall to block unknown outsiders, rate limit requests and protect data exposure – no configuration required.
+### 💜 Need Support?
 
-See more at [API Security](https://apisecurity.pro/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart).
+We aim to provide regular support for the CoCart plugin via [our Discord community server](https://cocartapi.com/community/?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink). Please understand that we do prioritize support for our [paying customers](https://cocartapi.com/pricing/?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink).
 
 ### ⌨️ Join our growing community
 
-A Discord community for developers, WordPress agencies and shop owners building the fastest and best headless WooCommerce stores with CoCart.
+On Discord, we have a community of developers, WordPress agencies, and shop owners building the fastest and best headless WooCommerce stores with CoCart.
 
-[Join our community](https://cocartapi.com/community/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart)
+Come and [join our community](https://cocartapi.com/community/?utm_medium=wp.org&utm_source=wordpressorg&utm_campaign=readme&utm_content=cocart)
 
 ### 🐞 Bug reports
 
-Bug reports for CoCart - JWT Authentication are welcomed in the [CoCart - JWT Authentication repository on GitHub](https://github.com/cocart-headless/cocart-jwt-authentication). Please note that GitHub is not a support forum, and that issues that aren’t properly qualified as bugs will be closed.
+Bug reports for CoCart JWT Authentication are welcomed in the [CoCart JWT Authentication repository on GitHub](https://github.com/cocart-headless/cocart-jwt-authentication). Please note that GitHub is not a support forum, and that issues that aren’t properly qualified as bugs will be closed.
 
 ### More information
 
-* The official [CoCart API plugin](https://cocartapi.com/?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink) website.
-* [CoCart for Developers](https://cocart.dev/?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink), an official hub for resources you need to be productive with CoCart and keep track of everything that is happening with the API.
-* The CoCart [Documentation](https://cocartapi.com/docs/?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink)
+* [Website](https://cocartapi.com/?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink).
+* [Documentation](https://cocartapi.com/docs/?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink)
 * [Subscribe to updates](http://eepurl.com/dKIYXE)
-* Like, Follow and Star on [Facebook](https://www.facebook.com/cocartforwc/), [Twitter](https://twitter.com/cocartapi), [Instagram](https://www.instagram.com/cocartheadless/) and [GitHub](https://github.com/co-cart/co-cart)
+* Like, Follow and Star on [Facebook](https://www.facebook.com/cocartforwc/), [X/Twitter](https://twitter.com/cocartapi), [Instagram](https://www.instagram.com/cocartheadless/) and [GitHub](https://github.com/co-cart/co-cart)
 
 #### 💯 Credits
 
@@ -135,13 +131,53 @@ No! This JWT Authentication was specifically designed for the CoCart API ONLY.
 
 It is possible due to a plugin conflict e.g. Login Limit and the token used failed many times and the IP address may have been blacklisted.
 
+= What algorithms does this plugin support? =
+
+It supports **HS256**, **HS384**, **HS512**, **RS256**, **RS384**, **RS512**, **ES256**, **ES384**, **ES512**, **PS256**, **PS384**, **PS512**
+
+= How secure is CoCart JWT Authentication ? =
+
+CoCart JWT authentication is very secure when implemented correctly. Make sure to use a strong secret key and keep it confidential.
+
+= How do I apply Rate Limiting? =
+
+Rate Limiting is only available with [CoCart Plus](https://cocartapi.com/?utm_medium=website&utm_source=wpplugindirectory&utm_campaign=readme&utm_content=readmelink)
+
 == Changelog ==
 
-= v3.0.0 - ?? ??, 2025 =
+= v3.0.2 - 21st March, 2026 =
+
+### Bug Fix
+
+* Fixed an edge case where token creation time could return an incorrect value when a token was invalid.
+* Fixed token ID generation failing if a collision was detected.
+* Fixed refreshing a token failing when no refresh token was provided.
+* Fixed tokens not being properly cleared when a user resets their password.
+
+### Compatible
+
+* Tested with WooCommerce v10.6
+
+= v3.0.1 - 3rd December, 2025 =
+
+### What's New?
+
+* Dashboard: Added plugin action links.
+
+### Bug Fix
+
+* Dashboard: WooCommerce System Status was not accessible.
+
+### Compatible
+
+* Tested with WordPress v6.9
+* Tested with WooCommerce v10.3
+
+= v3.0.0 - 20th September, 2025 =
 
 📢 This update will invalidate previous tokens as they will no longer be valid.
 
-With this update we have improved tracking of tokens to be dual-secured with a PAT (Personal Access Token) ID. This also makes sure users don't get unnecessary new tokens when already authenticated for proper token lifecycle management and prevent token proliferation when users are already authenticated.
+With this update we have improved tracking of tokens to be dual-secured with a PAT (Personal Access Token) ID. This also makes sure users don't get unnecessary new tokens when already authenticated for proper token life cycle management and prevent token proliferation when users are already authenticated.
 
 ### What's New?
 
@@ -176,12 +212,11 @@ With this update we have improved tracking of tokens to be dual-secured with a P
 ### Compatibility
 
 * Tested with CoCart v4.8
-* Tested with WooCommerce 10.1
 
 [View the full changelog here](https://github.com/cocart-headless/cocart-jwt-authentication/blob/master/CHANGELOG.md).
 
 == Upgrade Notice ==
 
-= 3.0.0 =
+= 3.0.2 =
 
-This update will invalidate previous tokens as they will no longer be valid.
+Fixed token ID generation failing if a collision was detected.

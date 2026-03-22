@@ -1,0 +1,138 @@
+name: PHPUnit Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      wp_version:
+        description: WordPress version
+        required: false
+        default: latest
+      wc_version:
+        description: WooCommerce version
+        required: false
+        default: latest
+  push:
+    branches:
+      - master
+    paths:
+      - '**.php'
+      - 'phpunit.xml'
+      - 'composer.json'
+      - '.github/workflows/phpunit-tests.yml'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '**.php'
+      - 'phpunit.xml'
+      - 'composer.json'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  phpunit:
+    name: PHP ${{ matrix.php }} / WP ${{ matrix.wp }} / WC ${{ matrix.wc }}
+    runs-on: ubuntu-latest
+    env:
+      WP_TESTS_DIR: /tmp/wordpress-tests-lib
+      WP_CORE_DIR: /tmp/wordpress
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Stable — matches currently tested/supported versions
+          - php: '8.1'
+            wp: '6.9'
+            wc: '10.6'
+          - php: '8.2'
+            wp: '6.9'
+            wc: '10.6'
+          - php: '8.3'
+            wp: '6.9'
+            wc: '10.6'
+          - php: '8.4'
+            wp: '6.9'
+            wc: '10.6'
+          # Latest — forward-looking, catches upcoming breakage early
+          - php: '8.3'
+            wp: 'latest'
+            wc: 'latest'
+          - php: '8.4'
+            wp: 'latest'
+            wc: 'latest'
+
+    steps:
+      - name: Checkout JWT plugin
+        uses: actions/checkout@v4
+
+      - name: Checkout CoCart core
+        uses: actions/checkout@v4
+        with:
+          repository: co-cart/co-cart
+          ref: tests
+          path: cocart-core
+
+      - name: Set up PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Install Composer dependencies
+        run: composer update --prefer-dist --no-progress
+
+      - name: Install CoCart core Composer dependencies
+        run: composer install --prefer-dist --no-progress
+        working-directory: cocart-core
+
+      - name: Install Subversion
+        run: sudo apt-get install -y subversion
+
+      - name: Install WordPress test suite
+        run: |
+          WP_VERSION="${{ matrix.wp }}"
+          bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1:3306 "$WP_VERSION"
+
+      - name: Install WooCommerce
+        run: |
+          WC_VERSION="${{ matrix.wc }}"
+          if [ "$WC_VERSION" = "latest" ]; then
+            WC_VERSION=$(curl -s https://api.github.com/repos/woocommerce/woocommerce/releases/latest | jq -r .tag_name | sed 's/^v//')
+          else
+            # Resolve a partial version (e.g. "10.6") to the latest full release tag (e.g. "10.6.1")
+            WC_VERSION=$(curl -s "https://api.github.com/repos/woocommerce/woocommerce/releases?per_page=50" \
+              | jq -r --arg v "$WC_VERSION" '[.[] | select(.tag_name | test("^" + $v + "\\.")) | select(.prerelease == false) | .tag_name] | first')
+          fi
+          echo "Installing WooCommerce $WC_VERSION"
+          curl -sL "https://github.com/woocommerce/woocommerce/releases/download/${WC_VERSION}/woocommerce.zip" -o /tmp/woocommerce.zip
+          unzip -q /tmp/woocommerce.zip -d /tmp/wordpress/wp-content/plugins/
+
+      - name: Copy plugins to test environment
+        run: |
+          mkdir -p /tmp/wordpress/wp-content/plugins/cart-rest-api-for-woocommerce
+          rsync -a --exclude='.git' --exclude='node_modules' cocart-core/ /tmp/wordpress/wp-content/plugins/cart-rest-api-for-woocommerce/
+          ls /tmp/wordpress/wp-content/plugins/cart-rest-api-for-woocommerce/cocart-core.php || echo "ERROR: cocart-core.php not found"
+          mkdir -p /tmp/wordpress/wp-content/plugins/cocart-jwt-authentication
+          rsync -a --exclude='.git' --exclude='node_modules' --exclude='cocart-core' . /tmp/wordpress/wp-content/plugins/cocart-jwt-authentication/
+
+      - name: Run PHPUnit tests
+        run: vendor/bin/phpunit -c phpunit.xml --testdox

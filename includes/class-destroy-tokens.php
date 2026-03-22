@@ -42,12 +42,18 @@ class DestroyTokens {
 	 *
 	 * @since 2.0.0 Introduced.
 	 * @since 2.3.0 Added filter to allow control over token revocation.
+	 * @since 3.0.2 Now also accepts a WP_User object, as passed by the after_password_reset hook.
 	 *
 	 * @hooked: wp_logout
 	 *
-	 * @param int $user_id User ID.
+	 * @param WP_User|int $user_id User ID.
 	 */
 	public function destroy_tokens( $user_id ) {
+		// after_password_reset passes a WP_User object as the first argument.
+		if ( $user_id instanceof \WP_User ) {
+			$user_id = $user_id->ID;
+		}
+
 		// Get current action hook.
 		$current_action = current_action();
 

@@ -10,7 +10,9 @@
  * @license GPL-3.0
  */
 
-namespace CoCart\JWTAuthentication;
+namespace CoCart\JWTAuthentication\Admin;
+
+use CoCart\JWTAuthentication\Plugin;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -30,6 +32,7 @@ class SystemStatus {
 		// Adds CoCart fields to WooCommerce System Status response.
 		add_filter( 'woocommerce_rest_prepare_system_status', array( $this, 'add_cocart_fields_to_response' ) );
 
+		// Add additional system status data.
 		add_filter( 'cocart_system_status_data', array( $this, 'add_system_status_data' ) );
 
 		// Add clear expired tokens button to System Status.

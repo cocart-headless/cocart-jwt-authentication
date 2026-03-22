@@ -1,10 +1,53 @@
 # Changelog for CoCart JWT Authentication
 
-## v3.0.0 -?? ??, 2025
+## v3.0.2 - 21st March, 2026
+
+### Bug Fix
+
+* `class-tokens.php`: Fixed `get_token_creation_time()` returning `true` instead of `false` when an exception is caught, causing incorrect return type.
+* `class-tokens.php`: Fixed `generate_token_id()` not passing `$user_tokens` in its recursive call, which would cause a `TypeError` on token ID collision.
+* `class-rest.php`: Fixed `refresh_token()` not guarding against an empty refresh token, which could throw a `TypeError`.
+* `class-destroy-tokens.php`: Fixed `destroy_tokens()` to accept a `WP_User` object, as passed by the `after_password_reset` hook.
+* Tests: Fixed `$_SERVER['REQUEST_URI']` deprecation notice in WP cron by restoring the variable after use instead of unsetting it.
+
+### Improvements
+
+* `class-tokens.php`: Corrected `@return` PHPDoc on `generate_token()` to reflect that a `WP_Error` may also be returned.
+
+### Tests
+
+* Added full PHPUnit test suite with GitHub Actions CI workflow.
+* Rewrote authentication and login tests to call internal methods directly, working around a WP REST unit test limitation where `determine_current_user` is not re-run on dispatch.
+* Fixed test framework to use `ReflectionMethod` for calling protected methods.
+* Added `destroy_pat_session()` test helper for token revocation tests.
+* Fixed `wp_set_current_user()` calls in login response tests.
+
+### Compatibility
+
+* Tested with WordPress v6.9
+* Tested with WooCommerce v10.6
+* Tested with CoCart v4.8
+
+## v3.0.1 - 3rd December, 2025
+
+### What's New?
+
+* Dashboard: Added plugin action links.
+
+### Bug Fix
+
+* Dashboard: WooCommerce System Status was not accessible.
+
+### Compatible
+
+* Tested with WordPress v6.9
+* Tested with WooCommerce v10.3
+
+## v3.0.0 - 20th September, 2025
 
 📢 This update will invalidate previous tokens as they will no longer be valid.
 
-With this update we have improved tracking of tokens to be dual-secured with a PAT (Personal Access Token) ID. This also makes sure users don't get unnecessary new tokens when already authenticated for proper token lifecycle management and prevent token proliferation when users are already authenticated.
+With this update we have improved tracking of tokens to be dual-secured with a PAT (Personal Access Token) ID. This also makes sure users don't get unnecessary new tokens when already authenticated for proper token life cycle management and prevent token proliferation when users are already authenticated.
 
 ### What's New?
 
@@ -39,7 +82,17 @@ With this update we have improved tracking of tokens to be dual-secured with a P
 ### Compatibility
 
 * Tested with CoCart v4.8
-* Tested with WooCommerce 10.1
+
+## v2.5.2 - 16th September, 2025
+
+### Bug Fix
+
+* Fixed compatibility with PHP v7.4 when generating token.
+
+### Compatibility
+
+* Tested with CoCart v4.7
+* Tested with WooCommerce v10.1
 
 ## v2.5.1 - 20th June, 2025
 
@@ -67,7 +120,7 @@ Last release broke support for guest users. [Reported](https://github.com/cocart
 ### Compatibility
 
 * Tested with CoCart v4.6
-* Tested with WooCommerce 9.9
+* Tested with WooCommerce v9.9
 
 ## v2.4.0 - 9th May, 2025
 
