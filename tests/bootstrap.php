@@ -243,6 +243,13 @@ class CoCart_JWT_Unit_Tests_Bootstrap {
 		// are re-registered after $wp_filter is restored by WP_UnitTestCase::tearDown().
 		new \CoCart\JWTAuthentication\REST();
 
+		// Load v5 controller classes for testing when CoCart_REST_Controller is available.
+		// CoCart_REST_API() above triggers rest_api_includes() which loads the base class.
+		if ( class_exists( 'CoCart_REST_Controller' ) ) {
+			require_once $this->jwt_plugin_dir . '/includes/controllers/class-refresh-token-controller.php';
+			require_once $this->jwt_plugin_dir . '/includes/controllers/class-validate-token-controller.php';
+		}
+
 		// Re-instantiate DestroyTokens on every rest_api_init so that revocation hooks
 		// (wp_logout, after_password_reset, etc.) survive the $wp_filter reset.
 		new \CoCart\JWTAuthentication\DestroyTokens();

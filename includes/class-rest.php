@@ -21,11 +21,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 class REST extends Tokens {
 
 	/**
-	 * REST API namespaces and endpoints.
+	 * Singleton instance.
 	 *
-	 * @var array
+	 * @access private
+	 *
+	 * @static
+	 *
+	 * @var self|null
 	 */
-	protected $routes = array();
+	private static $instance = null;
 
 	/**
 	 * Request made flag to prevent multiple authentication attempts.
@@ -39,59 +43,38 @@ class REST extends Tokens {
 	private $request_made = false;
 
 	/**
-	 * Constructor.
+	 * Get the singleton instance.
+	 *
+	 * Controllers use this to delegate business logic to the shared instance
+	 * that registered all the hooks at plugin load time. Tests may still
+	 * create independent instances via `new REST()` for isolation.
 	 *
 	 * @access public
 	 *
 	 * @static
+	 *
+	 * @return self
+	 */
+	public static function instance(): self {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	} // END instance()
+
+	/**
+	 * Constructor.
+	 *
+	 * @access public
 	 */
 	public function __construct() {
-		// Check which version of CoCart is running.
+		// Register JWT REST API routes. For CoCart 5.0+ we use proper controller
+		// classes that extend CoCart_REST_Controller (loaded by Core at priority 10).
+		// We register at priority 15 to guarantee Core has loaded the base class first.
 		if ( version_compare( COCART_VERSION, '5.0.0', '>=' ) ) {
-			// Define routes for JWT auth.
-			$this->routes = array(
-				CoCart::get_api_namespace() . 'jwt' => cocart_rest_should_load_namespace( 'cocart/jwt' ) ? array(
-					'refresh_token'  => array(
-						'methods'             => 'POST',
-						'callback'            => array( $this, 'refresh_token' ),
-						'permission_callback' => '__return_true',
-					),
-					'validate_token' => array(
-						'methods'             => 'POST',
-						'callback'            => function () {
-							return rest_ensure_response( array( 'message' => __( 'Token is valid.', 'cocart-jwt-authentication' ) ) );
-						},
-						'permission_callback' => function () {
-							return get_current_user_id() > 0;
-						},
-					),
-				) : array(),
-			);
-
-			// Register defined routes.
-			$this->register_routes( 'jwt' );
+			add_action( 'rest_api_init', array( $this, 'register_jwt_routes' ), 15 );
 		} else {
-			// Register REST API endpoint to refresh tokens.
-			add_action( 'rest_api_init', function () {
-				register_rest_route( 'cocart/jwt', '/refresh-token', array(
-					'methods'             => 'POST',
-					'callback'            => array( $this, 'refresh_token' ),
-					'permission_callback' => '__return_true',
-				) );
-			} );
-
-			// Register REST API endpoint to validate tokens.
-			add_action( 'rest_api_init', function () {
-				register_rest_route( 'cocart/jwt', '/validate-token', array(
-					'methods'             => 'POST',
-					'callback'            => function () {
-						return rest_ensure_response( array( 'message' => __( 'Token is valid.', 'cocart-jwt-authentication' ) ) );
-					},
-					'permission_callback' => function () {
-						return get_current_user_id() > 0;
-					},
-				) );
-			} );
+			add_action( 'rest_api_init', array( $this, 'register_jwt_routes_legacy' ), 10 );
 		}
 
 		// Filter in first before anyone else.
@@ -105,40 +88,71 @@ class REST extends Tokens {
 
 		// Add rate limits for JWT refresh token.
 		add_filter( 'cocart_api_rate_limit_options', array( $this, 'jwt_rate_limits' ), 0 );
-	} // END init()
+	} // END __construct()
 
 	/**
-	 * Register defined list of routes with WordPress.
+	 * Register JWT REST API routes for CoCart Basic.
 	 *
-	 * @access protected
+	 * Uses dedicated controller classes that extend CoCart_REST_Controller,
+	 * aligning with the CoCart Basic controller architecture. Falls back to
+	 * legacy registration if the base class is unexpectedly unavailable.
 	 *
-	 * @since x.x.x Introduced.
+	 * @access public
 	 *
-	 * @param string $version API Version being registered. Default is JWT.
+	 * @since 4.0.0 Introduced.
+	 *
+	 * @return void
 	 */
-	protected function register_routes( $version = 'jwt' ) {
-		$routes = $this->routes[ \CoCart::get_api_namespace() . $version ];
-
-		// If no routes for the version exist return nothing.
-		if ( ! isset( $routes ) ) {
+	public function register_jwt_routes() {
+		// CoCart_REST_Controller is loaded by CoCart Basic.
+		// If it's not available, something is wrong with the setup, so we fall back to legacy registration.
+		if ( ! class_exists( 'CoCart_REST_Controller' ) ) {
+			$this->register_jwt_routes_legacy();
 			return;
 		}
 
-		// Set the route namespace outside the controller.
-		$route_namespace = \CoCart::get_api_namespace() . '/' . $version;
+		include_once __DIR__ . '/controllers/class-refresh-token-controller.php';
+		include_once __DIR__ . '/controllers/class-validate-token-controller.php';
 
-		foreach ( $routes as $path => $args ) {
-			$route = $routes[ $path ] ?? false;
+		$namespace = \CoCart::get_api_namespace() . '/jwt';
+		$refresh   = new \CoCart_REST_JWT_Refresh_Token_Controller();
+		$validate  = new \CoCart_REST_JWT_Validate_Token_Controller();
 
-			if ( array_search( $path, $this->registered_routes ) === false ) {
-				register_rest_route(
-					$route_namespace,
-					$path,
-					$args
-				);
-			}
-		}
-	} // END register_routes()
+		register_rest_route( $namespace, $refresh->get_path_regex(), $refresh->get_args() );
+		register_rest_route( $namespace, $validate->get_path_regex(), $validate->get_args() );
+	} // END register_jwt_routes()
+
+	/**
+	 * Register JWT REST API routes for CoCart Community.
+	 *
+	 * Registers routes directly without controller classes, using the REST
+	 * singleton's callback for the refresh token endpoint.
+	 *
+	 * @access public
+	 *
+	 * @since 4.0.0 Introduced.
+	 *
+	 * @return void
+	 */
+	public function register_jwt_routes_legacy() {
+		$namespace = 'cocart/jwt';
+
+		register_rest_route( $namespace, '/refresh-token', array(
+			'methods'             => 'POST',
+			'callback'            => array( self::instance(), 'refresh_token' ),
+			'permission_callback' => '__return_true',
+		) );
+
+		register_rest_route( $namespace, '/validate-token', array(
+			'methods'             => 'POST',
+			'callback'            => function () {
+				return rest_ensure_response( array( 'message' => __( 'Token is valid.', 'cocart-jwt-authentication' ) ) );
+			},
+			'permission_callback' => function () {
+				return get_current_user_id() > 0;
+			},
+		) );
+	} // END register_jwt_routes_legacy()
 
 	/**
 	 * Check if the token is valid.
@@ -509,4 +523,4 @@ class REST extends Tokens {
 	} // END jwt_rate_limits()
 } // END class
 
-return new REST();
+REST::instance();
