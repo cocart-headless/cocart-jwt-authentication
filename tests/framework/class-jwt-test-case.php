@@ -130,8 +130,8 @@ abstract class CoCart_JWT_Test_Case extends CoCart_API_V2_Test_Case {
 		$headers = $token ? array( 'Authorization' => 'Bearer ' . $token ) : array();
 
 		// Preserve originals so we can restore them after dispatch.
-		$prev_request_uri    = $_SERVER['REQUEST_URI'] ?? '';
-		$prev_authorization  = $_SERVER['HTTP_AUTHORIZATION'] ?? null;
+		$prev_request_uri   = $_SERVER['REQUEST_URI'] ?? '';
+		$prev_authorization = $_SERVER['HTTP_AUTHORIZATION'] ?? null;
 
 		// CoCart::is_rest_api_request() checks $_SERVER['REQUEST_URI'] for the
 		// CoCart namespace. Without it, authenticate() returns early and JWT auth
