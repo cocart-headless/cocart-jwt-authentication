@@ -23,7 +23,7 @@
 	"wc_requires": "7.0",
 	"wc_tested_up_to": "10.6",
 	"cocart_requires": "4.3",
-	"cocart_tested_up_to": "4.8",
+	"cocart_tested_up_to": "5.0",
 	"license": "GPL-3.0",
 	"copyright": "Copyright (c) 2025, CoCart Headless, LLC",
 	"description": "JWT Authentication for CoCart.",

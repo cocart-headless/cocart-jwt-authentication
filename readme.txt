@@ -88,8 +88,8 @@ Founder of [CoCart Headless, LLC](https://twitter.com/cocartheadless).
 = Recommended Requirements =
 
 * WordPress v6.0 or higher.
-* WooCommerce v9.0 or higher.
-* PHP v8.0 or higher.
+* WooCommerce v10.0 or higher.
+* PHP v8.3 or higher.
 
 = Automatic installation =
 
