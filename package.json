@@ -18,7 +18,7 @@
 		"url": "https://github.com/cocart-headless/cocart-jwt-authentication/issues"
 	},
 	"requires": "6.0",
-	"requires_php": "7.4",
+	"requires_php": "8.2",
 	"tested_up_to": "6.9",
 	"wc_requires": "7.0",
 	"wc_tested_up_to": "10.6",
