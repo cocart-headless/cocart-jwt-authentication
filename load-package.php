@@ -8,10 +8,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
-	return;
-}
-
 if ( ! defined( 'COCART_JWT_AUTHENTICATION_FILE' ) ) {
 	define( 'COCART_JWT_AUTHENTICATION_FILE', __FILE__ );
 }
