@@ -110,9 +110,9 @@ class Test_CoCart_JWT_Refresh_Token extends CoCart_JWT_Test_Case {
 		$tokens = $this->get_jwt_tokens_for_user( $this->user->ID );
 
 		// Get the current PAT ID from the token before refreshing.
-		$rest           = new \CoCart\JWTAuthentication\REST();
-		$old_decoded    = $rest->decode_token( $tokens['token'] );
-		$old_pat_id     = $old_decoded->payload->data->user->pat;
+		$rest        = new \CoCart\JWTAuthentication\REST();
+		$old_decoded = $rest->decode_token( $tokens['token'] );
+		$old_pat_id  = $old_decoded->payload->data->user->pat;
 
 		// Perform the refresh.
 		$response = $this->rest_post( '/cocart/jwt/refresh-token', array(
@@ -122,7 +122,7 @@ class Test_CoCart_JWT_Refresh_Token extends CoCart_JWT_Test_Case {
 		$this->assert_rest_response_status( 200, $response );
 
 		// The old PAT should no longer be in _cocart_jwt_token_pat.
-		$pat_data = get_user_meta( $this->user->ID, '_cocart_jwt_token_pat' );
+		$pat_data      = get_user_meta( $this->user->ID, '_cocart_jwt_token_pat' );
 		$old_pat_found = false;
 
 		foreach ( $pat_data as $pat_entry ) {
@@ -158,7 +158,7 @@ class Test_CoCart_JWT_Refresh_Token extends CoCart_JWT_Test_Case {
 		$refresh_token = $rest->generate_refresh_token( $this->user->ID );
 
 		// Manually set the expiration to the past.
-		$refresh_tokens                  = get_user_meta( $this->user->ID, '_cocart_jwt_refresh_tokens', true );
+		$refresh_tokens                   = get_user_meta( $this->user->ID, '_cocart_jwt_refresh_tokens', true );
 		$refresh_tokens[ $refresh_token ] = time() - 3600; // Expired 1 hour ago.
 		update_user_meta( $this->user->ID, '_cocart_jwt_refresh_tokens', $refresh_tokens );
 

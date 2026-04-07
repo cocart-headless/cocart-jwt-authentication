@@ -1,7 +1,7 @@
 {
 	"title": "CoCart JWT Authentication",
 	"name": "cocart-jwt-authentication",
-	"version": "3.0.2",
+	"version": "3.0.3",
 	"private": false,
 	"contributors": [
 		"sebd86",
@@ -23,9 +23,9 @@
 	"wc_requires": "7.0",
 	"wc_tested_up_to": "10.6",
 	"cocart_requires": "4.3",
-	"cocart_tested_up_to": "4.8",
+	"cocart_tested_up_to": "4.9",
 	"license": "GPL-3.0",
-	"copyright": "Copyright (c) 2025, CoCart Headless, LLC",
+	"copyright": "Copyright (c) 2026, CoCart Headless, LLC",
 	"description": "JWT Authentication for CoCart.",
 	"tags": "",
 	"keywords": [

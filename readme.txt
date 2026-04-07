@@ -4,7 +4,7 @@ Tags: woocommerce, rest-api, decoupled, headless, jwt
 Requires at least: 6.0
 Requires PHP: 7.4
 Tested up to: 6.9
-Stable tag: 3.0.2
+Stable tag: 3.0.3
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -145,6 +145,16 @@ Rate Limiting is only available with [CoCart Plus](https://cocartapi.com/?utm_me
 
 == Changelog ==
 
+= v3.0.3 - 7th April, 2026 =
+
+### Bug Fix
+
+* Dashboard: Fixed crashing the plugins page if the main CoCart plugin is not active.
+
+### Compatible
+
+* Tested with CoCart Community v4.9
+
 = v3.0.2 - 21st March, 2026 =
 
 ### Bug Fix
@@ -217,6 +227,6 @@ With this update we have improved tracking of tokens to be dual-secured with a P
 
 == Upgrade Notice ==
 
-= 3.0.2 =
+= 3.0.3 =
 
-Fixed token ID generation failing if a collision was detected.
+Fixed crashing the plugins page if the main CoCart plugin is not active.
