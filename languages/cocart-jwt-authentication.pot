@@ -2,10 +2,10 @@
 # This file is distributed under the same license as the CoCart package.
 msgid ""
 msgstr ""
-"Project-Id-Version: CoCart JWT Authentication 3.0.2\n"
+"Project-Id-Version: CoCart JWT Authentication 3.0.3\n"
 "Report-Msgid-Bugs-To: "
 "https://github.com/cocart-headless/cocart-jwt-authentication/issues\n"
-"POT-Creation-Date: 2026-03-21 16:39:26+00:00\n"
+"POT-Creation-Date: 2026-04-07 16:30:57+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -33,34 +33,34 @@ msgstr ""
 msgid "Install CoCart now"
 msgstr ""
 
-#: includes/admin/class-admin-plugin-action-links.php:65
+#: includes/admin/class-admin-plugin-action-links.php:52
 msgid "Setup JWT"
 msgstr ""
 
-#: includes/admin/class-admin-plugin-action-links.php:90
+#: includes/admin/class-admin-plugin-action-links.php:77
 #. translators: %s: CoCart
 msgid "View %s Documentation"
 msgstr ""
 
-#: includes/admin/class-admin-plugin-action-links.php:92
+#: includes/admin/class-admin-plugin-action-links.php:79
 msgid "Documentation"
 msgstr ""
 
-#: includes/admin/class-admin-plugin-action-links.php:95
+#: includes/admin/class-admin-plugin-action-links.php:82
 #. translators: %s: CoCart
 msgid "Translate %s"
 msgstr ""
 
-#: includes/admin/class-admin-plugin-action-links.php:97
+#: includes/admin/class-admin-plugin-action-links.php:84
 msgid "Translate"
 msgstr ""
 
-#: includes/admin/class-admin-plugin-action-links.php:100
+#: includes/admin/class-admin-plugin-action-links.php:87
 #. translators: %s: CoCart
 msgid "Submit a review for %s"
 msgstr ""
 
-#: includes/admin/class-admin-plugin-action-links.php:102
+#: includes/admin/class-admin-plugin-action-links.php:89
 msgid "Leave a Review"
 msgstr ""
 
