@@ -7,11 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Debug .github directory
-        run: |
-          ls -al .github
+        uses: actions/checkout@v4
 
       - name: Sync repository labels
         uses: cocart-headless/wp-repo-labels@v1
