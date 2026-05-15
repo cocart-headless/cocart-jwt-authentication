@@ -80,10 +80,10 @@ jobs:
 
     steps:
       - name: Checkout JWT plugin
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Checkout CoCart core
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: co-cart/co-cart
           ref: tests
