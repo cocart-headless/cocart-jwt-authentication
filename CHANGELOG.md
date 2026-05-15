@@ -1,5 +1,15 @@
 # Changelog for CoCart JWT Authentication
 
+## v3.0.3 - 7th April, 2026
+
+### Bug Fix
+
+* Dashboard: Fixed crashing the plugins page if the main CoCart plugin is not active.
+
+### Compatible
+
+* Tested with CoCart Community v4.9
+
 ## v3.0.2 - 21st March, 2026
 
 ### Bug Fix

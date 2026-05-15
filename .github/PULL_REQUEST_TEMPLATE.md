@@ -2,20 +2,23 @@
 <!-- Please describe what you have changed or added -->
 
 ### Screenshots
-<!-- if applicable -->
+<!-- If applicable -->
 
-### Types of changes
-<!-- What types of changes does your code introduce?  -->
-<!-- Bug fix (non-breaking change which fixes an issue) -->
-<!-- New feature (non-breaking change which adds functionality) -->
-<!-- Breaking change -->
+### Type of change
+
+- [ ] Bug fix (non-breaking change which fixes an issue)
+- [ ] Enhancement (non-breaking change which improves existing functionality)
+- [ ] New feature (non-breaking change which adds functionality)
+- [ ] Breaking change (fix or feature that would cause existing functionality to change)
 
 ### How has this been tested?
 <!-- Please describe in detail how you tested your changes. -->
 
-### Checklist:
+### Checklist
+
 - [ ] My code is tested
-- [ ] My code has proper inline documentation <!-- Guidelines: https://make.wordpress.org/core/handbook/best-practices/inline-documentation-standards/php/ -->
-- [ ] I've included any necessary tests <!-- if applicable -->
-- [ ] I've included developer documentation <!-- if applicable -->
-- [ ] I've added proper labels to this pull request <!-- if applicable -->
+- [ ] My code follows the WordPress Coding Standards (`composer phpcs`)
+- [ ] My code passes static analysis (`composer phpstan`)
+- [ ] I have run the PHPUnit test suite and all tests pass (`vendor/bin/phpunit`)
+- [ ] I have included any necessary tests
+- [ ] I have included inline documentation where needed
