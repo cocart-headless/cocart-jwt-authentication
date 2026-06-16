@@ -93,10 +93,10 @@ class REST extends Tokens {
 	} // END __construct()
 
 	/**
-	 * Register JWT REST API routes for CoCart Basic.
+	 * Register JWT REST API routes for CoCart Starter.
 	 *
 	 * Uses dedicated controller classes that extend CoCart_REST_Controller,
-	 * aligning with the CoCart Basic controller architecture. Falls back to
+	 * aligning with the CoCart Starter controller architecture. Falls back to
 	 * legacy registration if the base class is unexpectedly unavailable.
 	 *
 	 * @access public
@@ -106,7 +106,7 @@ class REST extends Tokens {
 	 * @return void
 	 */
 	public function register_jwt_routes() {
-		// CoCart_REST_Controller is loaded by CoCart Basic.
+		// CoCart_REST_Controller is loaded by CoCart Starter.
 		// If it's not available, something is wrong with the setup, so we fall back to legacy registration.
 		if ( ! class_exists( 'CoCart_REST_Controller' ) ) {
 			$this->register_jwt_routes_legacy();
