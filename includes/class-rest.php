@@ -71,7 +71,7 @@ class REST extends Tokens {
 		// Register JWT REST API routes. For CoCart 5.0+ we use proper controller
 		// classes that extend CoCart_REST_Controller (loaded by Core at priority 10).
 		// We register at priority 15 to guarantee Core has loaded the base class first.
-		if ( version_compare( COCART_VERSION, '5.0.0', '>=' ) ) {
+		if ( defined( 'COCART_VERSION' ) && version_compare( COCART_VERSION, '5.0.0', '>=' ) ) {
 			add_action( 'rest_api_init', array( $this, 'register_jwt_routes' ), 15 );
 		} else {
 			add_action( 'rest_api_init', array( $this, 'register_jwt_routes_legacy' ), 10 );
