@@ -77,8 +77,10 @@ class REST extends Tokens {
 			add_action( 'rest_api_init', array( $this, 'register_jwt_routes_legacy' ), 10 );
 		}
 
-		// Filter in first before anyone else.
-		add_filter( 'cocart_authenticate', array( $this, 'perform_jwt_authentication' ), 0, 3 );
+		add_action( 'rest_api_init', function () {
+			// Filter in first before anyone else.
+			add_filter( 'cocart_authenticate', array( $this, 'perform_jwt_authentication' ), 0, 3 );
+		} );
 
 		// Update token access time when authenticated with it.
 		add_action( 'cocart_jwt_auth_authenticated', array( $this, 'update_jwt_token_access' ), 10, 2 );

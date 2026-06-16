@@ -548,29 +548,15 @@ final class Plugin {
 	 *
 	 * Locales found in:
 	 *      - WP_LANG_DIR/cocart-jwt-authentication/cocart-jwt-authentication-LOCALE.mo
-	 *      - WP_LANG_DIR/plugins/cocart-jwt-authentication-LOCALE.mo
+	 *      - PLUGIN_DIR/languages/cocart-jwt-authentication-LOCALE.mo
 	 *
 	 * @access public
 	 */
 	public function load_plugin_textdomain() {
-		/**
-		 * Filter to adjust the cocart-jwt-authentication locale to use for translations.
-		 *
-		 * @since 3.0.0 Introduced in WP core.
-		 */
-		$locale                  = apply_filters( 'plugin_locale', determine_locale(), 'cocart-jwt-authentication' );
-		$custom_translation_path = WP_LANG_DIR . '/cocart-jwt-authentication/cocart-jwt-authentication-' . $locale . '.mo';
-		$plugin_translation_path = WP_LANG_DIR . '/plugins/cocart-jwt-authentication-' . $locale . '.mo';
+		$locale = determine_locale();
 
-		// If a custom translation exists (by default it will not, as it is not a standard WordPress convention)
-		// we unload the existing translation, then essentially layer the custom translation on top of the canonical
-		// translation. Otherwise, we simply step back and let WP manage things.
 		unload_textdomain( 'cocart-jwt-authentication' );
-		if ( is_readable( $custom_translation_path ) ) {
-			load_textdomain( 'cocart-jwt-authentication', $custom_translation_path );
-			load_textdomain( 'cocart-jwt-authentication', $plugin_translation_path );
-		} else {
-			load_textdomain( 'cocart-jwt-authentication', plugin_basename( dirname( COCART_JWT_AUTHENTICATION_FILE ) ) . '/languages/cocart-jwt-authentication-' . $locale . '.mo' );
-		}
+		load_textdomain( 'cocart-jwt-authentication', WP_LANG_DIR . '/cocart-jwt-authentication/cocart-jwt-authentication-' . $locale . '.mo' );
+		load_textdomain( 'cocart-jwt-authentication', plugin_dir_path( COCART_JWT_AUTHENTICATION_FILE ) . 'languages/cocart-jwt-authentication-' . $locale . '.mo' );
 	} // END load_plugin_textdomain()
 } // END class
