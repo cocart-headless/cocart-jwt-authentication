@@ -506,14 +506,16 @@ class REST extends Tokens {
 	 * @return array
 	 */
 	public function jwt_rate_limits( $options ) {
-		if ( preg_match( '/cocart\/jwt\/refresh-token/', $GLOBALS['wp']->query_vars['rest_route'] ) ) {
+		$rest_route = $GLOBALS['wp']->query_vars['rest_route'] ?? '';
+
+		if ( preg_match( '/cocart\/jwt\/refresh-token/', $rest_route ) ) {
 			$options = array(
 				'enabled' => true,
 				'limit'   => 10,
 				'seconds' => MINUTE_IN_SECONDS,
 			);
 		}
-		if ( preg_match( '/cocart\/jwt\/validate-token/', $GLOBALS['wp']->query_vars['rest_route'] ) ) {
+		if ( preg_match( '/cocart\/jwt\/validate-token/', $rest_route ) ) {
 			$options = array(
 				'enabled' => true,
 				'limit'   => 2,
