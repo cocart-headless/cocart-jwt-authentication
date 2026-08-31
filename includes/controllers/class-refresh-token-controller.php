@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Business logic is delegated to the REST singleton which holds
  * all token management methods inherited from Tokens.
  *
- * @since 4.0.0 Introduced.
+ * @since 3.1.0 Introduced.
  * @extends CoCart_REST_Controller
  */
 class CoCart_REST_JWT_Refresh_Token_Controller extends CoCart_REST_Controller {
@@ -35,7 +35,7 @@ class CoCart_REST_JWT_Refresh_Token_Controller extends CoCart_REST_Controller {
 	 *
 	 * @access public
 	 *
-	 * @since 4.0.0 Introduced.
+	 * @since 3.1.0 Introduced.
 	 *
 	 * @return string
 	 */
@@ -48,7 +48,7 @@ class CoCart_REST_JWT_Refresh_Token_Controller extends CoCart_REST_Controller {
 	 *
 	 * @access public
 	 *
-	 * @since 4.0.0 Introduced.
+	 * @since 3.1.0 Introduced.
 	 *
 	 * @return array An array of endpoints.
 	 */
@@ -70,7 +70,7 @@ class CoCart_REST_JWT_Refresh_Token_Controller extends CoCart_REST_Controller {
 	 *
 	 * @access public
 	 *
-	 * @since 4.0.0 Introduced.
+	 * @since 3.1.0 Introduced.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
 	 *

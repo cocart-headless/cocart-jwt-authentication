@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * already passed JWT authentication via the cocart_authenticate filter)
  * can reach the handler. A 200 response confirms the token is valid.
  *
- * @since 4.0.0 Introduced.
+ * @since 3.1.0 Introduced.
  * @extends CoCart_REST_Controller
  */
 class CoCart_REST_JWT_Validate_Token_Controller extends CoCart_REST_Controller {
@@ -36,7 +36,7 @@ class CoCart_REST_JWT_Validate_Token_Controller extends CoCart_REST_Controller {
 	 *
 	 * @access public
 	 *
-	 * @since 4.0.0 Introduced.
+	 * @since 3.1.0 Introduced.
 	 *
 	 * @return string
 	 */
@@ -49,7 +49,7 @@ class CoCart_REST_JWT_Validate_Token_Controller extends CoCart_REST_Controller {
 	 *
 	 * @access public
 	 *
-	 * @since 4.0.0 Introduced.
+	 * @since 3.1.0 Introduced.
 	 *
 	 * @return array An array of endpoints.
 	 */
@@ -72,7 +72,7 @@ class CoCart_REST_JWT_Validate_Token_Controller extends CoCart_REST_Controller {
 	 *
 	 * @access public
 	 *
-	 * @since 4.0.0 Introduced.
+	 * @since 3.1.0 Introduced.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
 	 *
@@ -90,7 +90,7 @@ class CoCart_REST_JWT_Validate_Token_Controller extends CoCart_REST_Controller {
 	 *
 	 * @access public
 	 *
-	 * @since 4.0.0 Introduced.
+	 * @since 3.1.0 Introduced.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
 	 *

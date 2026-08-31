@@ -4,12 +4,19 @@
 
 ### What's New?
 
-* REST API: Routes now support the new registration method in CoCart Starter.
+* REST API: Routes now support a new registration method when using CoCart Starter.
 
 ### Bug Fixes
 
 * Fixed: The text-domain was always loaded before any translation calls in the authentication path can run.
 * Fixed: Fatal error in `cleanup_expired_tokens_for_user()` calling undefined `Plugin::is_token_expired()`.
+* Fixed: PHP warning for an undefined `rest_route` array key when applying rate limits.
+* Fixed: Admin classes could load before CoCart's own admin classes were defined, depending on plugin load order.
+
+### Improvements
+
+* Plugin: Added a `Plugin::log()` wrapper that supports both CoCart Starter's logger and older CoCart Community logging.
+* Plugin: `REST` class is now a singleton so route controllers can share the same authenticated instance.
 
 ### Compatibility
 

@@ -82,14 +82,14 @@ Founder of [CoCart Headless, LLC](https://twitter.com/cocartheadless).
 
 * WordPress v5.6
 * WooCommerce v7.0
-* PHP v8.2
+* PHP v7.4
 * CoCart v4.3
 
 = Recommended Requirements =
 
 * WordPress v6.0 or higher.
 * WooCommerce v10.0 or higher.
-* PHP v8.3 or higher.
+* PHP v8.0 or higher.
 
 = Automatic installation =
 
@@ -145,24 +145,28 @@ Rate Limiting is only available with [CoCart Plus](https://cocartapi.com/?utm_me
 
 == Changelog ==
 
-= v3.1.0 - 16th June, 2026 =
+= v3.1.0 - ?? ??, 2026 =
 
 ### What's New?
 
-* REST API: Routes now support a new registration method if CoCart Starter is installed.
+* REST API: Routes now support a new registration method when using CoCart Starter.
 
-### Bug Fix
+### Bug Fixes
 
-Fixed: The text-domain was always loaded before any translation calls in the authentication path can run.
+* Fixed: The text-domain was always loaded before any translation calls in the authentication path can run.
+* Fixed: Fatal error in `cleanup_expired_tokens_for_user()` calling undefined `Plugin::is_token_expired()`.
+* Fixed: PHP warning for an undefined `rest_route` array key when applying rate limits.
+* Fixed: Admin classes could load before CoCart's own admin classes were defined, depending on plugin load order.
 
-### Breaking Change
+### Improvements
 
-* Plugin: Minimum PHP version raised from 7.4 to 8.2.
+* Plugin: Added a `Plugin::log()` wrapper that supports both CoCart Starter's logger and older CoCart Community logging.
+* Plugin: `REST` class is now a singleton so route controllers can share the same authenticated instance.
 
 ### Compatibility
 
 * Tested with CoCart Starter v5.0
-* Tested with WooCommerce v10.8
+* Tested with WooCommerce v11.0
 
 = v3.0.3 - 7th April, 2026 =
 
