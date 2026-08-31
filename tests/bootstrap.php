@@ -133,7 +133,7 @@ class CoCart_JWT_Unit_Tests_Bootstrap {
 		tests_add_filter( 'init', array( 'WC_Install', 'install' ), 20 );
 
 		// Create CoCart custom tables (cocart_carts) after WooCommerce tables exist.
-		tests_add_filter( 'init', array( 'CoCart_Install', 'create_tables' ), 30 );
+		tests_add_filter( 'init', array( 'CoCart_Install', 'install' ), 30 );
 
 		// Force Action Scheduler to initialize now so its autoloader is registered before CoCart loads.
 		if ( function_exists( 'action_scheduler_initialize_3_dot_9_dot_3' ) ) {
@@ -174,7 +174,7 @@ class CoCart_JWT_Unit_Tests_Bootstrap {
 		}
 
 		// Load CoCart core.
-		require_once $this->wp_plugins_dir . '/cart-rest-api-for-woocommerce/cocart-core.php';
+		require_once $this->wp_plugins_dir . '/cart-rest-api-for-woocommerce/cart-rest-api-for-woocommerce.php';
 
 		if ( ! defined( 'COCART_CART_CACHE_GROUP' ) ) {
 			define( 'COCART_CART_CACHE_GROUP', 'cocart_cart_id' );

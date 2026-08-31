@@ -77,10 +77,8 @@ class REST extends Tokens {
 			add_action( 'rest_api_init', array( $this, 'register_jwt_routes_legacy' ), 10 );
 		}
 
-		add_action( 'rest_api_init', function () {
-			// Filter in first before anyone else.
-			add_filter( 'cocart_authenticate', array( $this, 'perform_jwt_authentication' ), 0, 3 );
-		} );
+		// Filter in first before anyone else to resolve user ID.
+		add_filter( 'cocart_authenticate', array( $this, 'perform_jwt_authentication' ), 0, 3 );
 
 		// Update token access time when authenticated with it.
 		add_action( 'cocart_jwt_auth_authenticated', array( $this, 'update_jwt_token_access' ), 10, 2 );
@@ -174,7 +172,7 @@ class REST extends Tokens {
 		// First thing, check the secret key, if not exist return error.
 		if ( ! $secret_key ) {
 			// Error: JWT is not configured properly.
-			\CoCart_Logger::log( esc_html__( 'JWT is not configured properly.', 'cocart-jwt-authentication' ), 'error', 'cocart-jwt-authentication' );
+			Plugin::log( esc_html__( 'JWT is not configured properly.', 'cocart-jwt-authentication' ) );
 			$auth->set_error( new \WP_Error( 'cocart_jwt_auth_bad_config', __( 'JWT configuration error.', 'cocart-jwt-authentication' ), array( 'status' => 403 ) ) );
 			return false;
 		}
@@ -190,7 +188,7 @@ class REST extends Tokens {
 			'JWT' !== $decoded_token->header->typ ||
 			$this->get_algorithm() !== $decoded_token->header->alg
 		) {
-			\CoCart_Logger::log( esc_html__( 'Token is malformed.', 'cocart-jwt-authentication' ), 'error', 'cocart-jwt-authentication' );
+			Plugin::log( esc_html__( 'Token is malformed.', 'cocart-jwt-authentication' ) );
 			$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 403 ) ) );
 			return false;
 		}
@@ -201,14 +199,14 @@ class REST extends Tokens {
 		);
 
 		if ( ! hash_equals( $encoded_regenerated_signature, $decoded_token->signature_encoded ) ) {
-			\CoCart_Logger::log( esc_html__( 'Token signature verification failed.', 'cocart-jwt-authentication' ), 'error', 'cocart-jwt-authentication' );
+			Plugin::log( esc_html__( 'Token signature verification failed.', 'cocart-jwt-authentication' ) );
 			$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 403 ) ) );
 			return false;
 		}
 
 		// Check if token is expired.
 		if ( ! property_exists( $decoded_token->payload, 'exp' ) || time() > (int) $decoded_token->payload->exp ) {
-			\CoCart_Logger::log( esc_html__( 'Token has expired.', 'cocart-jwt-authentication' ), 'error', 'cocart-jwt-authentication' );
+			Plugin::log( esc_html__( 'Token has expired.', 'cocart-jwt-authentication' ) );
 			$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 403 ) ) );
 			return false;
 		}
@@ -216,7 +214,7 @@ class REST extends Tokens {
 		// Check if the token matches server.
 		if ( $this->get_iss() !== $decoded_token->payload->iss ) {
 			// Error: The token issuer does not match with this server.
-			\CoCart_Logger::log( esc_html__( 'Token is invalid: Does not match with this server.', 'cocart-jwt-authentication' ), 'error', 'cocart-jwt-authentication' );
+			Plugin::log( esc_html__( 'Token is invalid: Does not match with this server.', 'cocart-jwt-authentication' ) );
 			$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 403 ) ) );
 			return false;
 		}
@@ -224,7 +222,7 @@ class REST extends Tokens {
 		// Check the user id existence in the token.
 		if ( ! isset( $decoded_token->payload->data->user->id ) ) {
 			// Error: The token does not identify a user.
-			\CoCart_Logger::log( esc_html__( 'Token is malformed: Missing user to identify.', 'cocart-jwt-authentication' ), 'error', 'cocart-jwt-authentication' );
+			Plugin::log( esc_html__( 'Token is malformed: Missing user to identify.', 'cocart-jwt-authentication' ) );
 			$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 403 ) ) );
 			return false;
 		}
@@ -234,7 +232,7 @@ class REST extends Tokens {
 
 		if ( ! $user ) {
 			// Error: The user doesn't exist.
-			\CoCart_Logger::log( esc_html__( 'User associated with token no longer exists.', 'cocart-jwt-authentication' ), 'error', 'cocart-jwt-authentication' );
+			Plugin::log( esc_html__( 'User associated with token no longer exists.', 'cocart-jwt-authentication' ) );
 			$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 403 ) ) );
 			return false;
 		}
@@ -242,7 +240,7 @@ class REST extends Tokens {
 		// Validate IP or Device.
 		if ( \CoCart_Authentication::get_ip_address() !== $decoded_token->payload->data->user->ip || ( isset( $_SERVER[ $this->get_user_agent_header() ] ) && sanitize_text_field( wp_unslash( $_SERVER[ $this->get_user_agent_header() ] ) ) !== $decoded_token->payload->data->user->device ) ) {
 			// Error: IP or Device mismatch.
-			\CoCart_Logger::log( esc_html__( 'Unable to validate IP or User-Agent.', 'cocart-jwt-authentication' ), 'error', 'cocart-jwt-authentication' );
+			Plugin::log( esc_html__( 'Unable to validate IP or User-Agent.', 'cocart-jwt-authentication' ) );
 			$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 403 ) ) );
 			return false;
 		}
@@ -252,7 +250,7 @@ class REST extends Tokens {
 		// If user tokens do no exist then fail.
 		if ( ! is_array( $user_tokens ) || empty( $user_tokens ) ) {
 			// Error: No tokens in session.
-			\CoCart_Logger::log( esc_html__( 'User has no tokens in session.', 'cocart-jwt-authentication' ), 'error', 'cocart-jwt-authentication' );
+			Plugin::log( esc_html__( 'User has no tokens in session.', 'cocart-jwt-authentication' ) );
 			$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 403 ) ) );
 			return false;
 		}
@@ -272,7 +270,7 @@ class REST extends Tokens {
 		// If no PAT found or PAT is empty then fail.
 		if ( empty( $target_pat ) || ! $pat_found ) {
 			// Error: Token not found in session.
-			\CoCart_Logger::log( esc_html__( 'Token not found in session.', 'cocart-jwt-authentication' ), 'error', 'cocart-jwt-authentication' );
+			Plugin::log( esc_html__( 'Token not found in session.', 'cocart-jwt-authentication' ) );
 			$auth->set_error( new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 403 ) ) );
 			return false;
 		}
@@ -311,6 +309,14 @@ class REST extends Tokens {
 		}
 
 		$this->request_made = true;
+
+		// Some plugins (e.g. WooCommerce Subscriptions' upgrade routine) call
+		// current_user_can() as early as `after_setup_theme`, before our own
+		// `init`-hooked load_plugin_textdomain() has run. Load it defensively
+		// here so translated strings below are never rendered untranslated.
+		if ( ! is_textdomain_loaded( 'cocart-jwt-authentication' ) ) {
+			Plugin::instance()->load_plugin_textdomain();
+		}
 
 		$auth->set_method( 'jwt_auth' );
 
@@ -377,7 +383,7 @@ class REST extends Tokens {
 
 		if ( empty( $user ) ) {
 			// Error: The user doesn't exist.
-			\CoCart_Logger::log( esc_html__( 'User associated with refresh token no longer exists.', 'cocart-jwt-authentication' ), 'error', 'cocart-jwt-authentication' );
+			Plugin::log( esc_html__( 'User associated with refresh token no longer exists.', 'cocart-jwt-authentication' ) );
 			return new \WP_Error( 'cocart_authentication_error', __( 'Authentication failed.', 'cocart-jwt-authentication' ), array( 'status' => 403 ) );
 		}
 
@@ -425,13 +431,13 @@ class REST extends Tokens {
 	 * @return void
 	 */
 	public function update_jwt_token_access( $token, $user ) {
-		\CoCart_Logger::log( sprintf(
+		Plugin::log( sprintf(
 			/* translators: 1: User login, 2: User ID. */
 			esc_html__( 'User %1$s (ID: %2$d) authenticated at %3$s.', 'cocart-jwt-authentication' ),
 			$user->user_login,
 			$user->ID,
 			date_i18n( 'Y-m-d H:i:s' )
-		), 'info', 'cocart-jwt-authentication' );
+		), 'info' );
 
 		// Time is time.
 		$time = time();

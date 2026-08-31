@@ -747,13 +747,13 @@ abstract class Tokens {
 	/**
 	 * Check if the token is expired.
 	 *
-	 * @access protected
+	 * @access public
 	 *
 	 * @param string $token The JWT token.
 	 *
 	 * @return bool True if expired, false otherwise.
 	 */
-	protected function is_token_expired( $token ) {
+	public function is_token_expired( $token ) {
 		try {
 			$parts = $this->decode_token( $token );
 
@@ -810,7 +810,7 @@ abstract class Tokens {
 		// Only validate prefix if enabled.
 		if ( $this->is_prefix_enabled() ) {
 			if ( strpos( $token, $this->get_token_prefix() ) !== 0 ) {
-				\CoCart_Logger::log( esc_html__( 'Token does not have a matching prefix.', 'cocart-jwt-authentication' ), 'error', 'cocart-jwt-authentication' );
+				Plugin::log( esc_html__( 'Token does not have a matching prefix.', 'cocart-jwt-authentication' ) );
 				throw new \Exception( 'Invalid token' );
 			}
 
@@ -822,7 +822,7 @@ abstract class Tokens {
 		$parts = explode( '.', $token );
 
 		if ( count( $parts ) !== 3 ) {
-			\CoCart_Logger::log( esc_html__( 'Token was incomplete.', 'cocart-jwt-authentication' ), 'error', 'cocart-jwt-authentication' );
+			Plugin::log( esc_html__( 'Token was incomplete.', 'cocart-jwt-authentication' ) );
 			throw new \Exception( 'Invalid token format' );
 		}
 

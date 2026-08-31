@@ -1,5 +1,21 @@
 # Changelog for CoCart JWT Authentication
 
+## v3.1.0 - ?? ??, 2026
+
+### What's New?
+
+* REST API: Routes now support a new registration method if CoCart Starter is installed.
+
+### Bug Fixes
+
+* Fixed: The text-domain was always loaded before any translation calls in the authentication path can run.
+* Fixed: Fatal error in `cleanup_expired_tokens_for_user()` calling undefined `Plugin::is_token_expired()`.
+
+### Compatibility
+
+* Tested with CoCart Starter v5.0
+* Tested with WooCommerce v11.0
+
 ## v3.0.3 - 7th April, 2026
 
 ### Bug Fix

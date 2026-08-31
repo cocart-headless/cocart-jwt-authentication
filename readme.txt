@@ -2,9 +2,9 @@
 Contributors: cocartforwc, sebd86
 Tags: woocommerce, rest-api, decoupled, headless, jwt
 Requires at least: 6.0
-Requires PHP: 8.2
+Requires PHP: 7.4
 Tested up to: 6.9
-Stable tag: 3.0.3
+Stable tag: 3.1.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -145,6 +145,25 @@ Rate Limiting is only available with [CoCart Plus](https://cocartapi.com/?utm_me
 
 == Changelog ==
 
+= v3.1.0 - 16th June, 2026 =
+
+### What's New?
+
+* REST API: Routes now support a new registration method if CoCart Starter is installed.
+
+### Bug Fix
+
+Fixed: The text-domain was always loaded before any translation calls in the authentication path can run.
+
+### Breaking Change
+
+* Plugin: Minimum PHP version raised from 7.4 to 8.2.
+
+### Compatibility
+
+* Tested with CoCart Starter v5.0
+* Tested with WooCommerce v10.8
+
 = v3.0.3 - 7th April, 2026 =
 
 ### Bug Fix
@@ -227,6 +246,6 @@ With this update we have improved tracking of tokens to be dual-secured with a P
 
 == Upgrade Notice ==
 
-= 3.0.3 =
+= 3.1.0 =
 
-Fixed crashing the plugins page if the main CoCart plugin is not active.
+Fixed the text-domain was always loaded before any translation calls in the authentication path can run.

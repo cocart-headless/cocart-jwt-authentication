@@ -29,7 +29,7 @@ final class Plugin {
 	 *
 	 * @var string
 	 */
-	public static $version = '3.0.3';
+	public static $version = '3.1.0-beta.1';
 
 	/**
 	 * Single instance of the CoCart class
@@ -61,6 +61,42 @@ final class Plugin {
 	public function __wakeup() {
 		_doing_it_wrong( __FUNCTION__, esc_html__( 'Unserializing instances of this class is forbidden.', 'cocart-jwt-authentication' ), '3.0.0' );
 	} // END __wakeup()
+
+	/**
+	 * Write a log entry attributed to this plugin.
+	 *
+	 * Supports both CoCart Starter 5.0+ and older CoCart Community releases.
+	 *
+	 * @access public
+	 *
+	 * @static
+	 *
+	 * @param string $message Log message.
+	 * @param string $type    Log level: debug|info|notice|warning|error|critical|alert|emergency.
+	 *
+	 * @return void
+	 */
+	public static function log( string $message, string $type = 'error' ): void {
+		if ( ! class_exists( 'CoCart_Logger' ) ) {
+			return;
+		}
+
+		// CoCart Starter 5.0+ — named methods and LOG_CONTEXT constant.
+		if ( defined( 'CoCart_Logger::LOG_CONTEXT' ) && method_exists( 'CoCart_Logger', $type ) ) {
+			$context = array_merge(
+				\CoCart_Logger::LOG_CONTEXT,
+				array(
+					'source'  => 'cocart-jwt-authentication',
+					'version' => self::$version,
+				)
+			);
+			\CoCart_Logger::{$type}( $message, $context );
+			return;
+		}
+
+		// Older versions — ::log( $message, $type, $plugin ).
+		\CoCart_Logger::log( $message, $type, 'cocart-jwt-authentication' );
+	} // END log()
 
 	/**
 	 * Main Instance.
@@ -327,7 +363,7 @@ final class Plugin {
 
 		if ( is_array( $user_tokens ) ) {
 			foreach ( $user_tokens as $pat_id => $token ) {
-				if ( self::is_token_expired( $token ) ) {
+				if ( REST::instance()->is_token_expired( $token ) ) {
 					// Remove from main tokens collection.
 					unset( $user_tokens[ $pat_id ] );
 
@@ -408,11 +444,10 @@ final class Plugin {
 		} while ( $batch_deleted === $batch_size );
 
 		// Log the cleanup results if CoCart logger is available.
-		if ( class_exists( 'CoCart_Logger' ) && $total_deleted > 0 ) {
-			\CoCart_Logger::log(
+		if ( $total_deleted > 0 ) {
+			self::log(
 				sprintf( 'Background cleanup completed: removed %d legacy JWT token meta entries (processed in batches of %d).', $total_deleted, $batch_size ),
-				'info',
-				'cocart-jwt-authentication'
+				'info'
 			);
 		}
 	} // END cleanup_legacy_user_meta()
