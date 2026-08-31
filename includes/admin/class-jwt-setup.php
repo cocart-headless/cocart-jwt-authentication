@@ -436,6 +436,7 @@ curl -X POST <?php echo esc_html( home_url( '/wp-json/cocart/jwt/validate-token'
 				<?php endif; ?>
 
 				<div class="jwt-key-section">
+					<h3><?php esc_html_e( 'Secret Key Generator', 'cocart-jwt-authentication' ); ?></h3>
 					<div class="terminal-controls">
 						<button type="button" id="copy-config" class="button button-secondary">
 							<?php esc_html_e( 'Copy', 'cocart-jwt-authentication' ); ?>

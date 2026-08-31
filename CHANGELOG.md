@@ -4,7 +4,7 @@
 
 ### What's New?
 
-* REST API: Routes now support a new registration method if CoCart Starter is installed.
+* REST API: Routes now support the new registration method in CoCart Starter.
 
 ### Bug Fixes
 

@@ -140,8 +140,10 @@ final class Plugin {
 		// Load translation files.
 		add_action( 'init', array( $this, 'load_plugin_textdomain' ), 0 );
 
-		// Load admin classes.
-		add_action( 'init', array( $this, 'load_admin' ) );
+		// Load admin classes. Hooked on `wp_loaded` (fires once, after every
+		// plugin's `init` callbacks complete) so CoCart's admin classes are
+		// guaranteed to be defined first, regardless of plugin load order.
+		add_action( 'wp_loaded', array( $this, 'load_admin' ) );
 
 		// Register the CLI commands.
 		add_action( 'plugins_loaded', array( $this, 'register_cli' ) );

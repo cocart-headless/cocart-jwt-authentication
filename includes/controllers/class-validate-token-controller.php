@@ -78,7 +78,7 @@ class CoCart_REST_JWT_Validate_Token_Controller extends CoCart_REST_Controller {
 	 *
 	 * @return bool True if a user is authenticated, false otherwise.
 	 */
-	public function check_permission( \WP_REST_Request $request ): bool {
+	public function check_permission( $request ): bool {
 		return get_current_user_id() > 0;
 	} // END check_permission()
 

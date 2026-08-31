@@ -57,6 +57,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Minimum supported — matches plugin's stated "Requires PHP" floor
+          - php: '7.4'
+            wp: '6.9'
+            wc: '10.6'
+          - php: '8.0'
+            wp: '6.9'
+            wc: '10.6'
           # Stable — matches currently tested/supported versions
           - php: '8.1'
             wp: '6.9'
@@ -82,12 +89,17 @@ jobs:
       - name: Checkout JWT plugin
         uses: actions/checkout@v4
 
-      - name: Checkout CoCart core
+      - name: Checkout CoCart Starter
         uses: actions/checkout@v4
         with:
-          repository: co-cart/co-cart
-          ref: tests
-          path: cocart-core
+          repository: cocart-headless/cocart-starter
+          ref: main
+          path: cocart-starter
+          # cocart-starter is a private repo — the default GITHUB_TOKEN can't
+          # check out a different private repo. Requires a PAT (with at least
+          # read access to cocart-headless/cocart-starter) stored as a secret
+          # named COCART_STARTER_PAT until that's configured, this job fails here.
+          token: ${{ secrets.COCART_STARTER_PAT }}
 
       - name: Set up PHP ${{ matrix.php }}
         uses: shivammathur/setup-php@v2
@@ -100,9 +112,9 @@ jobs:
       - name: Install Composer dependencies
         run: composer update --prefer-dist --no-progress
 
-      - name: Install CoCart core Composer dependencies
+      - name: Install CoCart Starter Composer dependencies
         run: composer install --prefer-dist --no-progress
-        working-directory: cocart-core
+        working-directory: cocart-starter
 
       - name: Install Subversion
         run: sudo apt-get install -y subversion
@@ -128,11 +140,11 @@ jobs:
 
       - name: Copy plugins to test environment
         run: |
-          mkdir -p /tmp/wordpress/wp-content/plugins/cart-rest-api-for-woocommerce
-          rsync -a --exclude='.git' --exclude='node_modules' cocart-core/ /tmp/wordpress/wp-content/plugins/cart-rest-api-for-woocommerce/
-          ls /tmp/wordpress/wp-content/plugins/cart-rest-api-for-woocommerce/cocart-core.php || echo "ERROR: cocart-core.php not found"
+          mkdir -p /tmp/wordpress/wp-content/plugins/cocart-starter
+          rsync -a --exclude='.git' --exclude='node_modules' cocart-starter/ /tmp/wordpress/wp-content/plugins/cocart-starter/
+          ls /tmp/wordpress/wp-content/plugins/cocart-starter/cocart-starter.php || echo "ERROR: cocart-starter.php not found"
           mkdir -p /tmp/wordpress/wp-content/plugins/cocart-jwt-authentication
-          rsync -a --exclude='.git' --exclude='node_modules' --exclude='cocart-core' . /tmp/wordpress/wp-content/plugins/cocart-jwt-authentication/
+          rsync -a --exclude='.git' --exclude='node_modules' --exclude='cocart-starter' . /tmp/wordpress/wp-content/plugins/cocart-jwt-authentication/
 
       - name: Run PHPUnit tests
         run: vendor/bin/phpunit -c phpunit.xml --testdox

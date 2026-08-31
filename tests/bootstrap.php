@@ -75,8 +75,8 @@ class CoCart_JWT_Unit_Tests_Bootstrap {
 		$wp_core_dir          = getenv( 'WP_CORE_DIR' ) ? rtrim( getenv( 'WP_CORE_DIR' ), '/' ) : '/tmp/wordpress';
 		$this->wp_plugins_dir = $wp_core_dir . '/wp-content/plugins';
 
-		// Use the polyfills from CoCart core's vendor since SSL prevents downloading them here.
-		$cocart_vendor = $this->wp_plugins_dir . '/cart-rest-api-for-woocommerce/vendor';
+		// Use the polyfills from CoCart Starter's vendor since SSL prevents downloading them here.
+		$cocart_vendor = $this->wp_plugins_dir . '/cocart-starter/vendor';
 		define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', $cocart_vendor . '/yoast/phpunit-polyfills/phpunitpolyfills-autoload.php' );
 		define( 'WP_PLUGIN_DIR', $this->wp_plugins_dir );
 
@@ -109,9 +109,9 @@ class CoCart_JWT_Unit_Tests_Bootstrap {
 	 * Loads the required files.
 	 */
 	private function includes() {
-		$cocart_tests_dir = $this->wp_plugins_dir . '/cart-rest-api-for-woocommerce/tests';
+		$cocart_tests_dir = $this->wp_plugins_dir . '/cocart-starter/tests';
 
-		// CoCart core framework (load order: base → rest → api → v1 → v2).
+		// CoCart Starter framework (load order: base → rest → api → v1 → v2).
 		require_once $cocart_tests_dir . '/framework/class-cocart-unit-test-case.php';
 		require_once $cocart_tests_dir . '/framework/class-cocart-rest-test-case.php';
 		require_once $cocart_tests_dir . '/framework/class-cocart-api-test-case.php';
@@ -133,11 +133,23 @@ class CoCart_JWT_Unit_Tests_Bootstrap {
 		tests_add_filter( 'init', array( 'WC_Install', 'install' ), 20 );
 
 		// Create CoCart custom tables (cocart_carts) after WooCommerce tables exist.
-		tests_add_filter( 'init', array( 'CoCart_Install', 'install' ), 30 );
+		tests_add_filter( 'init', array( 'CoCart_Install', 'create_tables' ), 30 );
 
-		// Force Action Scheduler to initialize now so its autoloader is registered before CoCart loads.
-		if ( function_exists( 'action_scheduler_initialize_3_dot_9_dot_3' ) ) {
-			action_scheduler_initialize_3_dot_9_dot_3();
+		// Force Action Scheduler to initialize now so its autoloader is registered before
+		// CoCart loads. The initializer function name is tied to the bundled Action
+		// Scheduler version, so instead of hardcoding one we discover whichever
+		// initializer is actually defined. It guards against double-init on its own.
+		$action_scheduler_init_fn = null;
+
+		foreach ( get_defined_functions()['user'] as $function_name ) {
+			if ( preg_match( '/^action_scheduler_initialize_\d+_dot_\d+_dot_\d+$/', $function_name ) ) {
+				$action_scheduler_init_fn = $function_name;
+				break;
+			}
+		}
+
+		if ( $action_scheduler_init_fn ) {
+			call_user_func( $action_scheduler_init_fn );
 			ActionScheduler_Versions::initialize_latest_version();
 		}
 
@@ -173,8 +185,8 @@ class CoCart_JWT_Unit_Tests_Bootstrap {
 			}
 		}
 
-		// Load CoCart core.
-		require_once $this->wp_plugins_dir . '/cart-rest-api-for-woocommerce/cart-rest-api-for-woocommerce.php';
+		// Load CoCart Starter.
+		require_once $this->wp_plugins_dir . '/cocart-starter/cocart-starter.php';
 
 		if ( ! defined( 'COCART_CART_CACHE_GROUP' ) ) {
 			define( 'COCART_CART_CACHE_GROUP', 'cocart_cart_id' );
@@ -219,21 +231,16 @@ class CoCart_JWT_Unit_Tests_Bootstrap {
 	 * @access public
 	 */
 	public function load_rest_api() {
+		require_once COCART_FILE_PATH . '/includes/classes/rest-api/abstracts/abstract-cocart-rest-callback.php';
+
 		require_once COCART_FILE_PATH . '/includes/classes/class-cocart-data-exception.php';
-		require_once COCART_FILE_PATH . '/includes/classes/rest-api/class-cocart-cart-callbacks.php';
-		require_once COCART_FILE_PATH . '/includes/classes/rest-api/class-cocart-cart-extension.php';
+		require_once COCART_FILE_PATH . '/includes/classes/rest-api/class-cocart-callback-registry.php';
 		require_once COCART_FILE_PATH . '/includes/classes/rest-api/class-cocart-response.php';
 		require_once COCART_FILE_PATH . '/includes/classes/rest-api/class-cocart-cart-formatting.php';
 		require_once COCART_FILE_PATH . '/includes/classes/rest-api/class-cocart-cart-validation.php';
 		require_once COCART_FILE_PATH . '/includes/classes/rest-api/class-cocart-product-validation.php';
 		require_once COCART_FILE_PATH . '/includes/classes/rest-api/class-cocart-rest-api.php';
 		require_once COCART_FILE_PATH . '/includes/classes/rest-api/class-cocart-security.php';
-
-		// Re-instantiate CoCart_Cart_Callbacks on every rest_api_init so that the
-		// cocart_register_extension_callback hooks are re-registered in $wp_filter.
-		// WP_UnitTestCase::tearDown() restores $wp_filter to its pre-setUp() state,
-		// which removes any hooks added during the previous test's rest_api_init.
-		new CoCart_Cart_Callbacks();
 
 		// Explicitly instantiate CoCart_REST_API on every rest_api_init so that routes
 		// are registered into the fresh WP_REST_Server created by each test's setUp().
