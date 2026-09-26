@@ -296,13 +296,21 @@ class REST extends Tokens {
 	 *
 	 * @since 1.0.0 Introduced.
 	 *
-	 * @param int    $user_id The user ID if authentication was successful.
-	 * @param bool   $ssl     Determines if the site is secure.
-	 * @param object $auth    The Authentication class.
+	 * @param int|false|null $user_id The user ID if authentication was successful, false or null otherwise.
+	 * @param bool           $ssl     Determines if the site is secure.
+	 * @param object         $auth    The Authentication class.
 	 *
-	 * @return int $user_id The user ID returned if authentication was successful.
+	 * @return int|false $user_id The user ID returned if authentication was successful.
 	 */
-	public function perform_jwt_authentication( int $user_id, bool $ssl, $auth ) {
+	public function perform_jwt_authentication( $user_id, bool $ssl, $auth ) {
+		// Other plugins sharing the `determine_current_user` filter chain
+		// (e.g. Jetpack Connection, bundled with WooCommerce) can return null
+		// instead of false to mean "not applicable". Normalize that here so
+		// it never reaches a strictly-typed consumer downstream.
+		if ( null === $user_id ) {
+			$user_id = false;
+		}
+
 		// Don't try to authenticate again if we already did.
 		if ( $this->request_made ) {
 			return $user_id;
